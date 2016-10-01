@@ -33,11 +33,8 @@ config :logger, :console, format: "[$level] $message\n"
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-# Configure your database
 config :properties, Properties.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "properties_dev",
-  hostname: "localhost",
-  pool_size: 10
+  url: "postgres://localhost/milwaukee_properties",
+  extensions: [{Geo.PostGIS.Extension, library: Geo}],
+  pool_size: 20
