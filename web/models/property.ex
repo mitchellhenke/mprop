@@ -96,19 +96,11 @@ defmodule Properties.Property do
      )
   end
 
-  def filter_by_land_use(query, nil), do: query
-  def filter_by_land_use(query, ""), do: query
-  def filter_by_land_use(query, land_use) do
+  def maybe_filter_by(query, _field, nil), do: query
+  def maybe_filter_by(query, _field, ""), do: query
+  def maybe_filter_by(query, field, value) do
     from(p in query,
-       where: p.land_use == ^land_use
-     )
-  end
-
-  def filter_by_parking_type(query, nil), do: query
-  def filter_by_parking_type(query, ""), do: query
-  def filter_by_parking_type(query, parking_type) do
-    from(p in query,
-       where: p.parking_type == ^parking_type
+       where: field(p, ^field) == ^value
      )
   end
 end
