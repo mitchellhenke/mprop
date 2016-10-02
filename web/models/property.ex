@@ -51,7 +51,6 @@ defmodule Properties.Property do
   def address(property) do
     zip_code = String.slice(property.zip_code, 0, 5)
     "#{property.house_number_low} #{property.street_direction} #{property.street} #{street_type(property.street_type)}, Milwaukee, WI #{zip_code}"
-    |> IO.inspect
   end
 
   def street_type("TR"), do: "TERRACE"
@@ -74,6 +73,43 @@ defmodule Properties.Property do
     {lng, lat} = point.coordinates
     from(property in query,
          select: %{property | distance: fragment("ST_Distance_Sphere(?, ST_SetSRID(ST_MakePoint(?,?), ?))", property.geom, ^lng, ^lat, ^point.srid)})
+  end
+
+  def filter_by_bathrooms(query, min_bathrooms, max_bathrooms) do
+    from(p in query,
+       where: fragment("(? + (coalesce(?, 0) * 0.5)) >= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^min_bathrooms) and
+       fragment("(? + (coalesce(?, 0) * 0.5)) <= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^max_bathrooms))
+  end
+
+  def filter_by_bedrooms(query, min_bedrooms, max_bedrooms) do
+    from(p in query,
+       where: p.number_of_bedrooms >= ^min_bedrooms and
+       p.number_of_bedrooms <= ^max_bedrooms
+     )
+  end
+
+  def filter_by_zipcode(query, nil), do: query
+  def filter_by_zipcode(query, ""), do: query
+  def filter_by_zipcode(query, zipcode) do
+    from(p in query,
+       where: fragment("substring(?, 0, 6) = ?", p.zip_code, ^zipcode)
+     )
+  end
+
+  def filter_by_land_use(query, nil), do: query
+  def filter_by_land_use(query, ""), do: query
+  def filter_by_land_use(query, land_use) do
+    from(p in query,
+       where: p.land_use == ^land_use
+     )
+  end
+
+  def filter_by_parking_type(query, nil), do: query
+  def filter_by_parking_type(query, ""), do: query
+  def filter_by_parking_type(query, parking_type) do
+    from(p in query,
+       where: p.parking_type == ^parking_type
+     )
   end
 end
 
