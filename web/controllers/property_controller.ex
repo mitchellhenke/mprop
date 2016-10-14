@@ -28,4 +28,10 @@ defmodule Properties.PropertyController do
                  |> Repo.all
     render conn, "index.json", properties: properties
   end
+
+  def show(conn, %{"id" => id}) do
+    id = String.to_integer(id)
+    property = Repo.get!(Property, id)
+    render(conn, "show.json", property: property)
+  end
 end

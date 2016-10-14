@@ -9,5 +9,6 @@ defmodule Properties.Router do
     pipe_through :api # Use the default browser stack
 
     get "/", PropertyController, :index
+    get "/properties/:id", PropertyController, :show
   end
 end
