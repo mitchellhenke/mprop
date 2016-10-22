@@ -19,7 +19,7 @@ defmodule Properties.Mixfile do
   def application do
     [mod: {Properties, []},
      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :corsica]]
+                    :phoenix_ecto, :postgrex, :corsica, :hackney]]
   end
 
   # Specifies which paths to compile per environment.
@@ -39,7 +39,9 @@ defmodule Properties.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:geo, "~> 1.0"},
-     {:corsica, "~> 0.4"}
+     {:corsica, "~> 0.4"},
+     {:erlsom, git: "git@github.com:willemdj/erlsom.git"},
+     {:hackney, "~> 1.6"},
    ]
   end
 

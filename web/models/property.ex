@@ -8,7 +8,7 @@ defmodule Properties.Property do
                     :number_of_bedrooms, :number_of_bathrooms,
                     :number_of_powder_rooms, :lot_area, :zoning, :building_type,
                     :zip_code, :geom, :air_conditioning, :fireplace, :parking_type,
-                    :number_units]
+                    :number_units, :neighborhood, :geo_tract, :geo_block]
 
   schema "properties" do
     field :tax_key, :string
@@ -36,6 +36,11 @@ defmodule Properties.Property do
     field :parking_type, :string
     field :number_units, :integer
     field :geom, Geo.Point
+    field :attic, :string
+    field :basement, :string
+    field :neighborhood, :string
+    field :geo_tract, :string
+    field :geo_block, :string
     field :distance, :float, virtual: true
 
     timestamps

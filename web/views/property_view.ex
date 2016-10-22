@@ -16,6 +16,9 @@ defmodule Properties.PropertyView do
       building_area: property.building_area,
       last_assessment_amount: property.last_assessment_amount,
       parking_type: property.parking_type,
+      air_conditioning: property.air_conditioning,
+      basement: property.basement,
+      attic: property.attic,
     }
   end
 

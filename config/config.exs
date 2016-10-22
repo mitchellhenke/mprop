@@ -12,6 +12,7 @@ config :properties,
 # Configures the endpoint
 config :properties, Properties.Endpoint,
   url: [host: "localhost"],
+  http: [compress: true],
   secret_key_base: "5UUQajanov7iRJdsiR1T4JRYaniTXCTgBGtFXGmhvWJ20PHHQWCI2NR63B0664b4",
   render_errors: [view: Properties.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Properties.PubSub,
