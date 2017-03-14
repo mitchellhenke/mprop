@@ -189,11 +189,23 @@ defmodule Properties.XMLParser do
     {"", %{property | neighborhood: element_accumulator}}
   end
 
+  def sax_event_handler({:endElement, _, 'CONVEY_DATE', _}, {element_accumulator, property}) do
+    {"", %{property | convey_datetime: Ecto.DateTime.cast!(element_accumulator)}}
+  end
+
+  def sax_event_handler({:endElement, _, 'CONVEY_TYPE', _}, {element_accumulator, property}) do
+    {"", %{property | convey_type: element_accumulator}}
+  end
+
+  def sax_event_handler({:endElement, _, 'GEO_ALDER', _}, {element_accumulator, property}) do
+    {"", %{property | geo_alder: element_accumulator}}
+  end
+
   def sax_event_handler({:endElement, _, 'MPROP', _}, {_element_accumulator, property}) do
     if is_nil(Properties.Repo.get_by(Properties.Property, [tax_key: property.tax_key])) do
       Properties.Repo.insert!(property)
     else
-      changes = Map.to_list(property) |> Keyword.drop([:geom, :distance, :__struct__, :updated_at, :inserted_at, :__meta__, :id])
+      changes = Map.to_list(property) |> Keyword.drop([:geom, :last_sale_datetime, :last_sale_amount, :distance, :__struct__, :updated_at, :inserted_at, :__meta__, :id])
       from(p in Properties.Property, where: [tax_key: ^property.tax_key])
       |> Properties.Repo.update_all(set: changes)
     end
