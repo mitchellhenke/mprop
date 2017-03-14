@@ -10,7 +10,7 @@ defmodule Properties.XMLParser do
 
     :erlsom.parse_sax("",
                       nil,
-                      &sax_event_handler/2, 
+                      &sax_event_handler/2,
                       [{:continuation_function, &continue_file/2, c_state}])
 
     :ok = File.close(handle)
