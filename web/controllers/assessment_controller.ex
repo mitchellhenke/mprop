@@ -1,11 +1,19 @@
 defmodule Properties.AssessmentController do
   use Properties.Web, :controller
   alias Properties.Assessment
+  alias Properties.Sale
   plug Properties.Plugs.Location
 
   def show(conn, %{"id" => id}) do
     id = String.to_integer(id)
     assessment = Repo.get!(Assessment, id)
+    key = assessment.tax_key
+    other_assessments = from(a in Assessment, where: a.id != ^id and a.tax_key == ^key)
+                        |> Repo.all
+    sales = from(s in Sale, where: s.tax_key == ^key)
+            |> Repo.all
+
+    assessment = %{assessment | sales: sales, other_assessments: other_assessments}
     render(conn, "show.json", assessment: assessment)
   end
 
@@ -33,6 +41,7 @@ defmodule Properties.AssessmentController do
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
                  |> Repo.all
+
     render conn, "index.json", assessments: assessments
   end
 end

@@ -47,6 +47,8 @@ schema "assessments" do
     field :convey_type, :string
     field :year, :integer
     field :distance, :float, virtual: true
+    field :other_assessments, {:array, :map}, virtual: :true
+    field :sales, {:array, :map}, virtual: :true
 
     belongs_to :property, Properties.Property
     timestamps()

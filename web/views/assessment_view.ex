@@ -19,8 +19,21 @@ defmodule Properties.AssessmentView do
       air_conditioning: assessment.air_conditioning,
       basement: assessment.basement,
       attic: assessment.attic,
+      year: assessment.year,
+      other_assessments: maybe_render_assessments(assessment.other_assessments),
+      sales: maybe_render_sales(assessment.sales)
     }
   end
+
+  def maybe_render_assessments(assessments) when is_list(assessments) do
+    render_many(assessments, Properties.AssessmentView, "show.json")
+  end
+  def maybe_render_assessments(_), do: nil
+
+  def maybe_render_sales(assessments) when is_list(assessments) do
+    render_many(assessments, Properties.SaleView, "show.json")
+  end
+  def maybe_render_sales(_), do: nil
 
   def bathroom_count(assessment) do
     case {assessment.number_of_bathrooms, assessment.number_of_powder_rooms} do
