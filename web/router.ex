@@ -8,7 +8,7 @@ defmodule Properties.Router do
   scope "/", Properties do
     pipe_through :api # Use the default browser stack
 
-    get "/", PropertyController, :index
-    get "/properties/:id", PropertyController, :show
+    get "/", AssessmentController, :index
+    get "/assessments/:id", AssessmentController, :show
   end
 end

@@ -1,6 +1,6 @@
 defmodule Properties.LocationService do
   import Ecto.Query
-  alias Properties.Property
+  alias Properties.Assessment
 
   def get_point(address) do
     {:ok, _status, _headers, client} = :hackney.get("http://www.mapquestapi.com/geocoding/v1/address?key=5AqAp2aSqxM9KzB4jpTV0Us67kmUuVjA&location=#{URI.encode(address)}", [], "", [connect_timeout: 10000, recv_timeout: 10000])
@@ -58,13 +58,13 @@ defmodule Properties.LocationService do
     end
   end
 
-  def update_property_with_geom(%Property{geom: nil} = property) do
-    result = Property.address(property)
+  def update_property_with_geom(%Assessment{geom: nil} = property) do
+    result = Assessment.address(property)
     |> point_from_address
 
     case result do
       {:ok, point} ->
-        Property.changeset(property, %{"geom" => point})
+        Assessment.changeset(property, %{"geom" => point})
                                                 |> Properties.Repo.update!
       {:error, reason} ->
         IO.inspect property.id
@@ -77,5 +77,5 @@ defmodule Properties.LocationService do
     from(p in query, where: fragment("ST_Distance_Sphere(?, ST_MakePoint(?, ?))", p.geom, ^lng, ^lat) < ^radius_meters)
   end
 
-  # import Ecto.Query; from(i in Properties.Property, where: fragment("substring(?, 0, 6)", i.zip_code) == "53207" and i.land_use == "8810" and is_nil(i.geom)) |> Properties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(50); Properties.LocationService.update_property_with_geom(p) end)
+  # import Ecto.Query; from(i in Properties.Assessment, where: fragment("substring(?, 0, 6)", i.zip_code) == "53207" and i.land_use == "8810" and is_nil(i.geom)) |> Properties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(50); Properties.LocationService.update_property_with_geom(p) end)
 end
