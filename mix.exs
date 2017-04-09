@@ -41,7 +41,7 @@ defmodule Properties.Mixfile do
      {:geo, "~> 1.0"},
      {:csv, "~> 1.0"},
      {:corsica, "~> 0.4"},
-     {:erlsom, git: "git@github.com:willemdj/erlsom.git"},
+     {:erlsom, git: "git://github.com/willemdj/erlsom.git"},
      {:hackney, "~> 1.6"},
    ]
   end
