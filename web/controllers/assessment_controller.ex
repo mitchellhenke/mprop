@@ -32,8 +32,8 @@ defmodule Properties.AssessmentController do
     year = params["year"] || 2016
     assessments = from(p in Assessment,
                    where: p.year == ^year,
-                   order_by: [desc: p.last_assessment_amount])
-                 |> Assessment.within(point, location.radius_in_m)
+                   order_by: [desc: p.last_assessment_amount],
+                   limit: 100)
                  |> Assessment.filter_by_bathrooms(min_bathrooms, max_bathrooms)
                  |> Assessment.filter_by_bedrooms(min_bedrooms, max_bedrooms)
                  |> Assessment.filter_by_zipcode(zipcode)
@@ -41,6 +41,7 @@ defmodule Properties.AssessmentController do
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
                  |> Repo.all
+                 # |> Assessment.within(point, location.radius_in_m)
 
     render conn, "index.json", assessments: assessments
   end
