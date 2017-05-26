@@ -40,8 +40,8 @@ defmodule Properties.AssessmentController do
                  |> Assessment.maybe_filter_by(:land_use, land_use)
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
+                 |> Assessment.within(point, location.radius_in_m)
                  |> Repo.all
-                 # |> Assessment.within(point, location.radius_in_m)
 
     render conn, "index.json", assessments: assessments
   end
