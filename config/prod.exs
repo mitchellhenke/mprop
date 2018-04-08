@@ -26,8 +26,8 @@ config :properties, Properties.Repo,
   adapter: Ecto.Adapters.Postgres,
   url: System.get_env("DATABASE_URL"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-  extensions: [{Geo.PostGIS.Extension, library: Geo}],
-  ssl: true
+  ssl: true,
+  types: Properties.PostgresTypes
 
 # ## SSL Support
 #
