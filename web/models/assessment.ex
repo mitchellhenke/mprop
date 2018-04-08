@@ -43,7 +43,7 @@ schema "assessments" do
     field :geo_tract, :string
     field :geo_block, :string
     field :geo_alder, :string
-    field :convey_datetime, Ecto.DateTime
+    field :convey_datetime, :naive_datetime
     field :convey_type, :string
     field :year, :integer
     field :distance, :float, virtual: true

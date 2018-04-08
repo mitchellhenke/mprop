@@ -3,12 +3,12 @@ defmodule Properties.CSVParser do
 
   def run(path, year) do
     File.stream!(path)
-    |> CSV.decode(headers: true)
+    |> CSV.decode!(headers: true)
     |> Enum.each(fn(x) ->
       attrs = %{
       year: year,
       tax_key: String.pad_leading(x["TAXKEY"], 10, "0"),
-      tax_rate_cd: String.to_integer(x["TAX_RATE_CD"]),
+      tax_rate_cd: parse_tax_rate_cd(x["TAX_RATE_CD"]),
       house_number_low: x["HOUSE_NR_LO"],
       house_number_high: x["HOUSE_NR_HI"],
       street_direction: x["SDIR"],
@@ -28,7 +28,7 @@ defmodule Properties.CSVParser do
       land_use_general: x["LAND_USE_GP"],
       fireplace: parse_int(x["FIREPLACE"]),
       air_conditioning: parse_air(String.trim(x["AIR_CONDITIONING"])),
-      parking_type: String.strip(x["PARKING_TYPE"]),
+      parking_type: String.trim(x["PARKING_TYPE"]),
       number_units: String.to_integer(x["NR_UNITS"]),
       attic: x["ATTIC"],
       basement: x["BASEMENT"],
@@ -60,6 +60,41 @@ defmodule Properties.CSVParser do
     end)
   end
 
+  def run_sales(path, year) do
+    File.stream!(path)
+    |> CSV.decode(headers: true)
+    |> Enum.each(fn(x) ->
+      tax_key = Map.get(x, "Taxkey")
+                |> String.replace("-", "")
+
+      property = Properties.Repo.get_by(Properties.Property, tax_key: tax_key)
+      last_sale_amount = String.replace(x["Sale $"], ",", "")
+
+      last_sale = "#{x["Sale Date"]} 00:00:00"
+      attrs = %{
+        property_id: (property && property.id) || nil,
+        tax_key: tax_key,
+        amount: last_sale_amount,
+        date_time: last_sale,
+        style: x["Style"],
+        exterior: x["Exterior"]
+      }
+
+      sale = Properties.Repo.get_by(Properties.Sale, tax_key: tax_key, date_time: last_sale)
+
+      if(is_nil(sale) && !is_nil(property)) do
+        Properties.Sale.changeset(%Properties.Sale{}, attrs)
+        |> Properties.Repo.insert!
+      else
+      end
+    end)
+  end
+
+  defp parse_tax_rate_cd("False"), do: 0
+  defp parse_tax_rate_cd(number) when is_binary(number) do
+    String.to_integer(number)
+  end
+
   defp parse_air("False"), do: 0
   defp parse_air("True"), do: 1
   defp parse_air(_), do: 0
@@ -69,11 +104,16 @@ defmodule Properties.CSVParser do
 
   defp parse_date(""), do: nil
   defp parse_date(date) do
-    if(String.length(date) == 10) do
+    date = if(String.length(date) == 10) do
       "#{date} 00:00:00"
     else
       date
     end
-    |> Ecto.DateTime.cast!
+
+    with {:ok, parsed} <- NaiveDateTime.from_iso8601(date)
+    do
+      parsed
+    else _ -> nil
+    end
   end
 end

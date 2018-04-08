@@ -36,5 +36,5 @@ config :phoenix, :stacktrace_depth, 20
 config :properties, Properties.Repo,
   adapter: Ecto.Adapters.Postgres,
   url: "postgres://localhost/milwaukee_properties",
-  extensions: [{Geo.PostGIS.Extension, library: Geo}],
-  pool_size: 20
+  pool_size: 20,
+  types: Properties.PostgresTypes

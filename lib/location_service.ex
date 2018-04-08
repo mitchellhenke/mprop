@@ -65,7 +65,7 @@ defmodule Properties.LocationService do
     case result do
       {:ok, point} ->
         Assessment.changeset(property, %{"geom" => point})
-                                                |> Properties.Repo.update!
+        |> Properties.Repo.update!
       {:error, reason} ->
         IO.inspect property.id
         ":("
@@ -77,5 +77,6 @@ defmodule Properties.LocationService do
     from(p in query, where: fragment("ST_Distance_Sphere(?, ST_MakePoint(?, ?))", p.geom, ^lng, ^lat) < ^radius_meters)
   end
 
-  # import Ecto.Query; from(i in Properties.Assessment, where: fragment("substring(?, 0, 6)", i.zip_code) == "53207" and i.land_use == "8810" and is_nil(i.geom)) |> Properties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(50); Properties.LocationService.update_property_with_geom(p) end)
+  # import Ecto.Query; from(i in Properties.Assessment, where: fragment("substring(?, 0, 6)", i.zip_code) == "53207" and i.year == 2016 and i.land_use == "8810" and is_nil(i.geom)) |> Properties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(50); Properties.LocationService.update_property_with_geom(p) end)
+  # import Ecto.Query; from(i in Properties.Assessment, where: i.geo_alder == "14" and i.land_use == "8810" and is_nil(i.geom) and i.year == 2016) |> Properties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(50); Properties.LocationService.update_property_with_geom(p) end)
 end

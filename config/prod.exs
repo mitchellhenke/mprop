@@ -14,7 +14,7 @@ use Mix.Config
 config :properties, Properties.Endpoint,
   http: [port: {:system, "PORT"}],
   url: [scheme: "https", host: "salty-beach-73298.herokuapp.com", port: 443],
-  cache_static_manifest: "priv/static/manifest.json",
+  cache_static_manifest: "priv/static/cache_manifest.json",
   secret_key_base: "4KtHeNAGRXmjorm8FQrzOgg5xHmVjeP1UfQHgsQnw9GS8I5jiXVCfq1FsdoMrsf3",
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 
