@@ -73,8 +73,11 @@ schema "assessments" do
   def street_type("ST"), do: "STREET"
   def street_type(type), do: type
 
+  def maybe_within(query, nil, _), do: query
+  def maybe_within(query, _, nil), do: query
+  def maybe_within(query, point, radius_in_m), do: within(query, point, radius_in_m)
+
   def within(query, point, radius_in_m) do
-    query
     {lng, lat} = point.coordinates
     from(property in query, where: fragment("ST_DWithin(?::geography, ST_SetSRID(ST_MakePoint(?, ?), ?), ?)", property.geom, ^lng, ^lat, ^point.srid, ^radius_in_m))
   end

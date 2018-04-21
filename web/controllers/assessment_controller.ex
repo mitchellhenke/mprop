@@ -19,7 +19,11 @@ defmodule Properties.AssessmentController do
 
   def index(conn, params) do
     location = conn.assigns[:location]
-    point = %Geo.Point{coordinates: {location.longitude, location.latitude}, srid: 4326}
+    {point, radius} = if(location) do
+      {%Geo.Point{coordinates: {location.longitude, location.latitude}, srid: 4326}, location.radius_in_m}
+    else
+      {nil, nil}
+    end
 
     min_bathrooms = String.to_integer(params["minBathrooms"] || "0")
     max_bathrooms = String.to_integer(params["maxBathrooms"] || "0")
@@ -40,7 +44,7 @@ defmodule Properties.AssessmentController do
                  |> Assessment.maybe_filter_by(:land_use, land_use)
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
-                 |> Assessment.within(point, location.radius_in_m)
+                 |> Assessment.maybe_within(point, radius)
                  |> Repo.all
 
     render conn, "index.json", assessments: assessments
