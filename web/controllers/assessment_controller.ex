@@ -8,7 +8,7 @@ defmodule Properties.AssessmentController do
     id = String.to_integer(id)
     assessment = Repo.get!(Assessment, id)
     key = assessment.tax_key
-    other_assessments = from(a in Assessment, where: a.id != ^id and a.tax_key == ^key)
+    other_assessments = from(a in Assessment, where: a.tax_key == ^key)
                         |> Repo.all
     sales = from(s in Sale, where: s.tax_key == ^key)
             |> Repo.all
