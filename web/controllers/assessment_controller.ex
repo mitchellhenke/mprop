@@ -29,7 +29,7 @@ defmodule Properties.AssessmentController do
     land_use = params["land_use"]
     parking_type = params["parking_type"]
     number_units = params["number_units"]
-    year = params["year"] || 2016
+    year = params["year"] || 2017
     assessments = from(p in Assessment,
                    where: p.year == ^year,
                    order_by: [desc: p.last_assessment_amount],

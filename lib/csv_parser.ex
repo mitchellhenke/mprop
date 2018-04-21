@@ -60,9 +60,9 @@ defmodule Properties.CSVParser do
     end)
   end
 
-  def run_sales(path, year) do
+  def run_sales(path, _year) do
     File.stream!(path)
-    |> CSV.decode(headers: true)
+    |> CSV.decode!(headers: true)
     |> Enum.each(fn(x) ->
       tax_key = Map.get(x, "Taxkey")
                 |> String.replace("-", "")
