@@ -79,7 +79,8 @@ schema "assessments" do
 
   def within(query, point, radius_in_m) do
     {lng, lat} = point.coordinates
-    from(property in query, where: fragment("ST_DWithin(?::geography, ST_SetSRID(ST_MakePoint(?, ?), ?), ?)", property.geom, ^lng, ^lat, ^point.srid, ^radius_in_m))
+    from(property in query, join: s in Properties.ShapeFile, on: s.taxkey == property.tax_key, where:
+    fragment("ST_DWithin(?::geography, ST_SetSRID(ST_MakePoint(?, ?), ?)::geography, ?)", s.geom_point, ^lng, ^lat, ^point.srid, ^radius_in_m))
   end
 
   def order_by_nearest(query, point) do
