@@ -63,7 +63,7 @@ schema "assessments" do
 
   def address(property) do
     zip_code = String.slice(property.zip_code, 0, 5)
-    "#{property.house_number_low} #{property.street_direction} #{property.street} #{street_type(property.street_type)}, Milwaukee, WI #{zip_code}"
+    "#{property.house_number_low} #{property.street_direction} #{property.street} #{property.street_type}, Milwaukee, WI #{zip_code}"
   end
 
   def street_type("TR"), do: "TERRACE"
@@ -97,6 +97,15 @@ schema "assessments" do
     from(p in query,
        where: fragment("(? + (coalesce(?, 0) * 0.5)) >= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^min_bathrooms) and
        fragment("(? + (coalesce(?, 0) * 0.5)) <= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^max_bathrooms))
+  end
+
+  def filter_by_address(query, nil), do: query
+  def filter_by_address(query, ""), do: query
+  def filter_by_address(query, text_query) do
+    text_query = String.split(text_query)
+                 |> Enum.join(" & ")
+
+    from(s in query, where: fragment("? @@ to_tsquery(?)", s.full_address_vector, ^text_query))
   end
 
   def filter_by_bedrooms(query, min_bedrooms, max_bedrooms) do

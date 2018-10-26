@@ -45,6 +45,7 @@ defmodule PropertiesWeb.AssessmentController do
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
                  |> Assessment.maybe_within(point, radius)
+                 |> Assessment.filter_by_address(params["textSearch"])
                  |> Repo.all
 
     render conn, "index.json", assessments: assessments
