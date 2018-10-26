@@ -1,6 +1,5 @@
 defmodule Properties.Property do
   use Ecto.Schema
-  import Ecto.Query
 
   schema "properties" do
     field :tax_key, :string

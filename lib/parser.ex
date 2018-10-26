@@ -162,7 +162,7 @@ defmodule Properties.XMLParser do
     {"", %{property | air_conditioning: String.trim(element_accumulator) |> String.to_integer}}
   end
   def sax_event_handler({:endElement, _, 'PARKING_TYPE', _}, {element_accumulator, property}) do
-    {"", %{property | parking_type: String.strip element_accumulator}}
+    {"", %{property | parking_type: String.trim element_accumulator}}
   end
 
   def sax_event_handler({:endElement, _, 'NR_UNITS', _}, {element_accumulator, property}) do

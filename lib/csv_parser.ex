@@ -1,6 +1,4 @@
 defmodule Properties.CSVParser do
-  import Ecto.Query
-
   def run(path, year) do
     File.stream!(path)
     |> CSV.decode!(headers: true)
