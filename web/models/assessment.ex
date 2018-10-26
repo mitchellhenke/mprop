@@ -7,7 +7,7 @@ defmodule Properties.Assessment do
                     :last_assessment_amount, :building_area, :year_built,
                     :number_of_bedrooms, :number_of_bathrooms,
                     :number_of_powder_rooms, :lot_area, :zoning, :building_type,
-                    :zip_code, :geom, :air_conditioning, :fireplace, :parking_type,
+                    :zip_code, :air_conditioning, :fireplace, :parking_type,
                     :number_units, :neighborhood, :geo_tract, :geo_block, :convey_datetime,
                     :convey_type, :geo_alder, :year, :land_use, :land_use_general]
 
@@ -36,7 +36,6 @@ schema "assessments" do
     field :air_conditioning, :integer
     field :parking_type, :string
     field :number_units, :integer
-    field :geom, Geo.Point
     field :attic, :string
     field :basement, :string
     field :neighborhood, :string
@@ -123,5 +122,3 @@ schema "assessments" do
      )
   end
 end
-#
-# import Ecto.Query; from(i in MilwaukeeProperties.Assessment, where: fragment("substring(?, 0, 6)", i.zip_code) == "53207" and i.land_use == "8810" and is_nil(i.geom)) |> MilwaukeeProperties.Repo.all |> Enum.each(fn(p) -> :timer.sleep(100); MilwaukeeProperties.LocationService.update_property_with_geom(p) end)
