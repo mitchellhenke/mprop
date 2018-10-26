@@ -1,5 +1,5 @@
 defmodule Properties.Sale do
-  use Properties.Web, :model
+  use PropertiesWeb, :model
 
   schema "sales" do
     belongs_to :property, Properties.Property

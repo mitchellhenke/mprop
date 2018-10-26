@@ -1,5 +1,5 @@
-defmodule Properties.PageControllerTest do
-  use Properties.ConnCase
+defmodule PropertiesWeb.PageControllerTest do
+  use PropertiesWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get conn, "/"

@@ -1,5 +1,5 @@
-defmodule Properties.AssessmentController do
-  use Properties.Web, :controller
+defmodule PropertiesWeb.AssessmentController do
+  use PropertiesWeb, :controller
   alias Properties.Assessment
   alias Properties.Sale
   plug Properties.Plugs.Location

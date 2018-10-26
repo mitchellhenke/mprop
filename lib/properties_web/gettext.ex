@@ -1,4 +1,4 @@
-defmodule Properties.Gettext do
+defmodule PropertiesWeb.Gettext do
   @moduledoc """
   A module providing Internationalization with a gettext-based API.
 

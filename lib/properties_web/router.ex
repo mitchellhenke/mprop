@@ -1,11 +1,11 @@
-defmodule Properties.Router do
-  use Properties.Web, :router
+defmodule PropertiesWeb.Router do
+  use PropertiesWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", Properties do
+  scope "/", PropertiesWeb do
     pipe_through :api # Use the default browser stack
 
     get "/", AssessmentController, :index

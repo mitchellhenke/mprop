@@ -1,5 +1,5 @@
-defmodule Properties.SaleView do
-  use Properties.Web, :view
+defmodule PropertiesWeb.SaleView do
+  use PropertiesWeb, :view
 
   def render("show.json", %{sale: sale}) do
     %{

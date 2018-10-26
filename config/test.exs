@@ -2,7 +2,7 @@ use Mix.Config
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :properties, Properties.Endpoint,
+config :properties, PropertiesWeb.Endpoint,
   http: [port: 4001],
   server: false
 

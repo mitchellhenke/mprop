@@ -1,4 +1,4 @@
-defmodule Properties.ErrorHelpers do
+defmodule PropertiesWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """

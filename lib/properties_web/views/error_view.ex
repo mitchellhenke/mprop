@@ -1,5 +1,5 @@
-defmodule Properties.ErrorView do
-  use Properties.Web, :view
+defmodule PropertiesWeb.ErrorView do
+  use PropertiesWeb, :view
 
   def render("404.html", _assigns) do
     "Page not found"

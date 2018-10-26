@@ -1,12 +1,12 @@
-defmodule Properties.Web do
+defmodule PropertiesWeb do
   @moduledoc """
   A module that keeps using definitions for controllers,
   views and so on.
 
   This can be used in your application as:
 
-      use Properties.Web, :controller
-      use Properties.Web, :view
+      use PropertiesWeb, :controller
+      use PropertiesWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -28,20 +28,21 @@ defmodule Properties.Web do
 
   def controller do
     quote do
-      use Phoenix.Controller
+      use Phoenix.Controller, namespace: PropertiesWeb
 
       alias Properties.Repo
       import Ecto
       import Ecto.Query
 
-      import Properties.Router.Helpers
-      import Properties.Gettext
+      import PropertiesWeb.Router.Helpers
+      import PropertiesWeb.Gettext
     end
   end
 
   def view do
     quote do
-      use Phoenix.View, root: "web/templates"
+      use Phoenix.View, root: "lib/properties_web/templates",
+        namespace: PropertiesWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
@@ -49,9 +50,9 @@ defmodule Properties.Web do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import Properties.Router.Helpers
-      import Properties.ErrorHelpers
-      import Properties.Gettext
+      import PropertiesWeb.Router.Helpers
+      import PropertiesWeb.ErrorHelpers
+      import PropertiesWeb.Gettext
     end
   end
 
@@ -68,7 +69,7 @@ defmodule Properties.Web do
       alias Properties.Repo
       import Ecto
       import Ecto.Query
-      import Properties.Gettext
+      import PropertiesWeb.Gettext
     end
   end
 

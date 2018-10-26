@@ -1,8 +1,8 @@
-defmodule Properties.PropertyView do
-  use Properties.Web, :view
+defmodule PropertiesWeb.PropertyView do
+  use PropertiesWeb, :view
 
   def render("index.json", %{properties: properties}) do
-    %{data: render_many(properties, Properties.PropertyView, "show.json")}
+    %{data: render_many(properties, PropertiesWeb.PropertyView, "show.json")}
   end
 
   def render("show.json", %{property: property}) do

@@ -1,8 +1,8 @@
-defmodule Properties.AssessmentView do
-  use Properties.Web, :view
+defmodule PropertiesWeb.AssessmentView do
+  use PropertiesWeb, :view
 
   def render("index.json", %{assessments: assessments}) do
-    %{data: render_many(assessments, Properties.AssessmentView, "show.json")}
+    %{data: render_many(assessments, PropertiesWeb.AssessmentView, "show.json")}
   end
 
   def render("show.json", %{assessment: assessment}) do
@@ -26,12 +26,12 @@ defmodule Properties.AssessmentView do
   end
 
   def maybe_render_assessments(assessments) when is_list(assessments) do
-    render_many(assessments, Properties.AssessmentView, "show.json")
+    render_many(assessments, PropertiesWeb.AssessmentView, "show.json")
   end
   def maybe_render_assessments(_), do: nil
 
   def maybe_render_sales(assessments) when is_list(assessments) do
-    render_many(assessments, Properties.SaleView, "show.json")
+    render_many(assessments, PropertiesWeb.SaleView, "show.json")
   end
   def maybe_render_sales(_), do: nil
 

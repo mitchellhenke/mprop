@@ -1,4 +1,4 @@
-defmodule Properties.ChannelCase do
+defmodule PropertiesWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -27,7 +27,7 @@ defmodule Properties.ChannelCase do
 
 
       # The default endpoint for testing
-      @endpoint Properties.Endpoint
+      @endpoint PropertiesWeb.Endpoint
     end
   end
 

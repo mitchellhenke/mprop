@@ -1,3 +1,3 @@
-defmodule Properties.LayoutViewTest do
-  use Properties.ConnCase, async: true
+defmodule PropertiesWeb.LayoutViewTest do
+  use PropertiesWeb.ConnCase, async: true
 end

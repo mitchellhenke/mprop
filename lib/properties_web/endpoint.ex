@@ -1,7 +1,7 @@
-defmodule Properties.Endpoint do
+defmodule PropertiesWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :properties
 
-  socket "/socket", Properties.UserSocket
+  socket "/socket", PropertiesWeb.UserSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -39,5 +39,5 @@ defmodule Properties.Endpoint do
     key: "_properties_key",
     signing_salt: "qgYk+r/a"
 
-  plug Properties.Router
+  plug PropertiesWeb.Router
 end

@@ -11,7 +11,7 @@ defmodule Properties do
       # Start the Ecto repository
       supervisor(Properties.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(Properties.Endpoint, []),
+      supervisor(PropertiesWeb.Endpoint, []),
       # Start your own worker by calling: Properties.Worker.start_link(arg1, arg2, arg3)
       # worker(Properties.Worker, [arg1, arg2, arg3]),
     ]
@@ -25,7 +25,7 @@ defmodule Properties do
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    Properties.Endpoint.config_change(changed, removed)
+    PropertiesWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end
