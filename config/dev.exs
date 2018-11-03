@@ -32,7 +32,6 @@ config :logger, :console, format: "[$level] $message\n"
 config :phoenix, :stacktrace_depth, 20
 
 config :properties, Properties.Repo,
-  adapter: Ecto.Adapters.Postgres,
   url: "postgres://localhost/milwaukee_properties",
   pool_size: 20,
   types: Properties.PostgresTypes

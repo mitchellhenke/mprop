@@ -6,7 +6,10 @@ defmodule PropertiesWeb.AssessmentController do
 
   def show(conn, %{"id" => id}) do
     id = String.to_integer(id)
-    assessment = Repo.get!(Assessment, id)
+    assessment = from(a in Assessment, where: a.id == ^id)
+                 |> Assessment.with_joined_shapefile()
+                 |> Assessment.select_latitude_longitude()
+                 |> Repo.one()
     key = assessment.tax_key
     other_assessments = from(a in Assessment, where: a.tax_key == ^key)
                         |> Repo.all
@@ -44,6 +47,8 @@ defmodule PropertiesWeb.AssessmentController do
                  |> Assessment.maybe_filter_by(:land_use, land_use)
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
                  |> Assessment.maybe_filter_by(:number_units, number_units)
+                 |> Assessment.with_joined_shapefile()
+                 |> Assessment.select_latitude_longitude()
                  |> Assessment.maybe_within(point, radius)
                  |> Assessment.filter_by_address(params["textSearch"])
                  |> Repo.all

@@ -21,7 +21,9 @@ defmodule PropertiesWeb.AssessmentView do
       attic: assessment.attic,
       year: assessment.year,
       other_assessments: maybe_render_assessments(assessment.other_assessments),
-      sales: maybe_render_sales(assessment.sales)
+      sales: maybe_render_sales(assessment.sales),
+      latitude: assessment.latitude,
+      longitude: assessment.longitude,
     }
   end
 

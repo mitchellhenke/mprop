@@ -48,6 +48,8 @@ schema "assessments" do
     field :distance, :float, virtual: true
     field :other_assessments, {:array, :map}, virtual: :true
     field :sales, {:array, :map}, virtual: :true
+    field :latitude, :float, virtual: true
+    field :longitude, :float, virtual: :true
 
     belongs_to :property, Properties.Property
     timestamps()
@@ -78,8 +80,8 @@ schema "assessments" do
 
   def within(query, point, radius_in_m) do
     {lng, lat} = point.coordinates
-    from(property in query, join: s in Properties.ShapeFile, on: s.taxkey == property.tax_key, where:
-    fragment("ST_DWithin(?::geography, ST_SetSRID(ST_MakePoint(?, ?), ?)::geography, ?)", s.geom_point, ^lng, ^lat, ^point.srid, ^radius_in_m))
+    from([property, shapefile] in query,
+      where: fragment("ST_DWithin(?::geography, ST_SetSRID(ST_MakePoint(?, ?), ?)::geography, ?)", shapefile.geom_point, ^lng, ^lat, ^point.srid, ^radius_in_m))
   end
 
   def order_by_nearest(query, point) do
@@ -99,10 +101,42 @@ schema "assessments" do
        fragment("(? + (coalesce(?, 0) * 0.5)) <= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^max_bathrooms))
   end
 
+  def with_joined_shapefile(queryable) do
+    if has_named_binding?(queryable, :shapefile) do
+      queryable
+    else
+      queryable
+      |> join(:left, [assessment], shapefile in Properties.ShapeFile, on: shapefile.taxkey == assessment.tax_key, as: :shapefile)
+    end
+  end
+
+  def select_latitude_longitude(query) do
+    from([assessment, shapefile] in query, select: %{assessment | longitude: fragment("ST_X(?)", shapefile.geom_point), latitude: fragment("ST_Y(?)", shapefile.geom_point)})
+  end
+
   def filter_by_address(query, nil), do: query
   def filter_by_address(query, ""), do: query
   def filter_by_address(query, text_query) do
-    text_query = String.split(text_query)
+    text_query = String.upcase(text_query)
+                 |> String.replace("TERRACE", "TR")
+                 |> String.replace("PLACE", "PL")
+                 |> String.replace("BLVD", "BL")
+                 |> String.replace("BOULEVARD", "BL")
+                 |> String.replace("DRIVE", "DR")
+                 |> String.replace("WAY", "WY")
+                 |> String.replace("LANE", "LN")
+                 |> String.replace("ROAD", "RD")
+                 |> String.replace("TERRACE", "TR")
+                 |> String.replace("COURT", "CR")
+                 |> String.replace("STREET", "ST")
+                 |> String.replace("STR", "ST")
+                 |> String.replace("AVENUE", "AV")
+                 |> String.replace("AVE", "AV")
+                 |> String.replace("CRT", "CT")
+                 |> String.replace("COURT", "CT")
+                 |> String.replace("PARKWAY", "PK")
+                 |> String.replace("PKWY", "PK")
+                 |> String.split()
                  |> Enum.join(" & ")
 
     from(s in query, where: fragment("? @@ to_tsquery(?)", s.full_address_vector, ^text_query))
