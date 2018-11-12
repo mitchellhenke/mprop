@@ -31,23 +31,23 @@ defmodule Properties.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_ecto, "~> 3.1"},
-      {:plug_cowboy, "~> 1.0"},
+      {:phoenix_ecto, "~> 4.0"},
+      {:plug_cowboy, "~> 2.0"},
+      {:plug, "~> 1.7"},
       {:phoenix_html, "~> 2.6"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"},
-      {:geo, "~> 2.0"},
-      {:geo_postgis, "~> 1.0"},
+      {:geo, "~> 3.0"},
+      {:geo_postgis, "~> 2.0"},
       {:csv, "~> 2.0"},
       {:corsica, "~> 1.0"},
       {:erlsom, git: "git://github.com/willemdj/erlsom.git"},
       {:hackney, "~> 1.6"},
       {:ecto_sql, "~> 3.0"},
-      {:ecto, "~> 3.0", override: true},
       {:postgrex, "~> 0.14-rc", override: true},
+      {:jason, "~> 1.0"}
     ]
   end
 

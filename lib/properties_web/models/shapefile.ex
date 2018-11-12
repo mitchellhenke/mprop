@@ -4,6 +4,6 @@ defmodule Properties.ShapeFile do
   @primary_key {:gid, :id, autogenerate: true}
   schema "shapefiles" do
     field :taxkey, :string
-    field :geom_point, Geo.Point
+    field :geom_point, Geo.PostGIS.Geometry
   end
 end

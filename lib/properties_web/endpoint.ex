@@ -1,7 +1,8 @@
 defmodule PropertiesWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :properties
 
-  socket "/socket", PropertiesWeb.UserSocket
+  socket "/socket", PropertiesWeb.UserSocket,
+    websocket: true # or list of options
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -26,7 +27,7 @@ defmodule PropertiesWeb.Endpoint do
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    json_decoder: Poison
+    json_decoder: Jason
 
   plug Plug.MethodOverride
   plug Plug.Head

@@ -34,7 +34,7 @@ defmodule PropertiesWeb do
       import Ecto
       import Ecto.Query
 
-      import PropertiesWeb.Router.Helpers
+      alias PropertiesWeb.Router.Helpers, as: Routes
       import PropertiesWeb.Gettext
     end
   end
@@ -50,7 +50,7 @@ defmodule PropertiesWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import PropertiesWeb.Router.Helpers
+      alias PropertiesWeb.Router.Helpers, as: Routes
       import PropertiesWeb.ErrorHelpers
       import PropertiesWeb.Gettext
     end
