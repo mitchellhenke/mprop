@@ -95,12 +95,6 @@ schema "assessments" do
          select: %{property | distance: fragment("ST_Distance_Sphere(?, ST_SetSRID(ST_MakePoint(?,?), ?))", property.geom, ^lng, ^lat, ^point.srid)})
   end
 
-  def filter_by_bathrooms(query, min_bathrooms, max_bathrooms) do
-    from(p in query,
-       where: fragment("(? + (coalesce(?, 0) * 0.5)) >= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^min_bathrooms) and
-       fragment("(? + (coalesce(?, 0) * 0.5)) <= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^max_bathrooms))
-  end
-
   def with_joined_shapefile(queryable) do
     if has_named_binding?(queryable, :shapefile) do
       queryable
@@ -142,11 +136,26 @@ schema "assessments" do
     from(s in query, where: fragment("? @@ to_tsquery(?)", s.full_address_vector, ^text_query))
   end
 
-  def filter_by_bedrooms(query, min_bedrooms, max_bedrooms) do
+  def filter_greater_than(query, _, nil), do: query
+  def filter_greater_than(query, :bathrooms, number) do
     from(p in query,
-       where: p.number_of_bedrooms >= ^min_bedrooms and
-       p.number_of_bedrooms <= ^max_bedrooms
-     )
+       where: fragment("(? + (coalesce(?, 0) * 0.5)) >= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^number))
+  end
+
+  def filter_greater_than(query, field, number) do
+    from(p in query,
+       where: field(p, ^field) >= ^number)
+  end
+
+  def filter_less_than(query, _, nil), do: query
+  def filter_less_than(query, :bathrooms, number) do
+    from(p in query,
+       where: fragment("(? + (coalesce(?, 0) * 0.5)) <= ?", p.number_of_bathrooms, p.number_of_powder_rooms, ^number))
+  end
+
+  def filter_less_than(query, field, number) do
+    from(p in query,
+       where: field(p, ^field) <= ^number)
   end
 
   def filter_by_zipcode(query, nil), do: query

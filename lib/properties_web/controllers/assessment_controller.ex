@@ -28,10 +28,10 @@ defmodule PropertiesWeb.AssessmentController do
       {nil, nil}
     end
 
-    min_bathrooms = String.to_integer(params["minBathrooms"] || "0")
-    max_bathrooms = String.to_integer(params["maxBathrooms"] || "0")
-    min_bedrooms = String.to_integer(params["minBedrooms"] || "0")
-    max_bedrooms = String.to_integer(params["maxBedrooms"] || "0")
+    min_bathrooms = handle_maybe_integer(params["minBathrooms"])
+    max_bathrooms = handle_maybe_integer(params["maxBathrooms"])
+    min_bedrooms = handle_maybe_integer(params["minBedrooms"])
+    max_bedrooms = handle_maybe_integer(params["maxBedrooms"])
     zipcode = params["zipcode"]
     land_use = params["land_use"]
     parking_type = params["parking_type"]
@@ -41,8 +41,10 @@ defmodule PropertiesWeb.AssessmentController do
                    where: p.year == ^year,
                    order_by: [desc: p.last_assessment_amount],
                    limit: 100)
-                 |> Assessment.filter_by_bathrooms(min_bathrooms, max_bathrooms)
-                 |> Assessment.filter_by_bedrooms(min_bedrooms, max_bedrooms)
+                 |> Assessment.filter_greater_than(:bathrooms, min_bathrooms)
+                 |> Assessment.filter_less_than(:bathrooms, max_bathrooms)
+                 |> Assessment.filter_greater_than(:number_of_bedrooms, min_bedrooms)
+                 |> Assessment.filter_less_than(:number_of_bedrooms, max_bedrooms)
                  |> Assessment.filter_by_zipcode(zipcode)
                  |> Assessment.maybe_filter_by(:land_use, land_use)
                  |> Assessment.maybe_filter_by(:parking_type, parking_type)
@@ -54,5 +56,12 @@ defmodule PropertiesWeb.AssessmentController do
                  |> Repo.all
 
     render conn, "index.json", assessments: assessments
+  end
+
+  defp handle_maybe_integer(binary) do
+    case Integer.parse(binary) do
+      {integer, _} -> integer
+      _ -> nil
+    end
   end
 end
