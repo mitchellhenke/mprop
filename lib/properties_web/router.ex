@@ -10,5 +10,6 @@ defmodule PropertiesWeb.Router do
 
     get "/", AssessmentController, :index
     get "/assessments/:id", AssessmentController, :show
+    get "/geocode", GeocodeController, :index
   end
 end
