@@ -6,7 +6,7 @@ defmodule Properties.Repo.Migrations.CreateSale do
       add :property_id, references(:properties, on_delete: :nothing), null: false
       add :tax_key, :string, null: false
       add :amount, :integer, null: false
-      add :date_time, :datetime, null: false
+      add :date_time, :naive_datetime_usec, null: false
       add :style, :string
       add :exterior, :string
 

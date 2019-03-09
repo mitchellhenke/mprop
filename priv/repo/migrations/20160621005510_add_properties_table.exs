@@ -24,7 +24,7 @@ defmodule MilwaukeeProperties.Repo.Migrations.AddPropertiesTable do
       add :land_use, :string
       add :land_use_general, :string
 
-      timestamps
+      timestamps()
     end
 
     create index(:properties, [:tax_key], unique: true)

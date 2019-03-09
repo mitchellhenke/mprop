@@ -18,4 +18,5 @@ defmodule Properties.Repo.Migrations.AssessmentAddressSearch do
   end
 end
 
+# TODO
 # UPDATE assessments set full_address_vector = to_tsvector((house_number_low || ' ' || house_number_high || ' ' || street_direction || ' ' || street || ' ' || street_type)) limit 1;
