@@ -9,7 +9,6 @@ defmodule PropertiesWeb.GeocodeController do
                    |> Assessment.with_joined_shapefile()
                    |> Assessment.filter_by_address(params["q"])
                    |> Assessment.select_latitude_longitude()
-                   |> IO.inspect
                    |> Properties.Repo.all()
 
     put_view(conn, PropertiesWeb.GeocodeView)
