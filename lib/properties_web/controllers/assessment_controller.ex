@@ -58,6 +58,7 @@ defmodule PropertiesWeb.AssessmentController do
     render conn, "index.json", assessments: assessments
   end
 
+  defp handle_maybe_integer(nil), do: nil
   defp handle_maybe_integer(binary) do
     case Integer.parse(binary) do
       {integer, _} -> integer

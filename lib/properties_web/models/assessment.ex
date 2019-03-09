@@ -111,29 +111,17 @@ schema "assessments" do
   def filter_by_address(query, nil), do: query
   def filter_by_address(query, ""), do: query
   def filter_by_address(query, text_query) do
-    text_query = String.upcase(text_query)
-                 |> String.replace("TERRACE", "TR")
-                 |> String.replace("PLACE", "PL")
-                 |> String.replace("BLVD", "BL")
-                 |> String.replace("BOULEVARD", "BL")
-                 |> String.replace("DRIVE", "DR")
-                 |> String.replace("WAY", "WY")
-                 |> String.replace("LANE", "LN")
-                 |> String.replace("ROAD", "RD")
-                 |> String.replace("TERRACE", "TR")
-                 |> String.replace("COURT", "CR")
-                 |> String.replace("STREET", "ST")
-                 |> String.replace("STR", "ST")
-                 |> String.replace("AVENUE", "AV")
-                 |> String.replace("AVE", "AV")
-                 |> String.replace("CRT", "CT")
-                 |> String.replace("COURT", "CT")
-                 |> String.replace("PARKWAY", "PK")
-                 |> String.replace("PKWY", "PK")
-                 |> String.split()
-                 |> Enum.join(" & ")
+    text_query = transform_text_query(text_query)
 
     from(s in query, where: fragment("? @@ to_tsquery(?)", s.full_address_vector, ^text_query))
+  end
+
+  def order_by_address_text_search(query, nil), do: query
+  def order_by_address_text_search(query, ""), do: query
+  def order_by_address_text_search(query, text_query) do
+    text_query = transform_text_query(text_query)
+    from(q in query,
+      order_by: fragment("ts_rank_cd(?, ?)", q.full_address_vector, ^text_query))
   end
 
   def filter_greater_than(query, _, nil), do: query
@@ -172,5 +160,29 @@ schema "assessments" do
     from(p in query,
        where: field(p, ^field) == ^value
      )
+  end
+
+  defp transform_text_query(text_query) do
+    String.upcase(text_query)
+    |> String.replace("TERRACE", "TR")
+    |> String.replace("PLACE", "PL")
+    |> String.replace("BLVD", "BL")
+    |> String.replace("BOULEVARD", "BL")
+    |> String.replace("DRIVE", "DR")
+    |> String.replace("WAY", "WY")
+    |> String.replace("LANE", "LN")
+    |> String.replace("ROAD", "RD")
+    |> String.replace("TERRACE", "TR")
+    |> String.replace("COURT", "CR")
+    |> String.replace("STREET", "ST")
+    |> String.replace("STR", "ST")
+    |> String.replace("AVENUE", "AV")
+    |> String.replace("AVE", "AV")
+    |> String.replace("CRT", "CT")
+    |> String.replace("COURT", "CT")
+    |> String.replace("PARKWAY", "PK")
+    |> String.replace("PKWY", "PK")
+    |> String.split()
+    |> Enum.join(" & ")
   end
 end
