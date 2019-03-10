@@ -12,13 +12,10 @@ defmodule Properties.Indexer do
      bigrams = Enum.chunk_every(graphemes, 2, 1)
      trigrams = Enum.chunk_every(graphemes, 3, 1)
 
-     all_grams = bigrams ++ trigrams
+     bigrams ++ trigrams
      |> Enum.uniq
-
-     gram_count = Enum.count(all_grams)
-
-     Enum.reduce(all_grams, map, fn(gram, map) ->
-       Map.update(map, gram, MapSet.new([{word, gram_count}]), fn(set) -> MapSet.put(set, {word, gram_count}) end)
+     |> Enum.reduce(map, fn(gram, map) ->
+       Map.update(map, gram, MapSet.new([word]), fn(set) -> MapSet.put(set, word) end)
      end)
     end)
 
@@ -30,14 +27,16 @@ defmodule Properties.Indexer do
   @spec search(String.t, gram_map) :: search_results
   def search(word, gram_map) do
     grams = build_grams(word)
-    Enum.reduce(grams, %{}, fn(gram, map) ->
+    Enum.reduce(grams, MapSet.new, fn(gram, set) ->
       Map.get(gram_map, gram, [])
-      |> Enum.reduce(map, fn({word, grams_count}, map) ->
-        Map.update(map, word, 1/grams_count, &(&1 + 1/grams_count))
-      end)
+      |> MapSet.new
+      |> MapSet.union(set)
     end)
-    |> Enum.sort(fn({_key, value}, {_key2, value2}) ->
-      value >= value2
+    |> Enum.map(fn(match) ->
+      {match, String.jaro_distance(match, word)}
+    end)
+    |> Enum.sort(fn({_word, score}, {_word2, score2}) ->
+      score >= score2
     end)
   end
 
