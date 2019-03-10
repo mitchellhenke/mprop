@@ -2,6 +2,7 @@ defmodule PropertiesWeb.GeocodeController do
   use PropertiesWeb, :controller
   alias Properties.Assessment
 
+  plug PropertiesWeb.Plugs.Brotli
   action_fallback PropertiesWeb.FallbackController
 
 

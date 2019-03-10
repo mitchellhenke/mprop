@@ -2,7 +2,7 @@ defmodule PropertiesWeb.AssessmentController do
   use PropertiesWeb, :controller
   alias Properties.Assessment
   alias Properties.Sale
-  plug Properties.Plugs.Location
+  plug PropertiesWeb.Plugs.Location
 
   def show(conn, %{"id" => id}) do
     id = String.to_integer(id)

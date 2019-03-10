@@ -1,4 +1,4 @@
-defmodule Properties.Plugs.Location do
+defmodule PropertiesWeb.Plugs.Location do
   @behaviour Plug
   import Plug.Conn
 

@@ -48,7 +48,8 @@ defmodule Properties.Mixfile do
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.14-rc", override: true},
       {:jason, "~> 1.0"},
-      {:nimble_parsec, "~> 0.5.0"}
+      {:nimble_parsec, "~> 0.5.0"},
+      {:brotli, ">= 0.0.0"},
     ]
   end
 
