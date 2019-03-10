@@ -47,7 +47,8 @@ defmodule Properties.Mixfile do
       {:hackney, "~> 1.6"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.14-rc", override: true},
-      {:jason, "~> 1.0"}
+      {:jason, "~> 1.0"},
+      {:nimble_parsec, "~> 0.5.0"}
     ]
   end
 
