@@ -1,8 +1,11 @@
 defmodule PropertiesWeb.GeocodeView do
   use PropertiesWeb, :view
 
-  def render("index.json", %{assessments: assessments}) do
-    %{data: render_many(assessments, PropertiesWeb.GeocodeView, "show.json", as: :assessment)}
+  def render("index.json", %{assessments: assessments, score: score}) do
+    %{
+      data: render_many(assessments, PropertiesWeb.GeocodeView, "show.json", as: :assessment),
+      score: score
+    }
   end
 
   def render("show.json", %{assessment: assessment}) do
