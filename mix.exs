@@ -40,7 +40,7 @@ defmodule Properties.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:geo, "~> 3.0"},
-      {:geo_postgis, "~> 2.0"},
+      {:geo_postgis, "~> 3.0"},
       {:csv, "~> 2.0"},
       {:corsica, "~> 1.0"},
       {:erlsom, git: "git://github.com/willemdj/erlsom.git"},
