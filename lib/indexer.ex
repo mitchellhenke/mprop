@@ -9,10 +9,9 @@ defmodule Properties.Indexer do
      graphemes = String.graphemes("  #{word}  ")
                  |> Enum.map(&String.trim/1)
                  |> Enum.reject(&(&1 == ""))
-     bigrams = Enum.chunk_every(graphemes, 2, 1)
      trigrams = Enum.chunk_every(graphemes, 3, 1)
 
-     bigrams ++ trigrams
+     trigrams
      |> Enum.uniq
      |> Enum.reduce(map, fn(gram, map) ->
        Map.update(map, gram, MapSet.new([word]), fn(set) -> MapSet.put(set, word) end)
@@ -46,9 +45,8 @@ defmodule Properties.Indexer do
     graphemes = String.graphemes("  #{word}  ")
                 |> Enum.map(&String.trim/1)
                 |> Enum.reject(&(&1 == ""))
-    bigrams = Enum.chunk_every(graphemes, 2, 1)
     trigrams = Enum.chunk_every(graphemes, 3, 1)
-    bigrams ++ trigrams
+    trigrams
     |> Enum.uniq
   end
 end
