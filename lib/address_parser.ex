@@ -60,15 +60,19 @@ defmodule Properties.AddressParser do
   end
 
   def validate_addresses() do
-    from(a in Properties.Assessment, where: a.year == 2017)
+    addresses = from(a in Properties.Assessment, where: a.year == 2017)
     |> Properties.Repo.all()
-    |> Enum.map(fn p ->
-      address =
-        "#{p.house_number_low} #{p.street_direction} #{p.street} #{p.street_type}"
-        |> String.trim()
-
-      {address, parse(address)}
+    |> Enum.map(fn(x) ->
+      "#{x.house_number_low} #{x.street_direction} #{x.street} #{x.street_type}"
+      |> String.trim()
     end)
+
+    IO.inspect("validating #{Enum.count(addresses)} at #{NaiveDateTime.utc_now()}")
+    results = Enum.map(addresses, fn address ->
+      {address, parse_address(address)}
+    end)
+    IO.inspect("done validating #{Enum.count(addresses)} at #{NaiveDateTime.utc_now()}")
+    results
   end
 
   @spec parse(String.t) :: String.t | {:error, term()}
