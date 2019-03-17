@@ -68,6 +68,15 @@ schema "assessments" do
     "#{property.house_number_low} #{property.street_direction} #{property.street} #{property.street_type}, Milwaukee, WI #{zip_code}"
   end
 
+  def bathroom_count(assessment) do
+    case {assessment.number_of_bathrooms, assessment.number_of_powder_rooms} do
+      {nil, nil} -> 0
+      {br, nil} -> br
+      {nil, pr} -> pr * 0.5
+      {br, pr} -> br + (pr * 0.5)
+    end
+  end
+
   def street_type("TR"), do: "TERRACE"
   def street_type("CR"), do: "CIRCLE"
   def street_type("AV"), do: "AVENUE"
@@ -149,9 +158,13 @@ schema "assessments" do
   def filter_by_zipcode(query, nil), do: query
   def filter_by_zipcode(query, ""), do: query
   def filter_by_zipcode(query, zipcode) do
-    from(p in query,
-       where: fragment("substring(?, 0, 6) = ?", p.zip_code, ^zipcode)
-     )
+    if String.length(zipcode) != 5 do
+      query
+    else
+      from(p in query,
+         where: fragment("substring(?, 0, 6) = ?", p.zip_code, ^zipcode)
+       )
+    end
   end
 
   def maybe_filter_by(query, _field, nil), do: query
