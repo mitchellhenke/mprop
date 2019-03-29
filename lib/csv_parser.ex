@@ -14,6 +14,14 @@ defmodule Properties.CSVParser do
       street_type: x["STTYPE"],
       last_assessment_year: parse_int(x["YR_ASSMT"]),
       last_assessment_amount: String.to_integer(x["C_A_TOTAL"]),
+      last_assessment_land: String.to_integer(x["C_A_LAND"]),
+      last_assessment_improvements: String.to_integer(x["C_A_IMPRV"]),
+
+      last_assessment_amount_exempt: String.to_integer(x["C_A_EXM_TOTAL"]),
+      last_assessment_land_exempt: String.to_integer(x["C_A_EXM_LAND"]),
+      last_assessment_improvements_exempt: String.to_integer(x["C_A_EXM_IMPRV"]),
+      exemption_code: String.to_integer(x["C_A_EXM_TYPE"]),
+
       building_area: parse_int(x["BLDG_AREA"]),
       year_built: parse_int(x["YR_BUILT"]),
       number_of_bedrooms: parse_int(x["BEDROOMS"]),

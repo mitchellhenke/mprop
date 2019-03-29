@@ -4,7 +4,11 @@ defmodule Properties.Assessment do
 
   @optional_fields [:tax_rate_cd, :house_number_high, :house_number_low,
                     :street_direction, :street, :street_type, :last_assessment_year,
-                    :last_assessment_amount, :building_area, :year_built,
+                    :last_assessment_land, :last_assessment_improvements,
+                    :last_assessment_amount, :last_assessment_land_exempt,
+                    :last_assessment_improvements_exempt,
+                    :last_assessment_amount_exempt, :exemption_code,
+                    :building_area, :year_built,
                     :number_of_bedrooms, :number_of_bathrooms,
                     :number_of_powder_rooms, :lot_area, :zoning, :building_type,
                     :zip_code, :air_conditioning, :fireplace, :parking_type,
@@ -20,7 +24,13 @@ schema "assessments" do
     field :street, :string
     field :street_type, :string
     field :last_assessment_year, :integer
+    field :last_assessment_land, :integer
+    field :last_assessment_improvements, :integer
     field :last_assessment_amount, :integer
+    field :last_assessment_land_exempt, :integer
+    field :last_assessment_improvements_exempt, :integer
+    field :last_assessment_amount_exempt, :integer
+    field :exemption_code, :string
     field :building_area, :integer
     field :year_built, :integer
     field :number_of_bedrooms, :integer
