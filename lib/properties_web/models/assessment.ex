@@ -172,6 +172,15 @@ schema "assessments" do
      )
   end
 
+  def bathroom_count(assessment) do
+    case {assessment.number_of_bathrooms, assessment.number_of_powder_rooms} do
+      {nil, nil} -> 0
+      {br, nil} -> br
+      {nil, pr} -> pr * 0.5
+      {br, pr} -> br + (pr * 0.5)
+    end
+  end
+
   defp transform_text_query(text_query) do
     String.upcase(text_query)
     |> String.split()

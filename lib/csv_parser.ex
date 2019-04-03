@@ -20,7 +20,7 @@ defmodule Properties.CSVParser do
       last_assessment_amount_exempt: String.to_integer(x["C_A_EXM_TOTAL"]),
       last_assessment_land_exempt: String.to_integer(x["C_A_EXM_LAND"]),
       last_assessment_improvements_exempt: String.to_integer(x["C_A_EXM_IMPRV"]),
-      exemption_code: String.to_integer(x["C_A_EXM_TYPE"]),
+      exemption_code: x["C_A_EXM_TYPE"],
 
       building_area: parse_int(x["BLDG_AREA"]),
       year_built: parse_int(x["YR_BUILT"]),

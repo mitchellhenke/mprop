@@ -5,5 +5,6 @@ defmodule Properties.ShapeFile do
   schema "shapefiles" do
     field :taxkey, :string
     field :geom_point, Geo.PostGIS.Geometry
+    field :geom, Geo.PostGIS.Geometry
   end
 end

@@ -12,7 +12,6 @@ config :properties, PropertiesWeb.Endpoint,
   code_reloader: true,
   check_origin: false
 
-
 # Watch static and templates for browser reloading.
 config :properties, PropertiesWeb.Endpoint,
   live_reload: [
@@ -33,5 +32,5 @@ config :phoenix, :stacktrace_depth, 20
 
 config :properties, Properties.Repo,
   url: "postgres://localhost/milwaukee_properties",
-  pool_size: 20,
+  pool_size: 75,
   types: Properties.PostgresTypes

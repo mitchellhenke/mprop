@@ -11,7 +11,7 @@ defmodule PropertiesWeb.AssessmentView do
       tax_key: assessment.tax_key,
       address: Properties.Assessment.address(assessment),
       bedrooms: assessment.number_of_bedrooms,
-      bathrooms: bathroom_count(assessment),
+      bathrooms: Properties.Assessment.bathroom_count(assessment),
       lot_area: assessment.lot_area,
       building_area: assessment.building_area,
       last_assessment_amount: assessment.last_assessment_amount,
@@ -36,13 +36,4 @@ defmodule PropertiesWeb.AssessmentView do
     render_many(assessments, PropertiesWeb.SaleView, "show.json")
   end
   def maybe_render_sales(_), do: nil
-
-  def bathroom_count(assessment) do
-    case {assessment.number_of_bathrooms, assessment.number_of_powder_rooms} do
-      {nil, nil} -> 0
-      {br, nil} -> br
-      {nil, pr} -> pr * 0.5
-      {br, pr} -> br + (pr * 0.5)
-    end
-  end
 end
