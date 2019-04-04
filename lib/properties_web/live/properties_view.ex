@@ -37,11 +37,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
           <div class="row mb-2">
             <label class="col-sm-2 justify-content-start form-control-label" htmlFor="zip_code">ZIP Code</label>
             <input id="zip_code" type="number" class="form-control col-sm-2" value="<%= @params.zip_code %>" phx-keyup="update_zip_code" />
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="land_use">Land Use</label>
-            <select id="land_use" class="form-control col-sm-2" phx-change="update_land_use">
-              <option value=""></option>
-              <option value="8810">Single-Private Households</option>
-            </select>
           </div>
         </div>
       </form>
@@ -140,19 +135,11 @@ defmodule PropertiesWeb.PropertiesLiveView do
     {:noreply, socket}
   end
 
-  def handle_event("update_land_use", value, socket) do
-    IO.inspect value
-    socket = update_socket_params_and_get_properties(socket, :land_use, value)
+  def handle_event(_, _value, socket) do
     {:noreply, socket}
   end
 
-  def handle_event(s, value, socket) do
-    IO.inspect s
-    IO.inspect value
-    {:noreply, socket}
-  end
-
-  def mount(_session, socket) do
+  def mount(session, socket) do
     socket = assign(socket, :properties, [])
              |> assign(:params, %Params{year: 2017})
 
@@ -179,7 +166,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.filter_greater_than(:number_of_bedrooms, params.min_bed)
       |> Assessment.filter_less_than(:number_of_bedrooms, params.max_bed)
       |> Assessment.filter_by_zipcode(params.zip_code)
-      |> Assessment.maybe_filter_by(:land_use, params.land_use)
+      |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
       |> Repo.all

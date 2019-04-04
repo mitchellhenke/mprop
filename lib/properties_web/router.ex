@@ -1,16 +1,18 @@
 defmodule PropertiesWeb.Router do
   use PropertiesWeb, :router
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Phoenix.LiveView.Flash
+    plug :put_layout, {PropertiesWeb.LayoutView, :app}
+  end
+
+  pipeline :api do
+    plug :accepts, ["json"]
   end
 
   scope "/", PropertiesWeb do
@@ -22,8 +24,9 @@ defmodule PropertiesWeb.Router do
   end
 
   scope "/web", PropertiesWeb do
-    pipe_through :api # Use the default browser stack
+    pipe_through :browser # Use the default browser stack
 
     get "/", MapController, :index
+    live "/properties", PropertiesLiveView
   end
 end

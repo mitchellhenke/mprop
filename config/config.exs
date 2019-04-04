@@ -17,16 +17,9 @@ config :properties, PropertiesWeb.Endpoint,
   render_errors: [view: PropertiesWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Properties.PubSub,
     adapter: Phoenix.PubSub.PG2],
-  watchers: [
-    node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+  live_view: [
+    signing_salt: "TlvpvGFzpO3J55/oVoHzGhOeFfZHU4f1"
   ]
-
 
 # Configures Elixir's Logger
 config :logger, :console,
