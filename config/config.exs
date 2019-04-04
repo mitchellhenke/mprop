@@ -16,7 +16,17 @@ config :properties, PropertiesWeb.Endpoint,
   secret_key_base: "5UUQajanov7iRJdsiR1T4JRYaniTXCTgBGtFXGmhvWJ20PHHQWCI2NR63B0664b4",
   render_errors: [view: PropertiesWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Properties.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+    adapter: Phoenix.PubSub.PG2],
+  watchers: [
+    node: [
+      "node_modules/webpack/bin/webpack.js",
+      "--mode",
+      "development",
+      "--watch-stdin",
+      cd: Path.expand("../assets", __DIR__)
+    ]
+  ]
+
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -26,8 +36,6 @@ config :logger, :console,
 config :phoenix,
   json_library: Jason,
   template_engines: [leex: Phoenix.LiveView.Engine]
-
-config :logger, level: :error
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
