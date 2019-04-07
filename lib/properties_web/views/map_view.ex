@@ -33,21 +33,21 @@ defmodule PropertiesWeb.MapView do
   defp fill_color(number) do
     cond do
       number <= 0.64393939393939393939 ->
-        "#FCFBFD"
+        "#003F5C"
       number <= 0.77131540546174692516 ->
-        "#EFEDF5"
+        "#2F4B7C"
       number <= 1.2682926829268293 ->
-        "#DADAEB"
+        "#665191"
       number <= 1.7400000000000000 ->
-        "#BCBDDC"
+        "#A05195"
       number <= 2.3299028016009148 ->
-        "#9E9AC8"
+        "#D45087"
       number <= 3.1190476190476190 ->
-        "#807DBA"
+        "#F95D6A"
       number <= 4.7138682002451211 ->
-        "#6A51A3"
+        "#FF7C43"
       number <= 6.3951970764813365 ->
-        "#54278F"
+        "#FFA600"
       true ->
         "#3F007D"
     end
