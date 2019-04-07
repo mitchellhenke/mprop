@@ -13,7 +13,7 @@
     <option>RS3</option>
   </select>
   <div>
-      R is residential, B is Business. Generally speaking, the higher the number, the denser the zoning is, meaning smaller lots and smaller setbacks.  Details can be found in the <a target="_blank" href="https://city.milwaukee.gov/ImageLibrary/Groups/ccClerk/Ordinances/Volume-2/CH295-sub5.pdf">Milwaukee City zoning codes</a>.
+      R is residential, B is Business. Generally speaking, the higher the number, the denser the zoning is, meaning smaller lots and smaller setbacks.  Details can be found in the <a target="_blank" href="https://city.milwaukee.gov/zoningcode">Milwaukee City zoning codes</a>.
   </div>
   <div id='map'></div>
 </div>

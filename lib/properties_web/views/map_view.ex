@@ -14,6 +14,7 @@ defmodule PropertiesWeb.MapView do
       properties: %{
         tax_key: shapefile.assessment.tax_key,
         popupContent: """
+        <a href=\"http://assessments.milwaukee.gov/remast.asp?taxkey=#{shapefile.assessment.tax_key}\" target=\"blank\">Assessment Link</a>
         <p>Tax Key: #{shapefile.assessment.tax_key}</p>
         <p>Lot Area: #{shapefile.assessment.lot_area} sq ft</p>
         <p>Land Assessment: $#{shapefile.assessment.last_assessment_land}</p>
