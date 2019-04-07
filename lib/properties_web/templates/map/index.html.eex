@@ -1,4 +1,5 @@
 <div>
+  <p>This map shows land assessment by zoning.</p>
   <label for="zoning-select">Choose a zoning:</label>
 
   <select id="zoning-select">

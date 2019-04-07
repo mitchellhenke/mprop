@@ -5,8 +5,13 @@ defmodule PropertiesWeb.AssessmentController do
   plug PropertiesWeb.Plugs.Location
 
   def show(conn, %{"id" => id}) do
-    id = String.to_integer(id)
-    assessment = from(a in Assessment, where: a.id == ^id)
+    query = if length(String.codepoints(id)) == 10 do
+      from(a in Assessment, where: a.tax_key == ^id and a.year == 2018)
+    else
+      id = String.to_integer(id)
+      from(a in Assessment, where: a.id == ^id)
+    end
+    assessment = query
                  |> Assessment.with_joined_shapefile()
                  |> Assessment.select_latitude_longitude()
                  |> Repo.one()
