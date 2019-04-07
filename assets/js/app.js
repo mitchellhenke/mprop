@@ -35,6 +35,8 @@ let selectedZoning = "RT4"
 layerGroup.addTo(map)
 
 zoningSelect.addEventListener('change', (e) => {
+  taxKeySet = new Set([])
+  layerGroup.clearLayers()
   selectedZoning = e.target.value
   updateMap()
 });
