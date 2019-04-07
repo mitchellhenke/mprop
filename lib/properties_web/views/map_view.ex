@@ -20,7 +20,7 @@ defmodule PropertiesWeb.MapView do
         <p>#{assessment_sq_foot} $/sq ft</p>
         """,
         style: %{
-          weight: 2,
+          weight: 1,
           color: "#999",
           opacity: 1,
           fillColor: fill_color(assessment_sq_foot),

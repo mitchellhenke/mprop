@@ -10,6 +10,7 @@ summary {
 #map {
   width: 100%;
   height: 600px;
+  margin-bottom: 30px;
 }
 
 .legend {
