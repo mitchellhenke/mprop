@@ -2,3 +2,9 @@
 
 @import "./phoenix.css";
 @import "./bootstrap.css";
+
+#map {
+  width: 1000px;
+  height: 800px;
+  margin: 30px;
+}

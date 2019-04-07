@@ -2,9 +2,11 @@ defmodule Properties.CSVParser do
   def run(path, year) do
     File.stream!(path)
     |> CSV.decode!(headers: true)
-    |> Enum.each(fn(x) ->
+    # |> Stream.each(fn(x) ->
+    |> Task.async_stream(fn(x) ->
       attrs = %{
       year: year,
+      zoning: x["ZONING"],
       tax_key: String.pad_leading(x["TAXKEY"], 10, "0"),
       tax_rate_cd: parse_tax_rate_cd(x["TAX_RATE_CD"]),
       house_number_low: x["HOUSE_NR_LO"],
@@ -61,7 +63,8 @@ defmodule Properties.CSVParser do
           Properties.Assessment.changeset(a, attrs)
           |> Properties.Repo.update!
       end
-    end)
+    end, max_concurrency: 100, timeout: :infinity)
+    |> Stream.run()
   end
 
   def run_sales(path, _year) do
