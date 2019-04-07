@@ -17,7 +17,9 @@ defmodule PropertiesWeb.MapController do
             |> Float.parse()
     {y_max, _} = params["northEastLatitude"]
             |> Float.parse()
-    shapefiles = Properties.ShapeFile.list(x_min, y_min, x_max, y_max)
+
+    zoning = params["zoning"]
+    shapefiles = Properties.ShapeFile.list(x_min, y_min, x_max, y_max, zoning)
     render(conn, "index.json", shapefiles: shapefiles)
   end
 end

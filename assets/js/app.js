@@ -30,16 +30,24 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 let myRenderer = L.canvas({ padding: 0.5 })
 let layerGroup = L.layerGroup()
 let taxKeySet = new Set([])
+const zoningSelect = document.getElementById("zoning-select");
+let selectedZoning = "RT4"
 layerGroup.addTo(map)
-map.on('moveend', (e) => {
+
+zoningSelect.addEventListener('change', (e) => {
+  selectedZoning = e.target.value
+  updateMap()
+});
+
+
+function updateMap() {
   let bounds = map.getBounds()
   let northEast = bounds._northEast
   let southWest = bounds._southWest
 
-  fetch(`/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}`)
+  fetch(`/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}`)
     .then(response => response.json())
     .then(data => {
-      debugger
       const newData = data.reduce((accumulator, shape) => {
         if(taxKeySet.has(shape.properties.tax_key)) {
           return accumulator
@@ -63,7 +71,13 @@ map.on('moveend', (e) => {
     }
     }).addTo(layerGroup)
   })
+}
+
+map.on('moveend', (e) => {
+  updateMap()
 })
+
+updateMap()
 
 // Import local files
 //

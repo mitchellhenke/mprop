@@ -1,1 +1,17 @@
-<div id='map'></div>
+<div>
+  <label for="zoning-select">Choose a zoning:</label>
+
+  <select id="zoning-select">
+    <option>RT4</option>
+    <option>RS6</option>
+    <option>RT3</option>
+    <option>RT2</option>
+    <option>RS5</option>
+    <option>RS4</option>
+    <option>LB2</option>
+    <option>PD</option>
+    <option>RM1</option>
+    <option>RS3</option>
+  </select>
+  <div id='map'></div>
+</div>
