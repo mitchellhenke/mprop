@@ -46,7 +46,7 @@ var legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
 
   let div = L.DomUtil.create('div', 'info legend')
-  const grades = ["#003F5C", "#2F4B7C", "#665191", "#A05195", "#D45087", "#F95D6A", "#FF7C43", "#FFA600"]
+  const grades = ["#003F5C", "#2F4B7C", "#665191", "#A05195", "#D45087", "#F95D6A", "#FF7C43", "#FFA600", "#FF0000"]
   let colors = []
   let labels = []
 

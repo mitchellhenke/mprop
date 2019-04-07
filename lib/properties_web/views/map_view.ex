@@ -49,7 +49,7 @@ defmodule PropertiesWeb.MapView do
       number <= 6.3951970764813365 ->
         "#FFA600"
       true ->
-        "#3F007D"
+        "#FF0000"
     end
   end
 
