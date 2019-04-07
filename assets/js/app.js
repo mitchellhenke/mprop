@@ -41,6 +41,26 @@ zoningSelect.addEventListener('change', (e) => {
   updateMap()
 });
 
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+  let div = L.DomUtil.create('div', 'info legend')
+  const grades = ["#003F5C", "#2F4B7C", "#665191", "#A05195", "#D45087", "#F95D6A", "#FF7C43", "#FFA600"]
+  let colors = []
+  let labels = []
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + grades[i] + '"></i>'
+    }
+
+    return div;
+};
+
+legend.addTo(map);
+
 
 function updateMap() {
   let bounds = map.getBounds()
