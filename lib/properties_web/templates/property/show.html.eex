@@ -43,7 +43,7 @@
     </div>
     <div class="col-sm-4">
       <h4>Link</h4>
-      <a href="http://assessments.milwaukee.gov/remast.asp?taxkey=3591546000" rel="noopener noreferrer" target="_blank">MPROP</a>
+      <a href="<%= "http://assessments.milwaukee.gov/remast.asp?taxkey=#{@assessment.tax_key}" %>" rel="noopener noreferrer" target="_blank">MPROP</a>
     </div>
     <div class="col-sm-4">
       <h4>Assessment:</h4>$<%= ViewHelper.number_with_commas(@assessment.last_assessment_amount) %>
