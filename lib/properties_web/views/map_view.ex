@@ -14,7 +14,7 @@ defmodule PropertiesWeb.MapView do
       properties: %{
         tax_key: shapefile.assessment.tax_key,
         popupContent: """
-        <a href=\"https://mprop.mitchellhenke.com/#/properties/#{shapefile.assessment.tax_key}\" target=\"blank\">Assessment Link</a>
+        <a href=\"/properties/#{shapefile.assessment.tax_key}\" target=\"blank\">Assessment Link</a>
         <p>Lot Area: #{shapefile.assessment.lot_area} sq ft</p>
         <p>Land Assessment: $#{shapefile.assessment.last_assessment_land}</p>
         <p>#{assessment_sq_foot} $/sq ft</p>

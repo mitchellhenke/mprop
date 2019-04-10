@@ -139,7 +139,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
     {:noreply, socket}
   end
 
-  def mount(session, socket) do
+  def mount(_session, socket) do
     socket = assign(socket, :properties, [])
              |> assign(:params, %Params{year: 2017})
 

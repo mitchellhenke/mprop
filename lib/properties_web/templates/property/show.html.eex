@@ -1,0 +1,75 @@
+<div>
+  <a href="/properties">Back to Search</a>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <h4>Tax Key:</h4> <%= @assessment.tax_key %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Address:</h4><%= Properties.Assessment.address(@assessment) %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Bedrooms:</h4><%= @assessment.number_of_bedrooms %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <h4>Bathrooms:</h4><%= Properties.Assessment.bathroom_count(@assessment) %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Lot Area:</h4><%= ViewHelper.number_with_commas(@assessment.lot_area) %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Building Area:</h4><%= ViewHelper.number_with_commas(@assessment.building_area) %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <h4>Air Conditioning:</h4><%= ViewHelper.air_conditioning(@assessment.air_conditioning) %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Attic</h4> <%= @assessment.attic %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Basement:</h4> <%= @assessment.basement %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <h4>Parking Type:</h4> <%= ViewHelper.parking_type(@assessment.parking_type) %>
+    </div>
+    <div class="col-sm-4">
+      <h4>Link</h4>
+      <a href="http://assessments.milwaukee.gov/remast.asp?taxkey=3591546000" rel="noopener noreferrer" target="_blank">MPROP</a>
+    </div>
+    <div class="col-sm-4">
+      <h4>Assessment:</h4>$<%= ViewHelper.number_with_commas(@assessment.last_assessment_amount) %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <img alt="house" class="mx-auto" src="<%= ViewHelper.mapbox_static(@assessment.latitude, @assessment.longitude)%>">
+  </div>
+  <hr>
+  <div class="row text-center">
+    <div class="col-sm-6">
+      <h3>Sales</h3>
+      <ul class="list-group">
+        <%= for s <- Enum.reverse(Enum.sort_by(@assessment.sales, &(NaiveDateTime.to_erl(&1.date_time)))) do %>
+          <li class="list-group-item"><%= "#{s.date_time.month}/#{s.date_time.day}/#{s.date_time.year}" %>: $<%= ViewHelper.number_with_commas(s.amount) %></li>
+        <% end %>
+      </ul>
+    </div>
+    <div class="col-sm-6">
+      <h3>Assessments</h3>
+      <ul class="list-group">
+        <%= for a <- Enum.sort_by(@assessment.other_assessments, &(&1.year * -1)) do %>
+          <li class="list-group-item"><%= a.year %>: $<%= ViewHelper.number_with_commas(a.last_assessment_amount) %></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>

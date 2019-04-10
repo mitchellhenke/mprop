@@ -67,7 +67,7 @@ function updateMap() {
   let northEast = bounds._northEast
   let southWest = bounds._southWest
 
-  fetch(`/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}`)
+  fetch(`/api/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}`)
     .then(response => response.json())
     .then(data => {
       const newData = data.reduce((accumulator, shape) => {

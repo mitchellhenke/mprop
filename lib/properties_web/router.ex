@@ -15,7 +15,7 @@ defmodule PropertiesWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", PropertiesWeb do
+  scope "/api", PropertiesWeb do
     pipe_through :api # Use the default browser stack
 
     get "/", AssessmentController, :index
@@ -24,10 +24,11 @@ defmodule PropertiesWeb.Router do
     get "/geojson", MapController, :geojson
   end
 
-  scope "/web", PropertiesWeb do
+  scope "/", PropertiesWeb do
     pipe_through :browser # Use the default browser stack
 
     get "/", MapController, :index
     live "/properties", PropertiesLiveView
+    get "/properties/:id", PropertyController, :show
   end
 end

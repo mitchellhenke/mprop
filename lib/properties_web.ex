@@ -51,6 +51,7 @@ defmodule PropertiesWeb do
       use Phoenix.HTML
 
       alias PropertiesWeb.Router.Helpers, as: Routes
+      alias PropertiesWeb.ViewHelper
       import PropertiesWeb.ErrorHelpers
       import PropertiesWeb.Gettext
       import Phoenix.LiveView, only: [live_render: 2, live_render: 3]
