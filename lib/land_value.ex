@@ -52,7 +52,7 @@ defmodule Properties.LandValue do
   end
 
   def sort_by_largest_diff(list) do
-    Enum.filter(list, fn({_tax_key, %{target: %{land_assessment: assessment, lot_area: area, land_use: land_use}, near: near}}) ->
+    Enum.filter(list, fn({_tax_key, %{target: %{land_assessment: assessment, lot_area: _area, land_use: land_use}, near: near}}) ->
       length(near) > 0 && land_use == "8810" && assessment > 0
     end)
     |> Enum.sort_by(fn({tax_key, %{target: %{lot_area: area, land_assessment: assessment}, near: near}}) ->
