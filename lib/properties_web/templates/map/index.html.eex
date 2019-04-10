@@ -3,6 +3,7 @@
   <label for="zoning-select">Choose a zoning:</label>
 
   <select id="zoning-select">
+    <option></option>
     <option>RT4</option>
     <option>RS6</option>
     <option>RT3</option>

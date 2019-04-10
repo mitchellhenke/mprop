@@ -31,7 +31,7 @@ let myRenderer = L.canvas({ padding: 0.5 })
 let layerGroup = L.layerGroup()
 let taxKeySet = new Set([])
 const zoningSelect = document.getElementById("zoning-select");
-let selectedZoning = "RT4"
+let selectedZoning = ""
 layerGroup.addTo(map)
 
 zoningSelect.addEventListener('change', (e) => {
