@@ -160,7 +160,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
-      |> Repo.all
+      |> Repo.all(timeout: :infinity)
   end
 
   defp comma_separated_number(nil), do: nil
