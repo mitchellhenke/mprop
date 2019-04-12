@@ -2,10 +2,32 @@ defmodule PropertiesWeb.PropertiesLiveView do
   defmodule Params do
     defstruct [:year, :text_query, :min_bath, :max_bath, :num_units, :min_bed,
       :max_bed, :zip_code, :land_use, :parking_type]
+
+    def change(params) do
+      types = %{
+        text_query: :string,
+        min_bath: :integer,
+        max_bath: :integer,
+        min_bed: :integer,
+        max_bed: :integer,
+        num_units: :integer,
+        zip_code: :string,
+        land_use: :string,
+        parking_type: :string,
+      }
+
+      data = %Params{}
+
+      {data, types}
+      |> Ecto.Changeset.cast(params, [:text_query, :min_bath, :max_bath,
+        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type])
+    end
   end
   use Phoenix.LiveView
   alias Properties.Assessment
   alias Properties.Repo
+  use Phoenix.HTML
+
   import Ecto.Query
   @number_comma_regex ~r/\B(?=(\d{3})+(?!\d))/
 
@@ -15,31 +37,33 @@ defmodule PropertiesWeb.PropertiesLiveView do
         <h1>Milwaukee Property Search</h1>
         <p>A website that allows filtering by some attributes from Milwaukee's <a href='http://city.milwaukee.gov/DownloadTabularData3496.htm?docid=3496'>Master Property Record</a></p>
         </h1>
-        <form>
+        <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
           <div class="row mb-2">
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="textSearch">Address Search</label>
-            <input id="textSearch" type="search" class="form-control col-sm-10" value="<%= @params.text_query %>" phx-keyup="update_text_search" />
+            <%= label f, :text_query, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= text_input f, :text_query, class: "form-control col-sm-10" %>
           </div>
           <div class="row mb-2">
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="minBathrooms">Min Bath</label>
-            <input id="minBathrooms" type="number" class="form-control col-sm-2" value="<%= @params.min_bath %>" phx-keyup="update_min_bath" />
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="maxBathrooms">Max Bath</label>
-            <input id="maxBathrooms" type="number" class="form-control col-sm-2" value="<%= @params.max_bath %>" phx-keyup="update_max_bath" />
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="number_units">Num Units</label>
-            <input id="number_units" type="number" class="form-control col-sm-2" value="<%= @params.num_units %>" phx-keyup="update_num_units" />
-          </div>
-          <div class="row mb-2">
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="minBedrooms">Min Beds</label>
-            <input id="minBedrooms" type="number" class="form-control col-sm-2" value="<%= @params.min_bed %>" phx-keyup="update_min_bed" />
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="maxBedrooms">Max Beds</label>
-            <input id="maxBedrooms" type="number" class="form-control col-sm-2" value="<%= @params.max_bed %>" phx-keyup="update_max_bed" />
-          </div>
-          <div class="row mb-2">
-            <label class="col-sm-2 justify-content-start form-control-label" htmlFor="zip_code">ZIP Code</label>
-            <input id="zip_code" type="number" class="form-control col-sm-2" value="<%= @params.zip_code %>" phx-keyup="update_zip_code" />
+            <%= label f, :min_bath, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :min_bath, class: "form-control col-sm-2" %>
+            <%= label f, :max_bath, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :max_bath, class: "form-control col-sm-2" %>
+            <%= label f, :num_units, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :num_units, class: "form-control col-sm-2" %>
+           </div>
+           <div class="row mb-2">
+            <%= label f, :min_bed, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :min_bed, class: "form-control col-sm-2" %>
+            <%= label f, :max_bed, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
+           </div>
+           <div class="row mb-2">
+            <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
+            <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
           </div>
         </div>
-      </form>
+      <% end %>
 
       <table class="table table-hover mt-2">
         <thead>
@@ -60,7 +84,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
           <%= for property <- @properties do %>
             <tr>
               <td>
-                <%= property.tax_key %>
+                <%= Phoenix.HTML.Link.link(property.tax_key, to: PropertiesWeb.Router.Helpers.property_path(PropertiesWeb.Endpoint, :show, property.tax_key)) %>
               </td>
               <td>
                 <%= Assessment.address(property) %>
@@ -95,44 +119,18 @@ defmodule PropertiesWeb.PropertiesLiveView do
     """
   end
 
-  def handle_event("update_text_search", text_value, socket) do
-    socket = update_socket_params_and_get_properties(socket, :text_query, text_value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_max_bath", value, socket) do
-    value = handle_maybe_integer(value)
-    socket = update_socket_params_and_get_properties(socket, :max_bath, value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_min_bath", value, socket) do
-    value = handle_maybe_integer(value)
-    socket = update_socket_params_and_get_properties(socket, :min_bath, value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_max_bed", value, socket) do
-    value = handle_maybe_integer(value)
-    socket = update_socket_params_and_get_properties(socket, :max_bed, value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_min_bed", value, socket) do
-    value = handle_maybe_integer(value)
-    socket = update_socket_params_and_get_properties(socket, :min_bed, value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_num_units", value, socket) do
-    value = handle_maybe_integer(value)
-    socket = update_socket_params_and_get_properties(socket, :num_units, value)
-    {:noreply, socket}
-  end
-
-  def handle_event("update_zip_code", value, socket) do
-    socket = update_socket_params_and_get_properties(socket, :zip_code, value)
-    {:noreply, socket}
+  def handle_event("change", %{"params" => params}, socket) do
+   changeset = Params.change(params)
+    case Ecto.Changeset.apply_action(changeset, :insert) do
+      {:ok, params} ->
+        properties = get_properties(params)
+        socket = assign(socket, :changeset, changeset)
+                 |> assign(:properties, properties)
+        {:noreply, socket}
+      {:error, error_changeset} ->
+        socket = assign(socket, :changeset, error_changeset)
+        {:noreply, socket}
+   end
   end
 
   def handle_event(_, _value, socket) do
@@ -141,23 +139,16 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
   def mount(_session, socket) do
     socket = assign(socket, :properties, [])
-             |> assign(:params, %Params{year: 2017})
+    |> assign(:changeset, Params.change(%{}))
 
-    properties = get_properties(socket.assigns.params)
+    properties = get_properties(%Params{})
     socket = assign(socket, :properties, properties)
     {:ok, socket}
   end
 
-  def update_socket_params_and_get_properties(socket, param_key, param_value) do
-    new_params = Map.put(socket.assigns.params, param_key, param_value)
-    properties = get_properties(new_params)
-    assign(socket, :params, new_params)
-    |> assign(:properties, properties)
-  end
-
   def get_properties(params) do
     from(p in Assessment,
-      where: p.year == ^params.year,
+      where: p.year == 2018,
       order_by: [desc: p.last_assessment_amount],
       limit: 20)
       |> Assessment.filter_by_address(params.text_query)
@@ -172,16 +163,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Repo.all
   end
 
-  def comma_separated_number(nil), do: nil
-  def comma_separated_number(num) do
+  defp comma_separated_number(nil), do: nil
+  defp comma_separated_number(num) do
     Regex.replace(@number_comma_regex, "#{num}", ",")
-  end
-
-  defp handle_maybe_integer(nil), do: nil
-  defp handle_maybe_integer(binary) do
-    case Integer.parse(binary) do
-      {integer, _} -> integer
-      _ -> nil
-    end
   end
 end

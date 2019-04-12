@@ -1,5 +1,5 @@
 <div>
-  <a href="/properties">Back to Search</a>
+  <%= link("Back to Search", to: "/properties") %>
   <hr>
   <div class="row">
     <div class="col-sm-4">
