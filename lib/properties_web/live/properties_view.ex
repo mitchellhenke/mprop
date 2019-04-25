@@ -157,7 +157,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.filter_greater_than(:number_of_bedrooms, params.min_bed)
       |> Assessment.filter_less_than(:number_of_bedrooms, params.max_bed)
       |> Assessment.filter_by_zipcode(params.zip_code)
-      |> Assessment.maybe_filter_by(:land_use, "8810")
+      # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
       |> Repo.all(timeout: :infinity)
