@@ -18,6 +18,9 @@
         <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
         <%= render @view_module, @view_template, assigns %>
       </main>
+      <div class="footer">
+        <%= link "Source Code", to: "https://github.com/mitchellhenke/mprop" %>
+      </div>
     </div> <!-- /container -->
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>

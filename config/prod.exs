@@ -13,7 +13,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :properties, PropertiesWeb.Endpoint,
   http: [compress: true, port: {:system, "PORT"}],
-  url: [scheme: "https", host: "salty-beach-73298.herokuapp.com", port: 443],
+  url: [scheme: "https", host: "mprop.mitchellhenke.com", port: 443],
   secret_key_base: "4KtHeNAGRXmjorm8FQrzOgg5xHmVjeP1UfQHgsQnw9GS8I5jiXVCfq1FsdoMrsf3",
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 
