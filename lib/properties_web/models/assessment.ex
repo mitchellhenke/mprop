@@ -132,7 +132,7 @@ schema "assessments" do
   def filter_by_address(query, text_query) do
     text_query = transform_text_query(text_query)
 
-    from(s in query, where: fragment("? @@ to_tsquery(?)", s.full_address_vector, ^text_query))
+    from(s in query, where: fragment("? @@ to_tsquery(?, ?)", s.full_address_vector, "simple", ^text_query))
   end
 
   def order_by_address_text_search(query, nil), do: query
