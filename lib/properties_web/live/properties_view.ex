@@ -39,7 +39,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
         </h1>
         <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
           <div class="row mb-2">
-            <%= label f, :text_query, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= label f, :text_query, "Address Search", class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :text_query, class: "form-control col-sm-10" %>
           </div>
           <div class="row mb-2">
