@@ -4,7 +4,8 @@ defmodule PropertiesWeb.Endpoint do
   socket "/socket", PropertiesWeb.UserSocket,
     websocket: true # or list of options
 
-  socket "/live", Phoenix.LiveView.Socket
+  socket "/live", Phoenix.LiveView.Socket, check_origin: ["https://mprop.mitchellhenke.com",
+    "https://salty-beach-73298.herokuapp.com"]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
