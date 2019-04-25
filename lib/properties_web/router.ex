@@ -27,8 +27,8 @@ defmodule PropertiesWeb.Router do
   scope "/", PropertiesWeb do
     pipe_through :browser # Use the default browser stack
 
-    get "/", MapController, :index
-    live "/properties", PropertiesLiveView
+    live "/", PropertiesLiveView
+    get "/map", MapController, :index
     get "/properties/:id", PropertyController, :show
   end
 end

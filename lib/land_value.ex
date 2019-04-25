@@ -68,4 +68,34 @@ defmodule Properties.LandValue do
       |> IO.inspect(label: tax_key)
     end)
   end
+
+  def adjacent_cov(%{tax_key: tax_key, last_assessment_land: dollars, lot_area: area}) do
+    adjacent = ConCache.get(:near_cache, tax_key)
+
+    if is_nil(adjacent) || adjacent.target.land_use == "8811" || Enum.count(adjacent.near) == 0 || adjacent.target.land_assessment < 1.0 do
+      0.0
+    else
+      values = Enum.filter(adjacent.near, fn(shape) ->
+        shape.land_use != "8811" && shape.land_assessment > 0.0 &&
+          shape.lot_area > 0
+      end)
+      |> Enum.map(fn(%{land_assessment: dollars, lot_area: area}) ->
+        dollars/area
+      end)
+      count = Enum.count(values)
+      if count == 0 do
+        0.0
+      else
+        values = [dollars/area | values]
+        count = Enum.count(values)
+        average = Enum.sum(values) / count
+        standard_deviation = Enum.map(values, &(:math.pow(&1 - average, 2)))
+                             |> Enum.sum()
+                             |> Kernel./(count)
+                             |> :math.pow(0.5)
+
+        standard_deviation / average
+      end
+    end
+  end
 end

@@ -46,10 +46,11 @@ defmodule Properties.Mixfile do
       {:erlsom, git: "git://github.com/willemdj/erlsom.git"},
       {:hackney, "~> 1.6"},
       {:ecto_sql, "~> 3.0"},
-      {:postgrex, "~> 0.14-rc", override: true},
+      {:postgrex, "~> 0.14.0"},
       {:jason, "~> 1.0"},
       {:nimble_parsec, "~> 0.5.0"},
       {:brotli, ">= 0.0.0"},
+      {:con_cache, ">= 0.0.0"},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"}
     ]
   end

@@ -20,6 +20,12 @@ defmodule PropertiesWeb.MapController do
 
     zoning = params["zoning"]
     shapefiles = Properties.ShapeFile.list(x_min, y_min, x_max, y_max, zoning)
+
+    shapefiles = Enum.map(shapefiles, fn(shapefile) ->
+      cov = Properties.LandValue.adjacent_cov(shapefile.assessment)
+      Map.put(shapefile, :adjacent_cov, cov)
+    end)
+
     render(conn, "index.json", shapefiles: shapefiles)
   end
 end

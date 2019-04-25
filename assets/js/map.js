@@ -1,7 +1,7 @@
 import Leaflet from "leaflet"
-const pathname = window.location.pathname.slice(0, 2)
+const pathname = window.location.pathname.slice(0, 5)
 
-if(pathname == "/" || pathname == "/?") {
+if(pathname == "/map" || pathname == "/map?") {
 let map = L.map('map').setView([42.9994366888185, -87.8985320066727], 15);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
