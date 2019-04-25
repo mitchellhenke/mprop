@@ -75,7 +75,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <th>Lot Area</th>
             <th>Property Area</th>
             <th>Parking Type</th>
-            <th>Link</th>
             <th>Search Near Me</th>
             <th>Assessment</th>
           </tr>
@@ -103,9 +102,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
               </td>
               <td>
                 <%= property.parking_type %>
-              </td>
-              <td>
-                <a href="<%= "http://assessments.milwaukee.gov/remast.asp?taxkey=#{property.tax_key}"%>" rel="noopener noreferrer" target='_blank'>Link</a>
               </td>
               <td>
               </td>
