@@ -188,6 +188,7 @@ schema "assessments" do
   defp transform_text_query(text_query) do
     String.upcase(text_query)
     |> String.split()
-    |> Enum.join(" & ")
+    |> Enum.map(&("#{&1}:*"))
+    |> Enum.join("& ")
   end
 end
