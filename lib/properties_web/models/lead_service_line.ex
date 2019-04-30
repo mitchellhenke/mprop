@@ -1,6 +1,5 @@
 defmodule Properties.LeadServiceLine do
   use Ecto.Schema
-  import Ecto.Query
 
   schema "lead_service_lines" do
     field :tax_key, :string

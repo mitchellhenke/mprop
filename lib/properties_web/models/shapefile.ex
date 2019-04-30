@@ -29,7 +29,7 @@ defmodule Properties.ShapeFile do
   def list_shapefiles_with_lead_service_lines(x_min, y_min, x_max, y_max) do
     from(s in "mitchells_material_view",
       where: fragment("? && ST_MakeEnvelope(?, ?, ?, ?)", s.geom, ^x_min, ^y_min, ^x_max, ^y_max) and s.nonunique_plot == 0,
-      left_join: l in Properties.LeadServiceLine, on: l.tax_key == s.tax_key,
+      inner_join: l in Properties.LeadServiceLine, on: l.tax_key == s.tax_key,
       select: %{geo_json: s.geo_json, lead_service_line_address: l.address, assessment: %{last_assessment_land: s.last_assessment_land, lot_area: s.lot_area, tax_key: s.tax_key, zoning: s.zoning}}
     )
     |> Properties.Repo.all()
