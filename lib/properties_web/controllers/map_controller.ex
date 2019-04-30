@@ -18,14 +18,15 @@ defmodule PropertiesWeb.MapController do
     {y_max, _} = params["northEastLatitude"]
             |> Float.parse()
 
-    zoning = params["zoning"]
-    shapefiles = Properties.ShapeFile.list(x_min, y_min, x_max, y_max, zoning)
+    # zoning = params["zoning"]
+    # shapefiles = Properties.ShapeFile.list(x_min, y_min, x_max, y_max, zoning)
+    shapefiles = Properties.ShapeFile.list_shapefiles_with_lead_service_lines(x_min, y_min, x_max, y_max)
 
-    shapefiles = Enum.map(shapefiles, fn(shapefile) ->
-      cov = Properties.LandValue.adjacent_cov(shapefile.assessment)
-      Map.put(shapefile, :adjacent_cov, cov)
-    end)
+    # shapefiles = Enum.map(shapefiles, fn(shapefile) ->
+    #   cov = Properties.LandValue.adjacent_cov(shapefile.assessment)
+    #   Map.put(shapefile, :adjacent_cov, cov)
+    # end)
 
-    render(conn, "index.json", shapefiles: shapefiles)
+    render(conn, "lead_index.json", shapefiles: shapefiles)
   end
 end

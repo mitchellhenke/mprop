@@ -18,10 +18,10 @@
       <h4>Bathrooms:</h4><%= Properties.Assessment.bathroom_count(@assessment) %>
     </div>
     <div class="col-sm-4">
-      <h4>Lot Area:</h4><%= ViewHelper.number_with_commas(@assessment.lot_area) %>
+      <h4>Lot Area:</h4><%= ViewHelper.number_with_commas(@assessment.lot_area) %> sq. ft
     </div>
     <div class="col-sm-4">
-      <h4>Building Area:</h4><%= ViewHelper.number_with_commas(@assessment.building_area) %>
+      <h4>Building Area:</h4><%= ViewHelper.number_with_commas(@assessment.building_area) %> sq. ft
     </div>
   </div>
   <hr>

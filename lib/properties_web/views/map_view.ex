@@ -20,7 +20,7 @@ defmodule PropertiesWeb.MapView do
       properties: %{
         tax_key: shapefile.assessment.tax_key,
         popupContent: """
-        <a href=\"/properties/#{shapefile.assessment.tax_key}\" target=\"blank\">Assessment Link</a>
+        <a href=\"/properties/#{shapefile.assessment.tax_key}\" target=\"_blank\">Assessment Link</a>
         <p>Zoning: #{shapefile.assessment.zoning}</p>
         <p>Lot Area: #{shapefile.assessment.lot_area} sq ft</p>
         <p>Land Assessment: $#{shapefile.assessment.last_assessment_land}</p>
@@ -31,6 +31,38 @@ defmodule PropertiesWeb.MapView do
           color: "#999",
           opacity: 1,
           fillColor: fill_color(shapefile, p),
+          fillOpacity: 0.8
+        }
+      },
+    }
+  end
+
+  def render("lead_index.json", %{shapefiles: shapefiles}) do
+    Enum.map(shapefiles, fn(shapefile) ->
+      render("lead_show.json", %{shapefile: shapefile})
+    end)
+  end
+
+  def render("lead_show.json", %{shapefile: shapefile}) do
+    {color, address} = if not is_nil(shapefile.lead_service_line_address) do
+      {"#FF0000", String.replace(shapefile.lead_service_line_address, "- ", " ")}
+    else
+      {"", ""}
+    end
+    %{
+      geometry: Jason.decode!(shapefile.geo_json),
+      type: "Feature",
+      properties: %{
+        tax_key: shapefile.assessment.tax_key,
+        popupContent: """
+        <div>#{address}</div>
+        <a href=\"/properties/#{shapefile.assessment.tax_key}\" target=\"_blank\">Assessment Link</a>
+        """,
+        style: %{
+          weight: 1,
+          color: "#999",
+          opacity: 1,
+          fillColor: color,
           fillOpacity: 0.8
         }
       },

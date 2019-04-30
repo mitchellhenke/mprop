@@ -1,8 +1,12 @@
 <div>
-  <p>This map shows land assessment by zoning.</p>
-  <label for="zoning-select">Choose a zoning:</label>
+  <p>This map shows lead service lines with addresses matched from the Master Property Record and the <a href="https://city.milwaukee.gov/water/WaterQuality/Lead-Awareness-and-Drinking-Water-Safety/Lead-Service-Line-Records" target="_blank">Lead Service Line Records</a></p>
+  <p>Not all addresses from the Lead Service Line Records were able to be matched with an address in the Master Property Record, so this map should not be considered complete or exhaustive.</p>
+  <p>The Lead Service Line Records mapped on this page were downloaded on April 29th, 2019</p>
+  <p>Properties shaded in red have been matched with a property associated with an address in the Lead Service Line Records.</p>
+  <%# <p>This map shows land assessment by zoning.</p> %>
+  <label style="display: none" for="zoning-select">Choose a zoning:</label>
 
-  <select id="zoning-select">
+  <select style="display: none" id="zoning-select">
     <option></option>
     <option>RT4</option>
     <option>RS6</option>
@@ -14,8 +18,8 @@
     <option>RM1</option>
     <option>RS3</option>
   </select>
-  <div>
-      R is residential, B is Business. Generally speaking, the higher the number, the denser the zoning is, meaning smaller lots and smaller setbacks.  Details can be found in the <a target="_blank" href="https://city.milwaukee.gov/zoningcode">Milwaukee City zoning codes</a>.
-  </div>
+  <%# <div> %>
+  <%#     R is residential, B is Business. Generally speaking, the higher the number, the denser the zoning is, meaning smaller lots and smaller setbacks.  Details can be found in the <a target="_blank" href="https://city.milwaukee.gov/zoningcode">Milwaukee City zoning codes</a>. %>
+  <%# </div> %>
   <div id='map'></div>
 </div>

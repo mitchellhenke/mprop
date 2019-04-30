@@ -1,4 +1,7 @@
 defmodule Properties.CSVParser do
+  require Logger
+  import Ecto.Query
+
   def run(path, year) do
     File.stream!(path)
     |> CSV.decode!(headers: true)
@@ -35,7 +38,7 @@ defmodule Properties.CSVParser do
       fireplace: parse_int(x["FIREPLACE"]),
       air_conditioning: parse_air(String.trim(x["AIR_CONDITIONING"])),
       parking_type: String.trim(x["PARKING_TYPE"]),
-      number_units: String.to_integer(x["NR_UNITS"]),
+      number_units: parse_int(x["NR_UNITS"]),
       attic: x["ATTIC"],
       basement: x["BASEMENT"],
       geo_tract: x["GEO_TRACT"],
@@ -97,6 +100,36 @@ defmodule Properties.CSVParser do
     end)
   end
 
+  def run_lead_service_lines(path) do
+    {found, not_found, multiple} = File.stream!(path)
+    |> CSV.decode!(headers: true)
+    |> Stream.filter(fn(row) ->
+      row["City"] == "MILWAUKEE"
+    end)
+    |> Enum.reduce({[], [], []}, fn(row, {found, not_found, multiple}) ->
+      # House Number Low,EMPTY,House Number High,Street Name,City,State,Zip Code
+      address = "#{row["House Number Low"]} #{row["Street Name"]}"
+      full_address = "#{row["House Number Low"]}-#{row["House Number High"]} #{row["Street Name"]} #{row["City"]}"
+      assessments = from(a in Properties.Assessment, where: a.year == 2018)
+                   |> Properties.Assessment.filter_by_address(address)
+                   |> Properties.Repo.all
+
+      case assessments do
+        [assessment] ->
+          {[{assessment, full_address} | found], not_found, multiple}
+        assessments = [_assessment1 | [_assessment2 | _]] ->
+          {found, not_found, [{assessments, address} | multiple]}
+        [] ->
+          {found, [address | not_found], multiple}
+      end
+    end)
+
+    Enum.each(found, fn({assessment, full_address}) ->
+      Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address)
+    end)
+  end
+
+  defp parse_tax_rate_cd(""), do: 0
   defp parse_tax_rate_cd("False"), do: 0
   defp parse_tax_rate_cd(number) when is_binary(number) do
     String.to_integer(number)
