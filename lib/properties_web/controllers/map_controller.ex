@@ -1,6 +1,7 @@
 defmodule PropertiesWeb.MapController do
   use PropertiesWeb, :controller
 
+  plug PropertiesWeb.Plugs.Brotli
   action_fallback PropertiesWeb.FallbackController
 
 

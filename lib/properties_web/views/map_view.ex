@@ -15,7 +15,7 @@ defmodule PropertiesWeb.MapView do
     assessment_sq_foot = assessment_sq_foot(shapefile.assessment)
 
     %{
-      geometry: Jason.decode!(shapefile.geo_json),
+      geometry: shapefile.geo_json,
       type: "Feature",
       properties: %{
         tax_key: shapefile.assessment.tax_key,
@@ -50,7 +50,7 @@ defmodule PropertiesWeb.MapView do
       {"", ""}
     end
     %{
-      geometry: Jason.decode!(shapefile.geo_json),
+      geometry: shapefile.geo_json,
       type: "Feature",
       properties: %{
         tax_key: shapefile.assessment.tax_key,
