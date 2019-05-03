@@ -16,16 +16,31 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 let myRenderer = L.canvas({ padding: 0.5 })
 let layerGroup = L.layerGroup()
 let taxKeySet = new Set([])
+let GIDSet = new Set([])
 const zoningSelect = document.getElementById("zoning-select");
 let selectedZoning = ""
+
+const layerSelect = document.getElementById("layer-select");
+let selectedLayer = layerSelect.value
+
 layerGroup.addTo(map)
 
 zoningSelect.addEventListener('change', (e) => {
   taxKeySet = new Set([])
+  GIDSet = new Set([])
   layerGroup.clearLayers()
   selectedZoning = e.target.value
   updateMap()
 });
+
+layerSelect.addEventListener('change', (e) => {
+  taxKeySet = new Set([])
+  GIDSet = new Set([])
+  layerGroup.clearLayers()
+  selectedLayer = e.target.value
+  updateMap()
+});
+
 
 var legend = L.control({position: 'bottomright'});
 
@@ -47,37 +62,62 @@ legend.onAdd = function (map) {
 
 // legend.addTo(map);
 
+function handleLeadServiceLineData(data) {
+  const newData = data.reduce((accumulator, shape) => {
+    if(taxKeySet.has(shape.properties.tax_key)) {
+      return accumulator
+    } else {
+      taxKeySet.add(shape.properties.tax_key)
+      accumulator.push(shape)
+      return accumulator
+    }
+  }, [])
+  L.geoJSON(newData, {renderer: myRenderer, onEachFeature: function(feature, layer) {
+    let popupContent = ""
+
+    if (feature.properties && feature.properties.popupContent) {
+      popupContent += feature.properties.popupContent
+    }
+
+    layer.bindPopup(popupContent)
+  },
+    style: function (feature) {
+      return feature.properties.style;
+    }
+  }).addTo(layerGroup)
+}
+
+function handleBikeLaneData(data) {
+  const newData = data.reduce((accumulator, shape) => {
+    if(GIDSet.has(shape.properties.gid)) {
+      return accumulator
+    } else {
+      GIDSet.add(shape.properties.gid)
+      accumulator.push(shape)
+      return accumulator
+    }
+  }, [])
+  L.geoJSON(newData, {renderer: myRenderer,
+    style: function (feature) {
+      return feature.properties.style;
+    }
+  }).addTo(layerGroup)
+}
+
 
 function updateMap() {
   let bounds = map.getBounds()
   let northEast = bounds._northEast
   let southWest = bounds._southWest
 
-  fetch(`/api/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}`)
+  fetch(`/api/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}&layer=${selectedLayer}`)
     .then(response => response.json())
     .then(data => {
-      const newData = data.reduce((accumulator, shape) => {
-        if(taxKeySet.has(shape.properties.tax_key)) {
-          return accumulator
-        } else {
-          taxKeySet.add(shape.properties.tax_key)
-          accumulator.push(shape)
-          return accumulator
-        }
-      }, [])
-      L.geoJSON(newData, {renderer: myRenderer, onEachFeature: function(feature, layer) {
-        let popupContent = ""
-
-        if (feature.properties && feature.properties.popupContent) {
-          popupContent += feature.properties.popupContent
-        }
-
-        layer.bindPopup(popupContent)
-      },
-      style: function (feature) {
-        return feature.properties.style;
-    }
-    }).addTo(layerGroup)
+      if(selectedLayer === "bike_lanes") {
+        handleBikeLaneData(data)
+      } else {
+        handleLeadServiceLineData(data)
+      }
   })
 }
 

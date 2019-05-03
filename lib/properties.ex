@@ -11,7 +11,8 @@ defmodule Properties do
     children = [
       # Start the Ecto repository
       supervisor(Properties.Repo, []),
-      {ConCache, [name: :near_cache, ttl_check_interval: false]},
+      Supervisor.child_spec({ConCache, name: :near_cache, ttl_check_interval: false}, id: :con_cache_near_cache),
+      Supervisor.child_spec({ConCache, name: :lead_service_render_cache, ttl_check_interval: false}, id: :con_cache_lead_service_render_cache),
       # Start the endpoint when the application starts
       supervisor(PropertiesWeb.Endpoint, []),
       # Start your own worker by calling: Properties.Worker.start_link(arg1, arg2, arg3)

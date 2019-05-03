@@ -39,7 +39,9 @@ defmodule PropertiesWeb.MapView do
 
   def render("lead_index.json", %{shapefiles: shapefiles}) do
     Enum.map(shapefiles, fn(shapefile) ->
-      render("lead_show.json", %{shapefile: shapefile})
+      ConCache.get_or_store(:lead_service_render_cache, shapefile.assessment.tax_key, fn ->
+        render("lead_show.json", %{shapefile: shapefile})
+      end)
     end)
   end
 
@@ -63,6 +65,29 @@ defmodule PropertiesWeb.MapView do
           color: "#999",
           opacity: 1,
           fillColor: color,
+          fillOpacity: 0.8
+        }
+      },
+    }
+  end
+
+  def render("bike_index.json", %{shapefiles: shapefiles}) do
+    Enum.map(shapefiles, fn(shapefile) ->
+      render("bike_show.json", %{shapefile: shapefile})
+    end)
+  end
+
+  def render("bike_show.json", %{shapefile: shapefile}) do
+    %{
+      geometry: shapefile.geo_json,
+      type: "Feature",
+      properties: %{
+        gid: shapefile.gid,
+        style: %{
+          weight: 1,
+          color: "#FF0000",
+          opacity: 1,
+          fillColor: "#FF0000",
           fillOpacity: 0.8
         }
       },
