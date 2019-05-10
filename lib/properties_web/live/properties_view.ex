@@ -94,8 +94,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
             <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
-            <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
           </div>
         <% end %>
 
