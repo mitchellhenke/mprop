@@ -1,7 +1,7 @@
 defmodule PropertiesWeb.PropertiesLiveView do
   defmodule Params do
     defstruct [:year, :text_query, :min_bath, :max_bath, :num_units, :min_bed,
-      :max_bed, :zip_code, :land_use, :parking_type]
+      :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius]
 
     def change(params) do
       types = %{
@@ -11,6 +11,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
         min_bed: :integer,
         max_bed: :integer,
         num_units: :integer,
+        latitude: :float,
+        longitude: :float,
+        radius: :float,
         zip_code: :string,
         land_use: :string,
         parking_type: :string,
@@ -20,7 +23,18 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
       {data, types}
       |> Ecto.Changeset.cast(params, [:text_query, :min_bath, :max_bath,
-        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type])
+        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius])
+        |> Ecto.Changeset.validate_number(:radius, less_than: 1_001, greater_than: 0)
+    end
+
+    def search_near_change(changeset, params) do
+      changeset = Ecto.Changeset.cast(changeset, params, [:latitude, :longitude])
+      radius = Ecto.Changeset.get_field(changeset, :radius)
+      if is_nil(radius) do
+        Ecto.Changeset.put_change(changeset, :radius, 500.0)
+      else
+        changeset
+      end
     end
   end
   use Phoenix.LiveView
@@ -57,13 +71,33 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
            <div class="row mb-2">
+            <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :latitude, class: "form-control col-sm-2" %>
+            <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :longitude, class: "form-control col-sm-2" %>
+            <%= label f, :radius, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :radius, class: "form-control col-sm-2", min: "0", max: "2000", step: "10" %>
+           </div>
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :latitude %>
+            </div>
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :longitude %>
+            </div>
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :radius %>
+            </div>
+          </div>
+          <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
             <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
+            <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
           </div>
-        </div>
-      <% end %>
+        <% end %>
 
       <table class="table table-hover mt-2">
         <thead>
@@ -104,6 +138,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
                 <%= property.parking_type %>
               </td>
               <td>
+                <span className="input-group-btn">
+                  <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
+                </span>
               </td>
               <td>
                 <%= comma_separated_number(property.last_assessment_amount) %>
@@ -129,6 +166,26 @@ defmodule PropertiesWeb.PropertiesLiveView do
    end
   end
 
+  def handle_event("search_near_me:" <> tax_key, _value, socket) do
+    property = Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key))
+
+    changeset = Params.search_near_change(socket.assigns.changeset, %{
+      latitude: property.latitude,
+      longitude: property.longitude,
+    })
+
+    case Ecto.Changeset.apply_action(changeset, :insert) do
+      {:ok, params} ->
+        properties = get_properties(params)
+        socket = assign(socket, :changeset, changeset)
+                 |> assign(:properties, properties)
+        {:noreply, socket}
+      {:error, error_changeset} ->
+        socket = assign(socket, :changeset, error_changeset)
+        {:noreply, socket}
+    end
+  end
+
   def handle_event(_, _value, socket) do
     {:noreply, socket}
   end
@@ -143,7 +200,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def get_properties(params) do
-    from(p in Assessment,
+    {point, radius} = build_point_and_radius(params.latitude, params.longitude, params.radius)
+    query = from(p in Assessment,
       where: p.year == 2018,
       order_by: [desc: p.last_assessment_amount],
       limit: 20)
@@ -156,9 +214,28 @@ defmodule PropertiesWeb.PropertiesLiveView do
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
-      |> Repo.all(timeout: :infinity)
+      |> Assessment.with_joined_shapefile()
+      |> Assessment.select_latitude_longitude()
+
+    query = if point && radius do
+      query
+      |> Assessment.maybe_within(point, radius)
+    else
+      query
+    end
+
+    Repo.all(query, timeout: :infinity)
   end
 
+
+  defp build_point_and_radius(latitude, longitude, radius_in_m) do
+    if is_float(latitude) && is_float(longitude) && is_float(radius_in_m) do
+      {%Geo.Point{coordinates: {longitude, latitude}, srid: 4326}, radius_in_m}
+    else
+      {nil, nil}
+    end
+
+  end
   defp comma_separated_number(nil), do: nil
   defp comma_separated_number(num) do
     Regex.replace(@number_comma_regex, "#{num}", ",")

@@ -12,7 +12,7 @@ defmodule Properties.BikeShapeFile do
     query =
     from(s in Properties.BikeShapeFile,
       where: fragment("? && ST_MakeEnvelope(?, ?, ?, ?)", s.geom, ^x_min, ^y_min, ^x_max, ^y_max) and s.fac_type == "Bike Lane",
-      select: %{geo_json: fragment("ST_AsGeoJSON(?)::jsonb", s.geom), gid: s.gid}
+      select: %{geo_json: fragment("ST_AsGeoJSON(?)::jsonb", s.geom), gid: s.gid, type: s.fac_type}
     )
 
     Properties.Repo.all(query)
