@@ -136,7 +136,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
                 <%= property.parking_type %>
               </td>
               <td>
-                <span className="input-group-btn">
+                <span class="input-group-btn">
                   <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
                 </span>
               </td>
