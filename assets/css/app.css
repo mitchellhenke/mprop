@@ -37,3 +37,14 @@ summary {
   margin-right: 6px;
 }
 
+.phx-disconnected {
+  opacity: 0.5;
+  cursor: wait;
+}
+.phx-disconnected *{
+  pointer-events: none;
+}
+
+.phx-error {
+  background: #ffe6f0!important;
+}
