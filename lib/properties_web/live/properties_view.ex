@@ -1,7 +1,7 @@
 defmodule PropertiesWeb.PropertiesLiveView do
   defmodule Params do
     defstruct [:year, :text_query, :min_bath, :max_bath, :num_units, :min_bed,
-      :max_bed, :zip_code, :land_use, :parking_type]
+      :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius]
 
     def change(params) do
       types = %{
@@ -11,6 +11,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
         min_bed: :integer,
         max_bed: :integer,
         num_units: :integer,
+        latitude: :float,
+        longitude: :float,
+        radius: :float,
         zip_code: :string,
         land_use: :string,
         parking_type: :string,
@@ -20,7 +23,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
       {data, types}
       |> Ecto.Changeset.cast(params, [:text_query, :min_bath, :max_bath,
-        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type])
+        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius])
+        |> Ecto.Changeset.validate_number(:radius, less_than: 1_001, greater_than: 0)
     end
   end
   use Phoenix.LiveView
