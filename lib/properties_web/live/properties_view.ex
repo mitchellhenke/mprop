@@ -147,7 +147,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def get_properties(params) do
-    from(p in Assessment,
+    {point, radius} = build_point_and_radius(params.latitude, params.longitude, params.radius)
+    query = from(p in Assessment,
       where: p.year == 2018,
       order_by: [desc: p.last_assessment_amount],
       limit: 20)
@@ -160,7 +161,25 @@ defmodule PropertiesWeb.PropertiesLiveView do
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
-      |> Repo.all(timeout: :infinity)
+      |> Assessment.with_joined_shapefile()
+      |> Assessment.select_latitude_longitude()
+
+    query = if point && radius do
+      query
+      |> Assessment.maybe_within(point, radius)
+    else
+      query
+    end
+
+    Repo.all(query, timeout: :infinity)
+  end
+
+  defp build_point_and_radius(latitude, longitude, radius_in_m) do
+    if is_float(latitude) && is_float(longitude) && is_float(radius_in_m) do
+      {%Geo.Point{coordinates: {longitude, latitude}, srid: 4326}, radius_in_m}
+    else
+      {nil, nil}
+    end
   end
 
   defp comma_separated_number(nil), do: nil
