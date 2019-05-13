@@ -40,7 +40,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
       <div>
         <h1>Milwaukee Property Search</h1>
         <p>A website that allows filtering by some attributes from Milwaukee's <a href='http://city.milwaukee.gov/DownloadTabularData3496.htm?docid=3496'>Master Property Record</a></p>
-        </h1>
         <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
           <div class="row mb-2">
             <%= label f, :text_query, "Address Search", class: "col-sm-2 justify-content-start form-control-label" %>
@@ -87,56 +86,57 @@ defmodule PropertiesWeb.PropertiesLiveView do
           </div>
         <% end %>
 
-      <table class="table table-hover mt-2">
-        <thead>
-          <tr>
-            <th>Tax Key</th>
-            <th>Address</th>
-            <th>Bedrooms</th>
-            <th>Bathrooms</th>
-            <th>Lot Area</th>
-            <th>Property Area</th>
-            <th>Parking Type</th>
-            <th>Search Near Me</th>
-            <th>Assessment</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for property <- @properties do %>
+        <table class="table table-hover mt-2">
+          <thead>
             <tr>
-              <td>
-                <%= Phoenix.HTML.Link.link(property.tax_key, to: PropertiesWeb.Router.Helpers.property_path(PropertiesWeb.Endpoint, :show, property.tax_key)) %>
-              </td>
-              <td>
-                <%= Assessment.address(property) %>
-              </td>
-              <td>
-                <%= property.number_of_bedrooms %>
-              </td>
-              <td>
-                <%= Assessment.bathroom_count(property) %>
-              </td>
-              <td>
-                <%= comma_separated_number(property.lot_area) %>
-              </td>
-              <td>
-                <%= comma_separated_number(property.building_area) %>
-              </td>
-              <td>
-                <%= property.parking_type %>
-              </td>
-              <td>
-                <span class="input-group-btn">
-                  <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
-                </span>
-              </td>
-              <td>
-                <%= comma_separated_number(property.last_assessment_amount) %>
-              </td>
+              <th>Tax Key</th>
+              <th>Address</th>
+              <th>Bedrooms</th>
+              <th>Bathrooms</th>
+              <th>Lot Area</th>
+              <th>Property Area</th>
+              <th>Parking Type</th>
+              <th>Search Near Me</th>
+              <th>Assessment</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <%= for property <- @properties do %>
+              <tr>
+                <td>
+                  <%= Phoenix.HTML.Link.link(property.tax_key, to: PropertiesWeb.Router.Helpers.property_path(PropertiesWeb.Endpoint, :show, property.tax_key)) %>
+                </td>
+                <td>
+                  <%= Assessment.address(property) %>
+                </td>
+                <td>
+                  <%= property.number_of_bedrooms %>
+                </td>
+                <td>
+                  <%= Assessment.bathroom_count(property) %>
+                </td>
+                <td>
+                  <%= comma_separated_number(property.lot_area) %>
+                </td>
+                <td>
+                  <%= comma_separated_number(property.building_area) %>
+                </td>
+                <td>
+                  <%= property.parking_type %>
+                </td>
+                <td>
+                  <span class="input-group-btn">
+                    <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
+                  </span>
+                </td>
+                <td>
+                  <%= comma_separated_number(property.last_assessment_amount) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     """
   end
 
