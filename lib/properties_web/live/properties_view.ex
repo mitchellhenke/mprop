@@ -61,13 +61,31 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
            <div class="row mb-2">
+            <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :latitude, class: "form-control col-sm-2" %>
+            <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :longitude, class: "form-control col-sm-2" %>
+            <%= label f, :radius, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :radius, class: "form-control col-sm-2", min: "0", max: "2000", step: "10" %>
+           </div>
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :latitude %>
+            </div>
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :longitude %>
+            </div>
+            <div class="col-sm-4">
+              <%= PropertiesWeb.ViewHelper.error_tag f, :radius %>
+            </div>
+          </div>
+          <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
             <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= Phoenix.HTML.Form.select f, :parking_type, ["": "", "Attached Garage": "A", "Detached Garage": "D", "Attached/Detached Garage": "AD"], class: "form-control col-sm-2" %>
           </div>
-        </div>
-      <% end %>
+        <% end %>
 
       <table class="table table-hover mt-2">
         <thead>
@@ -108,6 +126,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
                 <%= property.parking_type %>
               </td>
               <td>
+                <span class="input-group-btn">
+                  <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
+                </span>
               </td>
               <td>
                 <%= comma_separated_number(property.last_assessment_amount) %>
@@ -174,14 +195,15 @@ defmodule PropertiesWeb.PropertiesLiveView do
     Repo.all(query, timeout: :infinity)
   end
 
+
   defp build_point_and_radius(latitude, longitude, radius_in_m) do
     if is_float(latitude) && is_float(longitude) && is_float(radius_in_m) do
       {%Geo.Point{coordinates: {longitude, latitude}, srid: 4326}, radius_in_m}
     else
       {nil, nil}
     end
-  end
 
+  end
   defp comma_separated_number(nil), do: nil
   defp comma_separated_number(num) do
     Regex.replace(@number_comma_regex, "#{num}", ",")
