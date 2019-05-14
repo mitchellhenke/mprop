@@ -47,8 +47,8 @@ defmodule PropertiesWeb.MapView do
     %{
       shapefiles: shapefiles,
       legend: %{
-        colors: [],
-        labels: [],
+        colors: ["#FF0000"],
+        labels: ["Lead Service Line"],
       }
     }
   end
