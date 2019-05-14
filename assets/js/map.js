@@ -17,9 +17,6 @@ let myRenderer = L.canvas({ padding: 0.5 })
 let layerGroup = L.layerGroup()
 let taxKeySet = new Set([])
 let GIDSet = new Set([])
-const zoningSelect = document.getElementById("zoning-select");
-let selectedZoning = ""
-
 const layerSelect = document.getElementById("layer-select");
 let selectedLayer = layerSelect.value
 
@@ -27,14 +24,6 @@ let legend = L.control({position: 'bottomright'});
 let legendInfo = {'colors': [], 'labels': []}
 
 layerGroup.addTo(map)
-
-zoningSelect.addEventListener('change', (e) => {
-  taxKeySet = new Set([])
-  GIDSet = new Set([])
-  layerGroup.clearLayers()
-  selectedZoning = e.target.value
-  updateMap(true)
-});
 
 layerSelect.addEventListener('change', (e) => {
   taxKeySet = new Set([])
@@ -100,7 +89,7 @@ function updateMap(shouldUpdateLegend) {
   let northEast = bounds._northEast
   let southWest = bounds._southWest
 
-  fetch(`/api/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&zoning=${selectedZoning}&layer=${selectedLayer}`)
+  fetch(`/api/geojson?northEastLatitude=${northEast.lat}&northEastLongitude=${northEast.lng}&southWestLatitude=${southWest.lat}&southWestLongitude=${southWest.lng}&layer=${selectedLayer}`)
     .then(response => response.json())
     .then(data => {
       if(selectedLayer === "bike_lanes") {
