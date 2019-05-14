@@ -59,14 +59,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= label f, :max_bed, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
-           <div class="row mb-2">
-            <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :latitude, class: "form-control col-sm-2" %>
-            <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :longitude, class: "form-control col-sm-2" %>
-            <%= label f, :radius, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :radius, class: "form-control col-sm-2", min: "0", max: "2000", step: "10" %>
-           </div>
           <div class="row mb-2">
             <div class="col-sm-4">
               <%= PropertiesWeb.ViewHelper.error_tag f, :latitude %>
@@ -125,9 +117,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
                   <%= property.parking_type %>
                 </td>
                 <td>
-                  <span class="input-group-btn">
-                    <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
-                  </span>
                 </td>
                 <td>
                   <%= comma_separated_number(property.last_assessment_amount) %>
@@ -182,8 +171,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
-      |> Assessment.with_joined_shapefile()
-      |> Assessment.select_latitude_longitude()
+      # |> Assessment.with_joined_shapefile()
+      # |> Assessment.select_latitude_longitude()
 
     query = if point && radius do
       query

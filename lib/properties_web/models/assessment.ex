@@ -75,7 +75,11 @@ schema "assessments" do
 
   def address(property) do
     zip_code = String.slice(property.zip_code, 0, 5)
-    "#{property.house_number_low} #{property.street_direction} #{property.street} #{property.street_type}, Milwaukee, WI #{zip_code}"
+    if property.house_number_low != property.house_number_high do
+      "#{property.house_number_low}-#{property.house_number_high} #{property.street_direction} #{property.street} #{property.street_type}, Milwaukee, WI #{zip_code}"
+    else
+      "#{property.house_number_low} #{property.street_direction} #{property.street} #{property.street_type}, Milwaukee, WI #{zip_code}"
+    end
   end
 
   def bathroom_count(assessment) do
