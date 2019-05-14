@@ -23,6 +23,9 @@ let selectedZoning = ""
 const layerSelect = document.getElementById("layer-select");
 let selectedLayer = layerSelect.value
 
+let legend = L.control({position: 'bottomright'});
+let legendInfo = {'colors': [], 'labels': []}
+
 layerGroup.addTo(map)
 
 zoningSelect.addEventListener('change', (e) => {
@@ -30,7 +33,7 @@ zoningSelect.addEventListener('change', (e) => {
   GIDSet = new Set([])
   layerGroup.clearLayers()
   selectedZoning = e.target.value
-  updateMap()
+  updateMap(true)
 });
 
 layerSelect.addEventListener('change', (e) => {
@@ -38,32 +41,11 @@ layerSelect.addEventListener('change', (e) => {
   GIDSet = new Set([])
   layerGroup.clearLayers()
   selectedLayer = e.target.value
-  updateMap()
+  updateMap(true)
 });
 
-
-var legend = L.control({position: 'bottomright'});
-
-legend.onAdd = function (map) {
-
-  let div = L.DomUtil.create('div', 'info legend')
-  const grades = ["#003F5C", "#2F4B7C", "#665191", "#A05195", "#D45087", "#F95D6A", "#FF7C43", "#FFA600", "#FF0000"]
-  let colors = []
-  let labels = []
-
-    // loop through our density intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < grades.length; i++) {
-        div.innerHTML +=
-            '<i style="background:' + grades[i] + '"></i>'
-    }
-
-    return div;
-};
-
-// legend.addTo(map);
-
-function handleLeadServiceLineData(data) {
-  const newData = data.reduce((accumulator, shape) => {
+function handleLeadServiceLineData(data, shouldUpdateLegend) {
+  const newData = data.shapefiles.reduce((accumulator, shape) => {
     if(taxKeySet.has(shape.properties.tax_key)) {
       return accumulator
     } else {
@@ -85,10 +67,14 @@ function handleLeadServiceLineData(data) {
       return feature.properties.style;
     }
   }).addTo(layerGroup)
+
+  if(shouldUpdateLegend) {
+    updateLegend(data.legend)
+  }
 }
 
-function handleBikeLaneData(data) {
-  const newData = data.reduce((accumulator, shape) => {
+function handleBikeLaneData(data, shouldUpdateLegend) {
+  const newData = data.shapefiles.reduce((accumulator, shape) => {
     if(GIDSet.has(shape.properties.gid)) {
       return accumulator
     } else {
@@ -102,10 +88,14 @@ function handleBikeLaneData(data) {
       return feature.properties.style;
     }
   }).addTo(layerGroup)
+
+  if(shouldUpdateLegend) {
+    updateLegend(data.legend)
+  }
 }
 
 
-function updateMap() {
+function updateMap(shouldUpdateLegend) {
   let bounds = map.getBounds()
   let northEast = bounds._northEast
   let southWest = bounds._southWest
@@ -114,17 +104,38 @@ function updateMap() {
     .then(response => response.json())
     .then(data => {
       if(selectedLayer === "bike_lanes") {
-        handleBikeLaneData(data)
+        handleBikeLaneData(data, shouldUpdateLegend)
       } else {
-        handleLeadServiceLineData(data)
+        handleLeadServiceLineData(data, shouldUpdateLegend)
       }
   })
+}
+
+function updateLegend(newLegendInfo) {
+  legendInfo = newLegendInfo;
+  map.removeControl(legend);
+  legend = L.control({position: 'bottomright'});
+  legend.onAdd = function (map) {
+    let div = L.DomUtil.create('div', 'info legend')
+    const colors = legendInfo.colors
+    let labels = legendInfo.labels
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < labels.length; i++) {
+      div.innerHTML +=
+        '<i style="background:' + colors[i] + '"></i> ' +
+        labels[i] + (labels[i + 1] ? '<br>' : '');
+    }
+
+    return div;
+  };
+
+  legend.addTo(map);
 }
 
 map.on('moveend', (e) => {
   updateMap()
 })
 
-updateMap()
-
+updateMap(true)
 }

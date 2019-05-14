@@ -38,11 +38,19 @@ defmodule PropertiesWeb.MapView do
   end
 
   def render("lead_index.json", %{shapefiles: shapefiles}) do
-    Enum.map(shapefiles, fn(shapefile) ->
+    shapefiles = Enum.map(shapefiles, fn(shapefile) ->
       ConCache.get_or_store(:lead_service_render_cache, shapefile.assessment.tax_key, fn ->
         render("lead_show.json", %{shapefile: shapefile})
       end)
     end)
+
+    %{
+      shapefiles: shapefiles,
+      legend: %{
+        colors: [],
+        labels: [],
+      }
+    }
   end
 
   def render("lead_show.json", %{shapefile: shapefile}) do
@@ -72,9 +80,17 @@ defmodule PropertiesWeb.MapView do
   end
 
   def render("bike_index.json", %{shapefiles: shapefiles}) do
-    Enum.map(shapefiles, fn(shapefile) ->
+    shapefiles = Enum.map(shapefiles, fn(shapefile) ->
       render("bike_show.json", %{shapefile: shapefile})
     end)
+
+    %{
+      shapefiles: shapefiles,
+      legend: %{
+        colors: ["#4AA564", "#E31C3D"],
+        labels: ["Bike Lane", "Trail"],
+      }
+    }
   end
 
   def render("bike_show.json", %{shapefile: shapefile}) do
