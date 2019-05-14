@@ -85,7 +85,7 @@ defmodule PropertiesWeb.MapView do
         gid: shapefile.gid,
         style: %{
           weight: 2,
-          color: if(shapefile.type == "Bike Lane", do: "#4AA564", else: "#E31C3D"),
+          color: if(shapefile.type in ["BIKE LANE", "BUFFERED BIKE LANE", "PROTECTED BIKE LANE"], do: "#4AA564", else: "#E31C3D"),
           opacity: 1,
           fillColor: "#FF0000",
           fillOpacity: 0.8

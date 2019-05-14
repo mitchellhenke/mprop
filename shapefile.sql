@@ -12,6 +12,10 @@ ALTER TABLE bike_lane_shapefiles
  ALTER COLUMN geom TYPE geometry(MultiLineString, 4326)
    USING ST_Transform(geom, 4326);
 
+ALTER TABLE off_street_path_shapefiles
+ ALTER COLUMN geom TYPE geometry(MultiLineString, 4326)
+   USING ST_Transform(geom, 4326);
+
 CREATE INDEX shapefiles_geom_point_index on shapefiles using GIST (geography(geom_point));
 
 CREATE INDEX bike_lane_shapefiles_geom_index on bike_lane_shapefiles using GIST (geography(geom));
