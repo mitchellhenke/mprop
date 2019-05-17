@@ -123,7 +123,7 @@ schema "assessments" do
       queryable
     else
       queryable
-      |> join(:left, [assessment], shapefile in Properties.ShapeFile, on: shapefile.taxkey == assessment.tax_key, as: :shapefile)
+      |> join(:inner, [assessment], shapefile in Properties.ShapeFile, on: shapefile.taxkey == assessment.tax_key, as: :shapefile)
     end
   end
 

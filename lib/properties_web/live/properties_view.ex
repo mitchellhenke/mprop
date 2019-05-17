@@ -26,6 +26,11 @@ defmodule PropertiesWeb.PropertiesLiveView do
         :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius])
         |> Ecto.Changeset.validate_number(:radius, less_than: 1_001, greater_than: 0)
     end
+
+    def update_location(changeset, params) do
+      Ecto.Changeset.cast(changeset, params, [:latitude, :longitude, :radius])
+      |> Ecto.Changeset.validate_number(:radius, less_than: 1_001, greater_than: 0)
+    end
   end
   use Phoenix.LiveView
   alias Properties.Assessment
@@ -59,6 +64,14 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= label f, :max_bed, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
+           <div class="row mb-2">
+            <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :latitude, class: "form-control col-sm-2" %>
+            <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :longitude, class: "form-control col-sm-2" %>
+            <%= label f, :radius, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :radius, class: "form-control col-sm-2", min: "0", max: "2000", step: "10" %>
+          </div>
           <div class="row mb-2">
             <div class="col-sm-4">
               <%= PropertiesWeb.ViewHelper.error_tag f, :latitude %>
@@ -117,6 +130,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
                   <%= property.parking_type %>
                 </td>
                 <td>
+                  <span class="input-group-btn">
+                    <button class="btn btn-secondary" phx-click="search_near_me:<%= property.tax_key %>">Search Near Me</button>
+                  </span>
                 </td>
                 <td>
                   <%= comma_separated_number(property.last_assessment_amount) %>
@@ -141,6 +157,22 @@ defmodule PropertiesWeb.PropertiesLiveView do
         socket = assign(socket, :changeset, error_changeset)
         {:noreply, socket}
    end
+  end
+
+  def handle_event("search_near_me:" <> tax_key, _value, socket) do
+    property = Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key))
+    changeset = Params.update_location(socket.assigns.changeset, %{latitude: property.latitude, longitude: property.longitude, radius: 500})
+
+    case Ecto.Changeset.apply_action(changeset, :insert) do
+      {:ok, params} ->
+        properties = get_properties(params)
+        socket = assign(socket, :changeset, changeset)
+                 |> assign(:properties, properties)
+        {:noreply, socket}
+      {:error, error_changeset} ->
+        socket = assign(socket, :changeset, error_changeset)
+        {:noreply, socket}
+    end
   end
 
   def handle_event(_, _value, socket) do
@@ -171,8 +203,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
-      # |> Assessment.with_joined_shapefile()
-      # |> Assessment.select_latitude_longitude()
+      |> Assessment.with_joined_shapefile()
+      |> Assessment.select_latitude_longitude()
 
     query = if point && radius do
       query
