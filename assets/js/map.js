@@ -64,10 +64,10 @@ function handleLeadServiceLineData(data, shouldUpdateLegend) {
 
 function handleBikeLaneData(data, shouldUpdateLegend) {
   const newData = data.shapefiles.reduce((accumulator, shape) => {
-    if(GIDSet.has(shape.properties.gid)) {
+    if(GIDSet.has(shape.properties.type + shape.properties.gid)) {
       return accumulator
     } else {
-      GIDSet.add(shape.properties.gid)
+      GIDSet.add(shape.properties.type + shape.properties.gid)
       accumulator.push(shape)
       return accumulator
     }
