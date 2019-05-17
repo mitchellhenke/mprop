@@ -160,17 +160,19 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def handle_event("search_near_me:" <> tax_key, _value, socket) do
-    property = Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key))
-    changeset = Params.update_location(socket.assigns.changeset, %{latitude: property.latitude, longitude: property.longitude, radius: 500})
-
-    case Ecto.Changeset.apply_action(changeset, :insert) do
-      {:ok, params} ->
-        properties = get_properties(params)
-        socket = assign(socket, :changeset, changeset)
-                 |> assign(:properties, properties)
-        {:noreply, socket}
-      {:error, error_changeset} ->
-        socket = assign(socket, :changeset, error_changeset)
+    with %{latitude: lat, longitude: long} <- Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key)),
+         changeset <- Params.update_location(socket.assigns.changeset, %{latitude: lat, longitude: long, radius: 500}) do
+      case Ecto.Changeset.apply_action(changeset, :insert) do
+        {:ok, params} ->
+          properties = get_properties(params)
+          socket = assign(socket, :changeset, changeset)
+                   |> assign(:properties, properties)
+          {:noreply, socket}
+        {:error, error_changeset} ->
+          socket = assign(socket, :changeset, error_changeset)
+          {:noreply, socket}
+      end
+    else _ ->
         {:noreply, socket}
     end
   end
