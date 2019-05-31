@@ -9,6 +9,12 @@ defmodule PropertiesWeb.ErrorView do
     "Internal server error"
   end
 
+  def render("404.json", %{message: message}) do
+    %{
+      error: message
+    }
+  end
+
   def render("422.json", %{message: message}) do
     %{
       error: message

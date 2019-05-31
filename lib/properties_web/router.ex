@@ -22,6 +22,7 @@ defmodule PropertiesWeb.Router do
     get "/assessments/:id", AssessmentController, :show
     get "/geocode", GeocodeController, :index
     get "/geojson", MapController, :geojson
+    get "/neighborhood", MapController, :neighborhood
   end
 
   scope "/", PropertiesWeb do

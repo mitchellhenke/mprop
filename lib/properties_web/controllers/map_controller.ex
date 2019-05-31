@@ -2,6 +2,7 @@ defmodule PropertiesWeb.MapController do
   use PropertiesWeb, :controller
 
   plug PropertiesWeb.Plugs.Brotli
+  plug PropertiesWeb.Plugs.Location when action in [:neighborhood]
   action_fallback PropertiesWeb.FallbackController
 
 
@@ -36,5 +37,14 @@ defmodule PropertiesWeb.MapController do
     #   Map.put(shapefile, :adjacent_cov, cov)
     # end)
 
+  end
+
+  def neighborhood(conn, _params) do
+    location = conn.assigns[:location]
+    point = %Geo.Point{coordinates: {location.longitude, location.latitude}, srid: 4326}
+
+    with {:ok, neighborhood} <- Properties.NeighborhoodShapeFile.find(point) do
+      render(conn, "neighborhood_show.json", neighborhood: neighborhood)
+    end
   end
 end

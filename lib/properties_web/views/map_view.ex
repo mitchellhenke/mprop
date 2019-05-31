@@ -111,6 +111,12 @@ defmodule PropertiesWeb.MapView do
     }
   end
 
+  def render("neighborhood_show.json", %{neighborhood: neighborhood}) do
+    %{
+      name: neighborhood.neighborhd
+    }
+  end
+
   defp fill_color(%{assessment: %{last_assessment_land: land}}, _p) when land < 1 do
     ""
   end
