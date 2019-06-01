@@ -47,4 +47,9 @@ defmodule PropertiesWeb.MapController do
       render(conn, "neighborhood_show.json", neighborhood: neighborhood)
     end
   end
+
+  def neighborhood_random(conn, _params) do
+    neighborhood = Properties.NeighborhoodShapeFile.random()
+    render(conn, "neighborhood_show.json", neighborhood: neighborhood)
+  end
 end

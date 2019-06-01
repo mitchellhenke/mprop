@@ -23,4 +23,11 @@ defmodule Properties.NeighborhoodShapeFile do
       {:error, :not_found}
     end
   end
+
+  def random() do
+    from(s in Properties.NeighborhoodShapeFile,
+      order_by: fragment("random()"),
+      limit: 1)
+      |> Properties.Repo.one()
+  end
 end
