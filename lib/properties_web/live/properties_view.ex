@@ -64,25 +64,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= label f, :max_bed, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
-           <div class="row mb-2">
-            <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :latitude, class: "form-control col-sm-2" %>
-            <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :longitude, class: "form-control col-sm-2" %>
-            <%= label f, :radius, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :radius, class: "form-control col-sm-2", min: "0", max: "2000", step: "10" %>
-          </div>
-          <div class="row mb-2">
-            <div class="col-sm-4">
-              <%= PropertiesWeb.ViewHelper.error_tag f, :latitude %>
-            </div>
-            <div class="col-sm-4">
-              <%= PropertiesWeb.ViewHelper.error_tag f, :longitude %>
-            </div>
-            <div class="col-sm-4">
-              <%= PropertiesWeb.ViewHelper.error_tag f, :radius %>
-            </div>
-          </div>
           <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
