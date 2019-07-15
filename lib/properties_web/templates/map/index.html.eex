@@ -5,6 +5,8 @@
   <select id="layer-select">
     <option selected="selected" value="bike_lanes">Bike Lanes</option>
     <option value="lead">Lead Service Lines</option>
+    <option value="absolute_assessment_change">Absolute Assessment Change</option>
+    <option value="percent_assessment_change">Percent Assessment Change</option>
   </select>
   <div id='map'></div>
 </div>

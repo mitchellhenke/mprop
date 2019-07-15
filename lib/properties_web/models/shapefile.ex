@@ -34,4 +34,20 @@ defmodule Properties.ShapeFile do
     )
     |> Properties.Repo.all()
   end
+
+  def list_shapefiles_with_change_in_absolute_assessment(x_min, y_min, x_max, y_max) do
+    from(s in "change_in_assessment_material_view",
+      where: fragment("? && ST_MakeEnvelope(?, ?, ?, ?)", s.geom, ^x_min, ^y_min, ^x_max, ^y_max),
+      select: %{geo_json: s.geo_json, assessment: %{assessment_2018: s."2018_total", assessment_2019: s."2019_total", absolute_change: s.absolute_assessment_change}}
+    )
+    |> Properties.Repo.all()
+  end
+
+  def list_shapefiles_with_change_in_percent_assessment(x_min, y_min, x_max, y_max) do
+    from(s in "change_in_assessment_material_view",
+      where: fragment("? && ST_MakeEnvelope(?, ?, ?, ?)", s.geom, ^x_min, ^y_min, ^x_max, ^y_max),
+      select: %{geo_json: s.geo_json, assessment: %{tax_key: s.tax_key, assessment_2018: s."2018_total", assessment_2019: s."2019_total", percent_change: s.percent_assessment_change}}
+    )
+    |> Properties.Repo.all()
+  end
 end

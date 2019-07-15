@@ -79,6 +79,37 @@ defmodule PropertiesWeb.MapView do
     }
   end
 
+  def render("percent_change_index.json", %{shapefiles: shapefiles}) do
+    shapefiles = Enum.map(shapefiles, fn(shapefile) ->
+      render("percent_change_show.json", %{shapefile: shapefile})
+    end)
+
+    %{
+      shapefiles: shapefiles,
+      legend: %{
+        colors: ["#003F5C", "#2F4B7C", "#665191", "#A05195", "#D45087", "#F95D6A", "#FF7C43", "#FFA600", "#FF0000"],
+        labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      }
+    }
+  end
+
+  def render("percent_change_show.json", %{shapefile: shapefile}) do
+    %{
+      geometry: shapefile.geo_json,
+      type: "Feature",
+      properties: %{
+        tax_key: shapefile.assessment.tax_key,
+        style: %{
+          weight: 2,
+          color: "#999",
+          opacity: 1,
+          fillColor: fill_color(shapefile.assessment.percent_change, :percent_assessment_change),
+          fillOpacity: 0.8
+        }
+      },
+    }
+  end
+
   def render("bike_index.json", %{shapefiles: shapefiles}) do
     shapefiles = Enum.map(shapefiles, fn(shapefile) ->
       render("bike_show.json", %{shapefile: shapefile})
@@ -143,23 +174,23 @@ defmodule PropertiesWeb.MapView do
     end
   end
 
-  defp fill_color(number) do
+  defp fill_color(number, :percent_assessment_change) do
     cond do
-      number <= 0.64393939393939393939 ->
+      Decimal.compare(number, Decimal.from_float(-0.061)) == Decimal.new(-1) ->
         "#003F5C"
-      number <= 0.77131540546174692516 ->
+      Decimal.compare(number, Decimal.from_float(-0.018)) == Decimal.new(-1) ->
         "#2F4B7C"
-      number <= 1.2682926829268293 ->
+      Decimal.compare(number, Decimal.from_float(0.0)) == Decimal.new(-1) ->
         "#665191"
-      number <= 1.7400000000000000 ->
+      Decimal.compare(number, Decimal.from_float(0.021)) == Decimal.new(-1) ->
         "#A05195"
-      number <= 2.3299028016009148 ->
+      Decimal.compare(number, Decimal.from_float(0.046)) == Decimal.new(-1) ->
         "#D45087"
-      number <= 3.1190476190476190 ->
+      Decimal.compare(number, Decimal.from_float(0.08)) == Decimal.new(-1) ->
         "#F95D6A"
-      number <= 4.7138682002451211 ->
+      Decimal.compare(number, Decimal.from_float(0.143)) == Decimal.new(-1) ->
         "#FF7C43"
-      number <= 6.3951970764813365 ->
+      Decimal.compare(number, Decimal.from_float(306.0)) == Decimal.new(-1) ->
         "#FFA600"
       true ->
         "#FF0000"
@@ -188,4 +219,10 @@ defmodule PropertiesWeb.MapView do
       Enum.at(covs, trunc(count * (x/7 - 1)))
     end)
   end
+
+  # absolute percentiles
+  # .125, .25, .375, .5, .625, .75, .825, 1
+  # -5200 | -1300 |    0  |  1600 |  4100 |  7500 | 13800 | 30124650
+  # percent percentiles
+  # -0.061 | -0.018 | 0.000 | 0.021 | 0.046 | 0.080 | 0.143 | 305.500
 end

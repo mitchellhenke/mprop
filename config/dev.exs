@@ -7,7 +7,12 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :properties, PropertiesWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: 4001],
+  https: [
+    port: 4000,
+    keyfile: "priv/dev.key",
+    certfile: "priv/dev.crt"
+  ],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

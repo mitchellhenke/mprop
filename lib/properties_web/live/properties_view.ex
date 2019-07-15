@@ -154,7 +154,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
           {:noreply, socket}
       end
     else _ ->
-        {:noreply, socket}
+      {:noreply, socket}
     end
   end
 
