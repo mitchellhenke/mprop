@@ -30,6 +30,7 @@ defmodule PropertiesWeb.Router do
     pipe_through :browser # Use the default browser stack
 
     live "/", PropertiesLiveView
+    live "/parking_tickets", ParkingTicketsLiveView
     get "/map", MapController, :index
     get "/properties/:id", PropertyController, :show
   end
