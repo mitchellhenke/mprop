@@ -19,7 +19,9 @@ defmodule Properties.Twitter do
     screen_name = get_in(tweet, ["user", "screen_name"])
 
     in_reply_to_status_id = Map.get(tweet, "id")
+                            |> IO.inspect(label: "ID")
     status = "@#{screen_name} license plate #{license_plate} has #{Enum.count(tickets)} parking tickets"
+             |> IO.inspect(label: "STATUS")
 
     authenticated_request("https://api.twitter.com/1.1/statuses/update.json",
       [{"status", status}, {"in_reply_to_status_id", in_reply_to_status_id}])
@@ -27,9 +29,9 @@ defmodule Properties.Twitter do
 
   def handle_events(webhook_callback_body) do
     with tweets <- Map.get(webhook_callback_body, "tweet_create_events", []),
-         tweets <- Enum.filter(tweets, fn(tweet) -> Map.get(tweet, "retweeted") == false && Map.get(tweet, "protected") == false end) do
-      Enum.each(tweets, fn(%{"status" => status} = tweet) ->
-        case license_plate(status) do
+         tweets <- Enum.filter(tweets, fn(tweet) -> Map.get(tweet, "retweeted") == false && get_in(tweet, ["user", "protected"]) == false end) do
+      Enum.each(tweets, fn(%{"text" => text} = tweet) ->
+        case license_plate(text) do
           [license_plate] -> reply(tweet, license_plate)
           [] -> nil
         end
@@ -48,8 +50,13 @@ defmodule Properties.Twitter do
 
     params = OAuther.sign("post", url, parameters, creds)
     {header, req_params} = OAuther.header(params)
-    :hackney.post(url,
-      [header], {:form, req_params})
+                           |> IO.inspect
+    {_, _status, _headers, client} = :hackney.post(url,
+      [header, {"application/x-www-form-urlencoded"}], {:form, req_params})
+      |> IO.inspect
+
+    :hackney.body(client)
+    |> IO.inspect
   end
 
   def register do
