@@ -51,7 +51,8 @@ defmodule Properties.Mixfile do
       {:nimble_parsec, "~> 0.5.0"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
-      {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"}
+      {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
+      {:oauther, "~> 1.1"}
     ]
   end
 

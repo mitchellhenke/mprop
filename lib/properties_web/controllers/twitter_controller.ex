@@ -10,8 +10,11 @@ defmodule PropertiesWeb.TwitterController do
   end
 
   def index(conn, params) do
-    IO.inspect(params)
-    send_resp(conn, 200, "oops")
+    Task.start(fn ->
+      Properties.Twitter.handle_events(params)
+    end)
+
+    send_resp(conn, 200, "hi")
     |> halt()
   end
 end

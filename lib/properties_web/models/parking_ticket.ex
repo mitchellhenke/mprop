@@ -28,6 +28,12 @@ defmodule Properties.ParkingTicket do
     field :fine, :integer
   end
 
+  def filter_by_license_plate_state(query, nil), do: query
+  def filter_by_license_plate_state(query, ""), do: query
+  def filter_by_license_plate_state(query, license_plate_state) do
+    from(p in query, where: p.license_plate_state == ^license_plate_state)
+  end
+
   def filter_by_license_plate(query, nil), do: query
   def filter_by_license_plate(query, ""), do: query
   def filter_by_license_plate(query, license_plate) do
