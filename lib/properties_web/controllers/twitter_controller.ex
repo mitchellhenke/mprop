@@ -9,7 +9,8 @@ defmodule PropertiesWeb.TwitterController do
     render(conn, "crc.json", response_token: "sha256=#{response_token}")
   end
 
-  def index(conn, _params) do
+  def index(conn, params) do
+    IO.inspect(params)
     send_resp(conn, 200, "oops")
     |> halt()
   end
