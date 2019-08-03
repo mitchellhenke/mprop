@@ -27,7 +27,7 @@ defmodule Properties.Twitter do
 
     status = """
     @#{screen_name}
-    license plate #{state}:#{license_plate} has #{Enum.count(tickets)} parking tickets.
+    license plate #{state}:#{license_plate} has been issued #{Enum.count(tickets)} parking tickets between 2014-2018.
     #{Enum.map(tickets_by_year, fn({year, count}) ->
       "#{year}: #{count}\n"
     end)}
@@ -62,9 +62,10 @@ defmodule Properties.Twitter do
 
     params = OAuther.sign("post", url, parameters, creds)
     {header, req_params} = OAuther.header(params)
-                           |> IO.inspect
+    req_params = Enum.into(req_params, %{})
+                 |> URI.encode_query()
     {_, _status, _headers, client} = :hackney.post(url,
-      [header, {"Content-Type", "application/x-www-form-urlencoded"}], {:form, req_params})
+      [header, {"Content-Type", "application/x-www-form-urlencoded"}], req_params)
       |> IO.inspect
 
     :hackney.body(client)
