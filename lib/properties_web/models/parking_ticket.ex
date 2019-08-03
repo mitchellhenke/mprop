@@ -7,7 +7,7 @@ defmodule Properties.ParkingTicket do
   # CREATE INDEX ON parking_tickets (license_plate, license_plate_state);
   # UPDATE parking_tickets SET date = to_date(issue_date, 'YYYY/MM/DD');
   # ALTER TABLE parking_tickets DROP COLUMN issue_date;
-  # CREATE INDEX ON parking_tickets (date);
+  # CREATE INDEX ON parking_tickets (date, time);
   # ALTER TABLE parking_tickets ADD COLUMN time time;
   # UPDATE parking_tickets SET time = to_timestamp(issue_time, 'HH24:MI:SS') WHERE issue_time IS NOT NULL AND issue_time <> '12/30/1899';
   # ALTER TABLE parking_tickets DROP COLUMN issue_time;
@@ -28,7 +28,6 @@ defmodule Properties.ParkingTicket do
     field :fine, :integer
   end
 
-  def filter_by_date(query, nil), do: query
   def filter_by_license_plate(query, nil), do: query
   def filter_by_license_plate(query, ""), do: query
   def filter_by_license_plate(query, license_plate) do

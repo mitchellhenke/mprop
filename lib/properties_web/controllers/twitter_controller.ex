@@ -14,7 +14,7 @@ defmodule PropertiesWeb.TwitterController do
   def handle_crc_check(conn, _opts) do
     if is_crc_check?(conn.params) do
       crc_token = Map.get(conn.params, "crc_token")
-      consumer_secret = Application.get_env(:twitter, :consumer_secret)
+      consumer_secret = Application.get_env(:properties, :twitter_consumer_secret)
       response_token = :crypto.hmac(:sha256, consumer_secret, crc_token)
                        |> Base.encode16
 

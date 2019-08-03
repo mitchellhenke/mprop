@@ -101,7 +101,7 @@ defmodule Properties.CSVParser do
   end
 
   def run_lead_service_lines(path) do
-    {found, not_found, multiple} = File.stream!(path)
+    {found, _not_found, _multiple} = File.stream!(path)
     |> CSV.decode!(headers: true)
     |> Stream.filter(fn(row) ->
       row["City"] == "MILWAUKEE"

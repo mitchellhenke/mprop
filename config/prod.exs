@@ -17,6 +17,11 @@ config :properties, PropertiesWeb.Endpoint,
   secret_key_base: "4KtHeNAGRXmjorm8FQrzOgg5xHmVjeP1UfQHgsQnw9GS8I5jiXVCfq1FsdoMrsf3",
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 
+config :properties,
+  twitter_consumer_key: System.get_env("TWITTER_CONSUMER_KEY"),
+  twitter_consumer_secret: System.get_env("TWITTER_CONSUMER_SECRET"),
+  twitter_access_token: System.get_env("TWITTER_ACCESS_TOKEN"),
+  twitter_access_token_secret: System.get_env("TWITTER_ACCESS_TOKEN_SECRET")
 
 # Do not print debug messages in production
 config :logger, level: :info
