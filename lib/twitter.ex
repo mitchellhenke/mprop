@@ -6,6 +6,7 @@ defmodule Properties.Twitter do
   end
 
   def reply(tweet, license_plate) do
+    IO.inspect(tweet)
     [state, license_plate] = String.split(license_plate, ":")
     license_plate = String.upcase(license_plate)
                     |> String.replace(" ", "")

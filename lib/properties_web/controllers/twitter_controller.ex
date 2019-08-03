@@ -10,7 +10,6 @@ defmodule PropertiesWeb.TwitterController do
   end
 
   def index(conn, params) do
-    IO.inspect(Map.get(params, "tweet_create_events"))
     Task.start(fn ->
       Properties.Twitter.handle_events(params)
     end)
