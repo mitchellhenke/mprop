@@ -20,8 +20,20 @@ defmodule Properties.Twitter do
 
     in_reply_to_status_id = Map.get(tweet, "id")
                             |> IO.inspect(label: "ID")
-    status = "@#{screen_name} license plate #{license_plate} has #{Enum.count(tickets)} parking tickets"
-             |> IO.inspect(label: "STATUS")
+
+    tickets_by_year = Enum.group_by(tickets, fn(ticket) -> ticket.date.year end)
+                      |> Enum.map(fn({year, tickets}) -> {year, Enum.count(tickets)} end)
+                      |> Enum.sort_by(fn({year, _tickets}) -> year end)
+
+    status = """
+    @#{screen_name}
+    license plate #{state}:#{license_plate} has #{Enum.count(tickets)} parking tickets.
+    #{Enum.map(tickets_by_year, fn({year, count}) ->
+      "#{year}: #{count}\n"
+    end)}
+    """
+    |> String.trim()
+    |> IO.inspect(label: "STATUS")
 
     authenticated_request("https://api.twitter.com/1.1/statuses/update.json",
       [{"status", status}, {"in_reply_to_status_id", in_reply_to_status_id}])
