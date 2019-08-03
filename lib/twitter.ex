@@ -52,7 +52,7 @@ defmodule Properties.Twitter do
     {header, req_params} = OAuther.header(params)
                            |> IO.inspect
     {_, _status, _headers, client} = :hackney.post(url,
-      [header, {"application/x-www-form-urlencoded"}], {:form, req_params})
+      [header, {"Content-Type", "application/x-www-form-urlencoded"}], {:form, req_params})
       |> IO.inspect
 
     :hackney.body(client)
