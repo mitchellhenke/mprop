@@ -15,6 +15,12 @@ defmodule PropertiesWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/webhooks", PropertiesWeb do
+    pipe_through :api
+
+    post "/twitter", TwitterController, :index
+  end
+
   scope "/api", PropertiesWeb do
     pipe_through :api # Use the default browser stack
 
