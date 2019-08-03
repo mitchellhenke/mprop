@@ -41,7 +41,7 @@ defmodule Properties.Twitter do
 
   def handle_events(webhook_callback_body) do
     with tweets <- Map.get(webhook_callback_body, "tweet_create_events", []),
-         tweets <- Enum.filter(tweets, fn(tweet) -> Map.get(tweet, "retweeted") == false && get_in(tweet, ["user", "protected"]) == false end) do
+         tweets <- Enum.filter(tweets, fn(tweet) -> Map.get(tweet, "retweeted") == false && get_in(tweet, ["user", "protected"]) == false && get_in(tweet, ["user", "id"]) != 1157650398649507840 end) do
       Enum.each(tweets, fn(%{"text" => text} = tweet) ->
         case license_plate(text) do
           [license_plate] -> reply(tweet, license_plate)
