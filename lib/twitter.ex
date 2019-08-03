@@ -6,7 +6,6 @@ defmodule Properties.Twitter do
   end
 
   def reply(tweet, license_plate) do
-    IO.inspect(tweet)
     [state, license_plate] = String.split(license_plate, ":")
     license_plate = String.upcase(license_plate)
                     |> String.replace(" ", "")
@@ -65,12 +64,12 @@ defmodule Properties.Twitter do
     {header, req_params} = OAuther.header(params)
     req_params = Enum.into(req_params, %{})
                  |> URI.encode_query()
-    # {_, _status, _headers, client} = :hackney.post(url,
-    #   [header, {"Content-Type", "application/x-www-form-urlencoded"}], req_params)
-      # |> IO.inspect
+    {_, _status, _headers, client} = :hackney.post(url,
+      [header, {"Content-Type", "application/x-www-form-urlencoded"}], req_params)
+      |> IO.inspect
 
-    # :hackney.body(client)
-    # |> IO.inspect
+    :hackney.body(client)
+    |> IO.inspect
   end
 
   def register do
