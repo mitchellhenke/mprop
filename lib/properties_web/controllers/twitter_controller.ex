@@ -4,7 +4,7 @@ defmodule PropertiesWeb.TwitterController do
   def crc(conn, %{"crc_token" => crc_token}) do
     consumer_secret = Application.get_env(:properties, :twitter_consumer_secret)
     response_token = :crypto.hmac(:sha256, consumer_secret, crc_token)
-                     |> Base.encode16
+                     |> Base.encode64
 
     render(conn, "crc.json", response_token: response_token)
   end
