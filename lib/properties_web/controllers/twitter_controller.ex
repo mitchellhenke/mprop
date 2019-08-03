@@ -6,7 +6,7 @@ defmodule PropertiesWeb.TwitterController do
     response_token = :crypto.hmac(:sha256, consumer_secret, crc_token)
                      |> Base.encode64
 
-    render(conn, "crc.json", response_token: response_token)
+    render(conn, "crc.json", response_token: "sha256=#{response_token}")
   end
 
   def index(conn, _params) do
