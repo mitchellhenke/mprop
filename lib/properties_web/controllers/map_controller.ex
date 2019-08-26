@@ -29,7 +29,7 @@ defmodule PropertiesWeb.MapController do
         off_street_path_shapefiles = Properties.OffStreetPathShapeFile.list(x_min, y_min, x_max, y_max)
         shapefiles = bike_shapefiles ++ off_street_path_shapefiles
         render(conn, "bike_index.json", shapefiles: shapefiles)
-      layer == "bike_lanes" ->
+      layer == "lead" ->
         shapefiles = Properties.ShapeFile.list_shapefiles_with_lead_service_lines(x_min, y_min, x_max, y_max)
         render(conn, "lead_index.json", shapefiles: shapefiles)
       layer == "absolute_assessment_change" ->
