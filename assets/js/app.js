@@ -11,6 +11,8 @@ import css from "../css/app.css"
 //
 import "phoenix_html"
 import "./map"
+import "./map_live"
+import socket from "./socket"
 
 import LiveSocket from "phoenix_live_view"
 

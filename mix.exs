@@ -18,6 +18,7 @@ defmodule Properties.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [
+      extra_applications: [:logger],
       mod: {Properties, []},
     ]
   end
@@ -31,7 +32,7 @@ defmodule Properties.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.0"},
+      {:phoenix, "~> 1.4.9"},
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:plug_cowboy, "~> 2.0"},
@@ -51,8 +52,9 @@ defmodule Properties.Mixfile do
       {:nimble_parsec, "~> 0.5.0"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
-      {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
-      {:oauther, "~> 1.1"}
+      {:phoenix_live_view, "~> 0.1"},
+      {:oauther, "~> 1.1"},
+      {:nimble_csv, "~> 0.6.0"},
     ]
   end
 

@@ -37,6 +37,45 @@ defmodule PropertiesWeb.MapView do
     }
   end
 
+  def render("lead_index_reject.json", %{set: set, shapefiles: shapefiles}) do
+    {set, shapefiles} = Enum.reduce(shapefiles, {set, []}, fn(shapefile, {set, list}) ->
+      if MapSet.member?(set, id(shapefile)) do
+        {set, list}
+      else
+        json = ConCache.get_or_store(:lead_service_render_cache, shapefile.assessment.tax_key, fn ->
+          render("lead_show.json", %{shapefile: shapefile})
+        end)
+        {MapSet.put(set, id(shapefile)), [json | list]}
+      end
+    end)
+
+    {set,
+      %{
+        shapefiles: shapefiles,
+      }
+    }
+  end
+
+  def render("lead_legend.json", %{}) do
+    %{
+      legend: %{
+        name: "lead",
+        colors: ["#FF0000"],
+        labels: ["Lead Service Line"],
+      }
+    }
+  end
+
+  def render("bike_lanes_legend.json", %{}) do
+    %{
+      legend: %{
+        name: "bike_lanes",
+        colors: ["#4AA564", "#E31C3D"],
+        labels: ["Bike Lane", "Trail"],
+      }
+    }
+  end
+
   def render("lead_index.json", %{shapefiles: shapefiles}) do
     shapefiles = Enum.map(shapefiles, fn(shapefile) ->
       ConCache.get_or_store(:lead_service_render_cache, shapefile.assessment.tax_key, fn ->
@@ -47,6 +86,7 @@ defmodule PropertiesWeb.MapView do
     %{
       shapefiles: shapefiles,
       legend: %{
+        name: "lead",
         colors: ["#FF0000"],
         labels: ["Lead Service Line"],
       }
@@ -64,6 +104,7 @@ defmodule PropertiesWeb.MapView do
       type: "Feature",
       properties: %{
         tax_key: shapefile.assessment.tax_key,
+        id: id(shapefile),
         popupContent: """
         <div>#{address}</div>
         <a href=\"/properties/#{shapefile.assessment.tax_key}\" target=\"_blank\">Assessment Link</a>
@@ -99,6 +140,7 @@ defmodule PropertiesWeb.MapView do
       type: "Feature",
       properties: %{
         tax_key: shapefile.assessment.tax_key,
+        id: id(shapefile),
         style: %{
           weight: 2,
           color: "#999",
@@ -118,6 +160,7 @@ defmodule PropertiesWeb.MapView do
     %{
       shapefiles: shapefiles,
       legend: %{
+        name: "bike_lanes",
         colors: ["#4AA564", "#E31C3D"],
         labels: ["Bike Lane", "Trail"],
       }
@@ -131,6 +174,7 @@ defmodule PropertiesWeb.MapView do
       properties: %{
         gid: shapefile.gid,
         type: shapefile.type,
+        id: id(shapefile),
         style: %{
           weight: 2,
           color: if(shapefile.type in ["BIKE LANE", "BUFFERED BIKE LANE", "PROTECTED BIKE LANE"], do: "#4AA564", else: "#E31C3D"),
@@ -219,6 +263,9 @@ defmodule PropertiesWeb.MapView do
       Enum.at(covs, trunc(count * (x/7 - 1)))
     end)
   end
+
+  def id(%{assessment: %{tax_key: tax_key}}), do: tax_key
+  def id(%{gid: gid, type: type}), do: "#{gid}-#{type}"
 
   # absolute percentiles
   # .125, .25, .375, .5, .625, .75, .825, 1

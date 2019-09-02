@@ -13,6 +13,12 @@ summary {
   margin-bottom: 30px;
 }
 
+#live_map {
+  width: 100%;
+  height: 600px;
+  margin-bottom: 30px;
+}
+
 .info {
   padding: 6px 8px;
   font: 14px/16px Arial, Helvetica, sans-serif;

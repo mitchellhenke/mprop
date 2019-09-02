@@ -39,6 +39,7 @@ defmodule PropertiesWeb.Router do
     live "/", PropertiesLiveView
     live "/parking_tickets", ParkingTicketsLiveView
     get "/map", MapController, :index
+    get "/map_live", MapController, :index_live
     get "/properties/:id", PropertyController, :show
   end
 end

@@ -2,9 +2,9 @@ defmodule PropertiesWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :properties
 
   socket "/socket", PropertiesWeb.UserSocket,
-    websocket: true # or list of options
+    websocket: [compress: true]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [check_origin: ["https://mprop.mitchellhenke.com",
+  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, check_origin: ["https://mprop.mitchellhenke.com",
     "https://salty-beach-73298.herokuapp.com", "http://localhost:4000", "http://localhost:4000"]]
 
   # Serve at "/" the static files from "priv/static" directory.
