@@ -42,9 +42,7 @@ defmodule PropertiesWeb.MapView do
       if MapSet.member?(set, id(shapefile)) do
         {set, list}
       else
-        json = ConCache.get_or_store(:lead_service_render_cache, shapefile.assessment.tax_key, fn ->
-          render("lead_show.json", %{shapefile: shapefile})
-        end)
+        json = render("lead_show.json", %{shapefile: shapefile})
         {MapSet.put(set, id(shapefile)), [json | list]}
       end
     end)
