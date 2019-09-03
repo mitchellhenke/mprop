@@ -10,10 +10,6 @@ defmodule PropertiesWeb.MapController do
     render(conn, "index.html")
   end
 
-  def index_live(conn, _params) do
-    render(conn, "index_live.html")
-  end
-
   def geojson(conn, params) do
     {x_min, _} = params["southWestLongitude"]
             |> Float.parse()

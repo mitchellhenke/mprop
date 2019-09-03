@@ -1,12 +1,12 @@
 <div>
   <p>The information displayed is not guaranteed to be up to date and should be confirmed by visiting the appropriate City of Milwaukee resource.<p>
   <label for="layer-select">Choose a layer:</label>
-
   <select id="layer-select">
     <option selected="selected" value="bike_lanes">Bike Lanes</option>
     <option value="lead">Lead Service Lines</option>
     <option value="absolute_assessment_change">Absolute Assessment Change</option>
     <option value="percent_assessment_change">Percent Assessment Change</option>
   </select>
-  <div id='map'></div>
+
+  <div id='live_map'></div>
 </div>

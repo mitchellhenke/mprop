@@ -11,7 +11,6 @@ import css from "../css/app.css"
 //
 import "phoenix_html"
 import "./map"
-import "./map_live"
 import socket from "./socket"
 
 import LiveSocket from "phoenix_live_view"
@@ -22,4 +21,3 @@ liveSocket.connect()
 // Import local files
 //
 // Local files can be imported directly using relative paths, for example:
-// import socket from "./socket"
