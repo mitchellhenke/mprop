@@ -10,8 +10,8 @@ import css from "../css/app.css"
 // Import dependencies
 //
 import "phoenix_html"
+import "./socket"
 import "./map"
-import socket from "./socket"
 
 import LiveSocket from "phoenix_live_view"
 
