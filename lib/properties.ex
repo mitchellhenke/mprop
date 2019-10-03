@@ -10,6 +10,7 @@ defmodule Properties do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository
+      supervisor(Task.Supervisor, [[name: Properties.TaskSupervisor]]),
       supervisor(Properties.Repo, []),
       Supervisor.child_spec({ConCache, name: :near_cache, ttl_check_interval: false}, id: :con_cache_near_cache),
       Supervisor.child_spec({ConCache, name: :lead_service_render_cache, ttl_check_interval: false}, id: :con_cache_lead_service_render_cache),
@@ -26,7 +27,7 @@ defmodule Properties do
     opts = [strategy: :one_for_one, name: Properties.Supervisor]
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      fill_cache()
+      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn -> fill_cache() end)
       {:ok, pid}
     end
   end
@@ -49,10 +50,10 @@ defmodule Properties do
       ConCache.put(:transit_cache, "routes_#{id}", route)
     end)
 
-    # {_stop_times, stop_times_map} =
-    #   Path.join("./data/gtfs", "stop_times.txt")
-    #   |> File.stream!()
-    #   |> Transit.text_to_stop_times()
+    {_stop_times, stop_times_map} =
+      Path.join("./data/gtfs", "stop_times.txt")
+      |> File.stream!()
+      |> Transit.text_to_stop_times()
 
     stop_map =
       Path.join("./data/gtfs", "stops.txt")
@@ -77,15 +78,14 @@ defmodule Properties do
     |> File.stream!()
     |> Transit.text_to_trips()
     |> Enum.map(fn(trip) ->
-      # stop_times = Map.fetch!(stop_times_map, trip.id)
-      #              |> Enum.sort_by(&(&1.stop_sequence))
-      #              |> Enum.map(fn(stop_time) ->
-      #                stop = Map.get(stop_map, stop_time.stop_id)
-      #                %{stop_time | stop: stop}
-      #              end)
+      stop_times = Map.fetch!(stop_times_map, trip.id)
+                   |> Enum.sort_by(&(&1.stop_sequence))
+                   |> Enum.map(fn(stop_time) ->
+                     stop = Map.get(stop_map, stop_time.stop_id)
+                     %{stop_time | stop: stop}
+                   end)
 
-      # %{trip | stop_times: stop_times}
-      trip
+      %{trip | stop_times: stop_times}
     end)
 
     Enum.each(trips, fn(trip) ->

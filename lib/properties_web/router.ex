@@ -28,7 +28,6 @@ defmodule PropertiesWeb.Router do
     get "/", AssessmentController, :index
     get "/assessments/:id", AssessmentController, :show
     get "/geocode", GeocodeController, :index
-    get "/geojson", MapController, :geojson
     get "/neighborhood", MapController, :neighborhood
     get "/neighborhood_random", MapController, :neighborhood_random
   end

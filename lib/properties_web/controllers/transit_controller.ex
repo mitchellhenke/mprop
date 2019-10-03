@@ -9,9 +9,7 @@ defmodule PropertiesWeb.TransitController do
   def trips(conn, %{"id" => route_id}) do
     date = ~D[2019-07-09]
     route = ConCache.get(:transit_cache, "routes_#{route_id}")
-            |> IO.inspect
     trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
-            |> IO.inspect
 
     render conn, "trips.html", route: route, trips: trips
   end
