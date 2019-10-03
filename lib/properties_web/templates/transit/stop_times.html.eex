@@ -1,0 +1,19 @@
+<div>
+  <h1>MCTS Bus Routes</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Arrival Time</th>
+        <th scope="col">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= Enum.map(@stop_times, fn(stop_time) -> %>
+        <tr>
+          <th scope="row"><%= stop_time.arrival_time %></th>
+          <th scope="row"><%= stop_time.stop.name %></th>
+        </tr>
+      <% end) %>
+    </tbody>
+  </table>
+</div>

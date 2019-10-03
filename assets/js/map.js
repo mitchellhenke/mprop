@@ -1,5 +1,4 @@
 import Leaflet from "leaflet"
-import LiveSocket from "phoenix_live_view"
 import socket from "./socket"
 const pathname = window.location.pathname.slice(0, 5)
 
@@ -18,7 +17,9 @@ function updateMap() {
   })
 }
 
-let channel = socket.channel("map:lobby", {})
+const randomString = Math.random().toString(36).substring(2, 15)
+
+let channel = socket.channel(`map:${randomString}`, {})
 channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp) })
   .receive("error", resp => { console.log("Unable to join", resp) })

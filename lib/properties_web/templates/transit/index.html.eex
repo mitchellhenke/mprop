@@ -1,0 +1,19 @@
+<div>
+  <h1>MCTS Bus Routes</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Long Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= Enum.map(@routes, fn(route) -> %>
+        <tr>
+          <th scope="row"><%= route.id %> </th>
+          <td><%= route.long_name %> </td>
+        </tr>
+      <% end) %>
+    </tbody>
+  </table>
+</div>

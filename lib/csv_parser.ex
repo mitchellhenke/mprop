@@ -5,7 +5,6 @@ defmodule Properties.CSVParser do
   def run(path, year) do
     File.stream!(path)
     |> CSV.decode!(headers: true)
-    # |> Stream.each(fn(x) ->
     |> Task.async_stream(fn(x) ->
       attrs = %{
       year: year,
@@ -101,32 +100,42 @@ defmodule Properties.CSVParser do
   end
 
   def run_lead_service_lines(path) do
-    {found, _not_found, _multiple} = File.stream!(path)
-    |> CSV.decode!(headers: true)
-    |> Stream.filter(fn(row) ->
-      row["City"] == "MILWAUKEE"
+    File.stream!(path)
+    |> NimbleCSV.RFC4180.parse_stream(skip_headers: true)
+    |> Stream.filter(fn([_, _, _, _, city, _, _]) ->
+      city == "MILWAUKEE"
     end)
-    |> Enum.reduce({[], [], []}, fn(row, {found, not_found, multiple}) ->
+    |> Task.async_stream(fn(row) ->
       # House Number Low,EMPTY,House Number High,Street Name,City,State,Zip Code
-      address = "#{row["House Number Low"]} #{row["Street Name"]}"
-      full_address = "#{row["House Number Low"]}-#{row["House Number High"]} #{row["Street Name"]} #{row["City"]}"
-      assessments = from(a in Properties.Assessment, where: a.year == 2018)
-                   |> Properties.Assessment.filter_by_address(address)
-                   |> Properties.Repo.all
+      [house_number_low, _, house_number_high, street_name, city, _state, _zip_code] = row
+      address = "#{house_number_low} #{street_name}"
+      full_address = "#{house_number_low}-#{house_number_high} #{street_name} #{city}"
 
+      assessments = from(a in Properties.Assessment,
+        where: a.year == 2018, limit: 2
+      )
+      |> Properties.Assessment.filter_by_address(address)
+      |> Properties.Repo.all
+
+      if :random.uniform() > 0.999 do
+        IO.inspect address
+      end
       case assessments do
         [assessment] ->
-          {[{assessment, full_address} | found], not_found, multiple}
-        assessments = [_assessment1 | [_assessment2 | _]] ->
-          {found, not_found, [{assessments, address} | multiple]}
+          sf = Properties.ShapeFile.get_by_tax_key(assessment.tax_key)
+          if sf do
+            Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address, sf.geom)
+          else
+            Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address, nil)
+            IO.inspect(assessment.tax_key)
+          end
+        _assessments = [_assessment1 | [_assessment2 | _]] ->
+          nil
         [] ->
-          {found, [address | not_found], multiple}
+          nil
       end
     end)
-
-    Enum.each(found, fn({assessment, full_address}) ->
-      Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address)
-    end)
+    |> Stream.run()
   end
 
   defp parse_tax_rate_cd(""), do: 0

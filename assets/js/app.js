@@ -10,12 +10,13 @@ import css from "../css/app.css"
 // Import dependencies
 //
 import "phoenix_html"
+import {Socket} from "phoenix"
 import "./socket"
 import "./map"
 
 import LiveSocket from "phoenix_live_view"
 
-let liveSocket = new LiveSocket("/live")
+let liveSocket = new LiveSocket("/live", Socket)
 liveSocket.connect()
 
 // Import local files
