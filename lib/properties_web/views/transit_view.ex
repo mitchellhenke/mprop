@@ -24,4 +24,15 @@ defmodule PropertiesWeb.TransitView do
     minutes = div(seconds, 60)
     "#{minutes}m"
   end
+
+  def human_readable_time(time) do
+    if time.hour < 12 || (time.hour == 12 && time.minute == 0) do
+      "#{zeroed_int2(time.hour)}:#{zeroed_int2(time.minute)} AM"
+    else
+      "#{zeroed_int2(rem(time.hour, 12))}:#{zeroed_int2(time.minute)} PM"
+    end
+  end
+
+  def zeroed_int2(int) when int >= 10, do: Integer.to_string(int)
+  def zeroed_int2(int), do: <<?0, Integer.to_string(int)::1-bytes>>
 end

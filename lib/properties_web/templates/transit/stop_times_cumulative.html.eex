@@ -8,7 +8,7 @@
         <th scope="col">Stop ID</th>
         <th scope="col">Arrival Time</th>
         <th scope="col">Name</th>
-        <th scope="col">Seconds Until Next Stop</th>
+        <th scope="col">Time From Target Stop</th>
         <th scope="col">Seconds Until Next Stop (25th Percentile)</th>
         <th scope="col">Seconds Until Next Stop (50th Percentile)</th>
       </tr>
