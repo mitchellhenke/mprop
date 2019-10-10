@@ -147,7 +147,7 @@ defmodule Transit do
   # ]
   def text_to_stop_times(stream) do
     Stream.drop(stream, 1)
-    |> Enum.reduce({[], %{}}, fn(row, {list, map_by_trip_id}) ->
+    |> Enum.reduce(%{}, fn(row, map_by_trip_id) ->
       values = String.trim(row)
         |> String.split(",")
 
@@ -163,11 +163,11 @@ defmodule Transit do
         timepoint: Enum.at(values, 8) |> String.trim()
       }
 
-      {[stop_time | list], Map.update(map_by_trip_id, stop_time.trip_id, [stop_time], fn([previous | rest]) ->
+      Map.update(map_by_trip_id, stop_time.trip_id, [stop_time], fn([previous | rest]) ->
         seconds_until_next_stop = calculate_time_diff(previous.arrival_time, stop_time.arrival_time)
         previous = Map.put(previous, :seconds_until_next_stop, seconds_until_next_stop)
         [stop_time | [previous | rest]]
-      end)}
+      end)
     end)
   end
 
@@ -287,7 +287,7 @@ defmodule Transit do
     time_3 = :erlang.monotonic_time()
     IO.inspect(System.convert_time_unit(time_2 - time_3, :native, :millisecond), label: "routes 2")
 
-    {_stop_times, stop_times_map} =
+    stop_times_map =
       Path.join("/tmp/gtfs", "stop_times.txt")
       |> File.stream!()
       |> Transit.text_to_stop_times()
@@ -299,6 +299,10 @@ defmodule Transit do
       Path.join("/tmp/gtfs", "stops.txt")
       |> File.stream!()
       |> Transit.text_to_stops()
+
+    Enum.each(stop_map, fn({key, value}) ->
+      ConCache.put(:transit_cache, "stops_#{key}", value)
+    end)
 
     time_5 = :erlang.monotonic_time()
     IO.inspect(System.convert_time_unit(time_4 - time_5, :native, :millisecond), label: "stop map")
@@ -332,10 +336,6 @@ defmodule Transit do
     |> Enum.map(fn(trip) ->
       stop_times = Map.fetch!(stop_times_map, trip.id)
                    |> Enum.sort_by(&(&1.stop_sequence))
-                   |> Enum.map(fn(stop_time) ->
-                     stop = Map.get(stop_map, stop_time.stop_id)
-                     %{stop_time | stop: stop}
-                   end)
 
       first = List.first(stop_times).departure_time
       last = List.last(stop_times).arrival_time
@@ -368,11 +368,12 @@ defmodule Transit do
       dates = ConCache.get(:transit_cache, "calendar_dates_#{service_id}")
       Enum.each(dates, fn(date) ->
         ConCache.update(:transit_cache, "trips_by_route_date_#{route_id}_#{date.date}", fn(current) ->
+          trip_ids = Enum.map(trips, &(&1.id))
           case current do
             nil ->
-              {:ok, MapSet.new(trips)}
+              {:ok, MapSet.new(trip_ids)}
             existing ->
-              {:ok, MapSet.union(existing, MapSet.new(trips))}
+              {:ok, MapSet.union(existing, MapSet.new(trip_ids))}
           end
         end)
       end)

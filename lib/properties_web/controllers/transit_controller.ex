@@ -11,6 +11,9 @@ defmodule PropertiesWeb.TransitController do
     date = Map.get(params, "date", Date.utc_today)
     route = ConCache.get(:transit_cache, "routes_#{route_id}")
     trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
+            |> Enum.map(fn(trip_id) ->
+              ConCache.get(:transit_cache, "trips_#{trip_id}")
+            end)
             |> Enum.sort_by(fn(trip) ->
               List.first(trip.stop_times).departure_time
             end)
@@ -32,10 +35,15 @@ defmodule PropertiesWeb.TransitController do
   def stop_times_cumulative(conn, params) do
     trip_id = Map.fetch!(params, "id")
     trip = ConCache.get(:transit_cache, "trips_#{trip_id}")
+           |> Transit.Trip.preload_stop_time_stops()
     date = Map.get(params, "date", Date.utc_today)
     starting_stop_id = Map.get(params, "starting_stop_id", List.first(trip.stop_times).stop_id)
 
     trips = ConCache.get(:transit_cache, "trips_by_route_date_#{trip.route_id}_#{date}")
+            |> Enum.map(fn(trip_id) ->
+              ConCache.get(:transit_cache, "trips_#{trip_id}")
+              |> Transit.Trip.preload_stop_time_stops()
+            end)
             |> Enum.filter(&(&1.headsign == trip.headsign && &1.shape_id == trip.shape_id))
             |> Enum.sort_by(fn(trip) ->
               Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
