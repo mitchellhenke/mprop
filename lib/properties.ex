@@ -27,7 +27,10 @@ defmodule Properties do
     opts = [strategy: :one_for_one, name: Properties.Supervisor]
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn -> Transit.fill_cache() end)
+      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn ->
+        Transit.download_gtfs()
+        Transit.fill_cache()
+      end)
       {:ok, pid}
     end
   end
