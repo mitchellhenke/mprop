@@ -49,7 +49,7 @@ defmodule Properties.Mixfile do
       {:ecto_sql, "~> 3.0"},
       {:postgrex, "~> 0.14.0"},
       {:jason, "~> 1.0"},
-      {:nimble_parsec, "~> 0.5.0"},
+      {:nimble_parsec, "~> 0.5.1"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.1"},

@@ -27,7 +27,7 @@ defmodule Properties do
     opts = [strategy: :one_for_one, name: Properties.Supervisor]
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn -> fill_cache() end)
+      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn -> Transit.fill_cache() end)
       {:ok, pid}
     end
   end
@@ -37,77 +37,5 @@ defmodule Properties do
   def config_change(changed, _new, removed) do
     PropertiesWeb.Endpoint.config_change(changed, removed)
     :ok
-  end
-
-  def fill_cache do
-    routes = Path.join("./data/gtfs/", "routes.txt")
-    |> File.stream!()
-    |> Transit.text_to_routes()
-
-    ConCache.put(:transit_cache, "all_routes", routes)
-
-    Enum.each(routes, fn(%{id: id} = route) ->
-      ConCache.put(:transit_cache, "routes_#{id}", route)
-    end)
-
-    {_stop_times, stop_times_map} =
-      Path.join("./data/gtfs", "stop_times.txt")
-      |> File.stream!()
-      |> Transit.text_to_stop_times()
-
-    stop_map =
-      Path.join("./data/gtfs", "stops.txt")
-      |> File.stream!()
-      |> Transit.text_to_stops()
-
-    calendar_dates = Path.join("./data/gtfs/", "calendar_dates.txt")
-    |> File.stream!()
-    |> Transit.text_to_calendar_dates()
-
-    Enum.group_by(calendar_dates, fn(%{service_id: service_id}) -> service_id end)
-    |> Enum.each(fn({service_id, calendar_dates}) ->
-      ConCache.put(:transit_cache, "calendar_dates_#{service_id}", calendar_dates)
-    end)
-
-    Enum.group_by(calendar_dates, fn(%{date: date}) -> date end)
-    |> Enum.each(fn({date, calendar_dates}) ->
-      ConCache.put(:transit_cache, "calendar_dates_#{date}", calendar_dates)
-    end)
-
-    trips = Path.join("./data/gtfs/", "trips.txt")
-    |> File.stream!()
-    |> Transit.text_to_trips()
-    |> Enum.map(fn(trip) ->
-      stop_times = Map.fetch!(stop_times_map, trip.id)
-                   |> Enum.sort_by(&(&1.stop_sequence))
-                   |> Enum.map(fn(stop_time) ->
-                     stop = Map.get(stop_map, stop_time.stop_id)
-                     %{stop_time | stop: stop}
-                   end)
-
-      %{trip | stop_times: stop_times}
-    end)
-
-    Enum.each(trips, fn(trip) ->
-      ConCache.put(:transit_cache, "trips_#{trip.id}", trip)
-    end)
-
-    # a service is a set of trips
-    Enum.group_by(trips, fn(%{route_id: route_id, service_id: service_id}) ->
-      {route_id, service_id}
-    end)
-    |> Enum.each(fn({{route_id, service_id}, trips}) ->
-      dates = ConCache.get(:transit_cache, "calendar_dates_#{service_id}")
-      Enum.each(dates, fn(date) ->
-        ConCache.update(:transit_cache, "trips_by_route_date_#{route_id}_#{date.date}", fn(current) ->
-          case current do
-            nil ->
-              {:ok, MapSet.new(trips)}
-            existing ->
-              {:ok, MapSet.union(existing, MapSet.new(trips))}
-          end
-        end)
-      end)
-    end)
   end
 end

@@ -3,6 +3,7 @@ defmodule Transit do
   Documentation for Transit.
   """
   alias Transit.{CalendarDate, Route, Stop, StopTime, Trip}
+  require Logger
 
   def read_text_files(directory) do
     routes =
@@ -162,7 +163,11 @@ defmodule Transit do
         timepoint: Enum.at(values, 8) |> String.trim()
       }
 
-      {[stop_time | list], Map.update(map_by_trip_id, stop_time.trip_id, [stop_time], fn(list) -> [stop_time | list] end)}
+      {[stop_time | list], Map.update(map_by_trip_id, stop_time.trip_id, [stop_time], fn([previous | rest]) ->
+        seconds_until_next_stop = calculate_time_diff(previous.arrival_time, stop_time.arrival_time)
+        previous = Map.put(previous, :seconds_until_next_stop, seconds_until_next_stop)
+        [stop_time | [previous | rest]]
+      end)}
     end)
   end
 
@@ -219,6 +224,163 @@ defmodule Transit do
     else
       diff
     end
+  end
+
+  def percentile(values, 0) do
+    Enum.sort(values)
+    |> List.first()
+  end
+  def percentile(values, 100) do
+    Enum.sort(values)
+    |> List.last()
+  end
+  def percentile(values, percentile) when is_integer(percentile) do
+    sorted_values = Enum.sort(values)
+    i = Enum.count(sorted_values)
+            |> Kernel.*(percentile)
+            |> Kernel./(100)
+            |> Kernel.+(0.5)
+
+    integer = Float.floor(i)
+              |> round()
+
+    fractional = (i - integer)
+    index = (integer - 1)
+
+    (Enum.at(sorted_values, index) * (1.0 - fractional) +
+      Enum.at(sorted_values, index + 1) * fractional)
+      |> Float.round(0)
+      |> round()
+  end
+
+  def download_gtfs do
+    url = "http://kamino.mcts.org/gtfs/google_transit.zip"
+    directory = "/tmp/gtfs"
+    destination = "/tmp/gtfs/transit.zip"
+    with :ok <- File.mkdir_p(directory),
+         {:ok, 200, _headers, client_ref} <- :hackney.get(url, [], "", follow_redirect: true),
+         {:ok, body} <- :hackney.body(client_ref),
+         :ok <- File.write(destination, body),
+         {:ok, _files} <- :zip.unzip(String.to_charlist(destination), [cwd: directory]) do
+      IO.inspect("DONE")
+    else
+      e ->
+        Logger.error(inspect(e))
+    end
+  end
+
+  def fill_cache do
+    time_1 = :erlang.monotonic_time()
+    routes = Path.join("/tmp/gtfs", "routes.txt")
+    |> File.stream!()
+    |> Transit.text_to_routes()
+
+    time_2 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_1 - time_2, :native, :millisecond), label: "routes")
+
+    ConCache.put(:transit_cache, "all_routes", routes)
+
+    Enum.each(routes, fn(%{id: id} = route) ->
+      ConCache.put(:transit_cache, "routes_#{id}", route)
+    end)
+
+    time_3 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_2 - time_3, :native, :millisecond), label: "routes 2")
+
+    {_stop_times, stop_times_map} =
+      Path.join("/tmp/gtfs", "stop_times.txt")
+      |> File.stream!()
+      |> Transit.text_to_stop_times()
+
+    time_4 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_3 - time_4, :native, :millisecond), label: "routes 3")
+
+    stop_map =
+      Path.join("/tmp/gtfs", "stops.txt")
+      |> File.stream!()
+      |> Transit.text_to_stops()
+
+    time_5 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_4 - time_5, :native, :millisecond), label: "stop map")
+
+    calendar_dates = Path.join("/tmp/gtfs", "calendar_dates.txt")
+    |> File.stream!()
+    |> Transit.text_to_calendar_dates()
+
+    time_6 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_5 - time_6, :native, :millisecond), label: "calendar dates")
+
+    Enum.group_by(calendar_dates, fn(%{service_id: service_id}) -> service_id end)
+    |> Enum.each(fn({service_id, calendar_dates}) ->
+      ConCache.put(:transit_cache, "calendar_dates_#{service_id}", calendar_dates)
+    end)
+
+    time_7 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_6 - time_7, :native, :millisecond), label: "calendar dates group")
+
+    Enum.group_by(calendar_dates, fn(%{date: date}) -> date end)
+    |> Enum.each(fn({date, calendar_dates}) ->
+      ConCache.put(:transit_cache, "calendar_dates_#{date}", calendar_dates)
+    end)
+
+    time_8 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_7 - time_8, :native, :millisecond), label: "calendar dates cache")
+
+    trips = Path.join("/tmp/gtfs", "trips.txt")
+    |> File.stream!()
+    |> Transit.text_to_trips()
+    |> Enum.map(fn(trip) ->
+      stop_times = Map.fetch!(stop_times_map, trip.id)
+                   |> Enum.sort_by(&(&1.stop_sequence))
+                   |> Enum.map(fn(stop_time) ->
+                     stop = Map.get(stop_map, stop_time.stop_id)
+                     %{stop_time | stop: stop}
+                   end)
+
+      first = List.first(stop_times).departure_time
+      last = List.last(stop_times).arrival_time
+
+      total_time = Transit.calculate_time_diff(first, last)
+
+      Map.put(trip, :total_time, total_time)
+      |> Map.put(:stop_times, stop_times)
+    end)
+
+    time_9 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_8 - time_9, :native, :millisecond), label: "trips diff")
+
+    Enum.each(trips, fn(trip) ->
+      ConCache.put(:transit_cache, "trips_#{trip.id}", trip)
+    end)
+
+    time_10 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_9 - time_10, :native, :millisecond), label: "trips cache")
+
+    # a service is a set of trips
+    grouped = Enum.group_by(trips, fn(%{route_id: route_id, service_id: service_id}) ->
+      {route_id, service_id}
+    end)
+
+    time_11 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_10 - time_11, :native, :millisecond), label: "trips grouping")
+
+    Enum.each(grouped, fn({{route_id, service_id}, trips}) ->
+      dates = ConCache.get(:transit_cache, "calendar_dates_#{service_id}")
+      Enum.each(dates, fn(date) ->
+        ConCache.update(:transit_cache, "trips_by_route_date_#{route_id}_#{date.date}", fn(current) ->
+          case current do
+            nil ->
+              {:ok, MapSet.new(trips)}
+            existing ->
+              {:ok, MapSet.union(existing, MapSet.new(trips))}
+          end
+        end)
+      end)
+    end)
+
+    time_12 = :erlang.monotonic_time()
+    IO.inspect(System.convert_time_unit(time_11 - time_12, :native, :millisecond), label: "DONE cache")
+    IO.inspect("DONE")
   end
 end
 

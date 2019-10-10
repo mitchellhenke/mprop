@@ -5,6 +5,7 @@
   <table class="table">
     <thead>
       <tr>
+        <th scope="col">Stop ID</th>
         <th scope="col">Arrival Time</th>
         <th scope="col">Name</th>
         <th scope="col">Seconds Until Next Stop</th>
@@ -15,11 +16,12 @@
     <tbody>
       <%= Enum.map(@stop_times, fn(stop_time) -> %>
         <tr>
+          <th scope="row"><%= stop_time.stop_id %></th>
           <th scope="row"><%= stop_time.arrival_time %></th>
-          <th scope="row"><%= stop_time.stop.name %></th>
-          <th scope="row"><%= stop_time.seconds_until_next_stop %></th>
-          <th scope="row"><%= time_for_percentile(@trips, stop_time, 25)%></th>
-          <th scope="row"><%= time_for_percentile(@trips, stop_time, 50)%></th>
+          <th id="<%= "stop-#{stop_time.stop_id}" %>"scope="row"><%= link(stop_time.stop.name, to: Routes.transit_path(@conn, :stop_times_cumulative, @trip.id, starting_stop_id: stop_time.stop_id) <> "#stop-#{stop_time.stop_id}") %></th>
+          <th scope="row"><%= seconds_to_human_readable(stop_time.diff - stop_time.diff_25) %></th>
+          <th scope="row"><%= seconds_to_human_readable(stop_time.diff) %></th>
+          <th scope="row"><%= seconds_to_human_readable(stop_time.diff_25) %></th>
         </tr>
       <% end) %>
     </tbody>

@@ -3,13 +3,17 @@
   <table class="table">
     <thead>
       <tr>
+        <th scope="col">Leave Time</th>
+        <th scope="col">Total Time</th>
         <th scope="col">Name</th>
       </tr>
     </thead>
     <tbody>
       <%= Enum.map(@trips, fn(trip) -> %>
         <tr>
-          <th scope="row"><%= link(trip.headsign, to: Routes.transit_path(@conn, :stop_times, trip.id)) %></th>
+          <th scope="row"><%= List.first(trip.stop_times).departure_time %></th>
+          <th scope="row"><%= trip.total_time %></th>
+          <th scope="row"><%= link(trip.headsign, to: Routes.transit_path(@conn, :stop_times_cumulative, trip.id)) %></th>
         </tr>
       <% end) %>
     </tbody>
