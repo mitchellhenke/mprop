@@ -4,10 +4,12 @@
   <h3><%= @fastest_trip.headsign %></h3>
   <h3><%= @date %></h3>
   <div>
-    Start Time of Slowest Trip: <%= human_readable_time(List.first(@slowest_trip.stop_times).arrival_time) %>
+    Fastest Trip: <%= human_readable_time(List.first(@fastest_trip.stop_times).arrival_time)  <> " - #{seconds_to_human_readable(@fastest_trip.total_time)}" %>
   </div>
   <div>
-    Start Time of Fastest Trip: <%= human_readable_time(List.first(@fastest_trip.stop_times).arrival_time) %>
+    Slowest Trip: <%= human_readable_time(List.first(@slowest_trip.stop_times).arrival_time) <> " - #{seconds_to_human_readable(@slowest_trip.total_time)}" %>
+  </div>
+  <div>
   </div>
   <table class="table">
     <thead>
