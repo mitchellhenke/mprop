@@ -1,26 +1,27 @@
 <div>
   <h1>MCTS Bus Routes</div>
-  <h2><%= @percentile_10.route_id %></h2>
-  <h3><%= @percentile_10.headsign %></h3>
+  <h2><%= @fastest_trip.route_id %></h2>
+  <h3><%= @fastest_trip.headsign %></h3>
+  <h3><%= @date %></h3>
   <div>
-    10th Percentile Time: <%= human_readable_time(List.first(@percentile_10.stop_times).arrival_time) %>
+    Start Time of Slowest Trip: <%= human_readable_time(List.first(@slowest_trip.stop_times).arrival_time) %>
   </div>
   <div>
-    100th Percentile: <%= human_readable_time(List.first(@percentile_100.stop_times).arrival_time) %>
+    Start Time of Fastest Trip: <%= human_readable_time(List.first(@fastest_trip.stop_times).arrival_time) %>
   </div>
   <table class="table">
     <thead>
       <tr>
         <th scope="col">Name</th>
-        <th scope="col">Time From Target Stop (10th Percentile)</th>
-        <th scope="col">Time From Target Stop (100th Percentile)</th>
-        <th scope="col">Difference in 10th and 100th Percentile</th>
+        <th scope="col">Time From Target Stop (Slowest)</th>
+        <th scope="col">Time From Target Stop (Fastest)</th>
+        <th scope="col">Difference in Fastest and Slowest</th>
       </tr>
     </thead>
     <tbody>
-      <%= Enum.map(@stop_times, fn(stop_time) -> %>
+      <%= Enum.map(@fastest_trip.stop_times, fn(stop_time) -> %>
         <tr>
-          <td id="<%= "stop-#{stop_time.stop_id}" %>"scope="row"><%= link(stop_time.stop.name, to: Routes.transit_path(@conn, :stop_times_comparison, @percentile_10.route_id, starting_stop_id: stop_time.stop_id) <> "#stop-#{stop_time.stop_id}") %></td>
+          <td id="<%= "stop-#{stop_time.stop_id}" %>"scope="row"><%= link(stop_time.stop.name, to: Routes.transit_path(@conn, :stop_times_comparison, @fastest_trip.route_id, starting_stop_id: stop_time.stop_id, headsign: @fastest_trip.headsign, shape_id: @fastest_trip.shape_id, date: "#{@date}") <> "#stop-#{stop_time.stop_id}") %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff) %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff_100) %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff - stop_time.diff_100) %></td>

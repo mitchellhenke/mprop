@@ -11,7 +11,7 @@
       <%= Enum.map(@routes, fn(route) -> %>
         <tr>
           <th scope="row"><%= route.id %> </th>
-          <td><%= link route.long_name, to: Routes.transit_path(@conn, :stop_times_comparison, route.id)%></td>
+          <td><%= link route.long_name, to: Routes.transit_path(@conn, :route_headsign_shape, route.id)%></td>
         </tr>
       <% end) %>
     </tbody>

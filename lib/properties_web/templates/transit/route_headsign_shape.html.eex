@@ -1,0 +1,21 @@
+<div>
+  <h1>MCTS Bus Routes</div>
+  <h2><%= "Route #{@route.short_name}" %></h2>
+  <h3><%= @date %></h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Headsign</th>
+        <th scope="col">Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= Enum.map(@groups, fn({{headsign, shape_id}, trips}) -> %>
+        <tr>
+          <td scope="row"><%= link(headsign, to: Routes.transit_path(@conn, :stop_times_comparison, @route.id, headsign: headsign, shape_id: shape_id)) %></td>
+          <td scope="row"><%= Enum.count(trips) %></td>
+        </tr>
+      <% end) %>
+    </tbody>
+  </table>
+</div>

@@ -21,54 +21,24 @@ defmodule PropertiesWeb.TransitController do
     render conn, "trips.html", route: route, trips: trips, date: date
   end
 
-  def stop_times(conn, params) do
-    trip_id = Map.fetch!(params, "id")
+  def route_headsign_shape(conn, params) do
+    route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today)
-    trip = ConCache.get(:transit_cache, "trips_#{trip_id}")
-
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{trip.route_id}_#{date}")
-            |> Enum.filter(&(&1.headsign == trip.headsign && &1.shape_id == trip.shape_id))
-
-    render conn, "stop_times.html", trip: trip, trips: trips, stop_times: trip.stop_times
-  end
-
-  def stop_times_cumulative(conn, params) do
-    trip_id = Map.fetch!(params, "id")
-    trip = ConCache.get(:transit_cache, "trips_#{trip_id}")
-           |> Transit.Trip.preload_stop_time_stops()
-    date = Map.get(params, "date", Date.utc_today)
-    starting_stop_id = Map.get(params, "starting_stop_id", List.first(trip.stop_times).stop_id)
-
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{trip.route_id}_#{date}")
+    route = ConCache.get(:transit_cache, "routes_#{route_id}")
+    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
             |> Enum.map(fn(trip_id) ->
               ConCache.get(:transit_cache, "trips_#{trip_id}")
-              |> Transit.Trip.preload_stop_time_stops()
-            end)
-            |> Enum.filter(&(&1.headsign == trip.headsign && &1.shape_id == trip.shape_id))
-            |> Enum.sort_by(fn(trip) ->
-              Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
             end)
 
-    percentile_25 = Enum.count(trips) * 0.10
-                      |> round()
-
-    percentile_25 = Enum.at(trips, percentile_25)
-
-    start = Enum.find(trip.stop_times, &(&1.stop_id == starting_stop_id))
-    start_25th = Enum.find(percentile_25.stop_times, &(&1.stop_id == starting_stop_id))
-    stop_times = Enum.map(trip.stop_times, fn(stop_time) ->
-      stop_time_25 = Enum.find(percentile_25.stop_times, &(&1.stop_id == stop_time.stop_id))
-
-      diff = Transit.calculate_time_diff(stop_time.arrival_time, start.arrival_time)
-      diff_25 = Transit.calculate_time_diff(stop_time_25.arrival_time, start_25th.arrival_time)
-
-      Map.put(stop_time, :diff, diff)
-      |> Map.put(:diff_25, diff_25)
+    groups = Enum.group_by(trips, fn(trip) ->
+      {trip.headsign, trip.shape_id}
     end)
+    |> Enum.sort_by(fn({{_headsign, _shape_id}, trips}) ->
+      Enum.count(trips) * -1
+    end)
+    |> Enum.take(2)
 
-    trip = %{trip | stop_times: stop_times}
-
-    render conn, "stop_times_cumulative.html", trip: trip, trips: trips, stop_times: trip.stop_times
+    render conn, "route_headsign_shape.html", groups: groups, route: route, date: date
   end
 
   def stop_times_comparison(conn, params) do
@@ -80,6 +50,47 @@ defmodule PropertiesWeb.TransitController do
               ConCache.get(:transit_cache, "trips_#{trip_id}")
             end)
 
+    headsign = Map.get(params, "headsign")
+    shape_id = Map.get(params, "shape_id")
+
+    trips = get_trips(trips, headsign, shape_id)
+            |> Enum.map(fn(trip) ->
+              Transit.Trip.preload_stop_time_stops(trip)
+            end)
+            |> Enum.sort_by(fn(trip) ->
+              Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
+            end)
+
+    fastest_trip = List.first(trips)
+    slowest_trip = List.last(trips)
+
+    starting_stop_id = Map.get(params, "starting_stop_id", List.first(slowest_trip.stop_times).stop_id)
+
+    start_fastest = Enum.find(fastest_trip.stop_times, &(&1.stop_id == starting_stop_id))
+    start_slowest = Enum.find(slowest_trip.stop_times, &(&1.stop_id == starting_stop_id))
+
+    stop_times = Enum.map(fastest_trip.stop_times, fn(stop_time) ->
+      stop_time_slowest = Enum.find(slowest_trip.stop_times, &(&1.stop_id == stop_time.stop_id))
+
+      diff_fastest = Transit.calculate_time_diff(stop_time.arrival_time, start_fastest.arrival_time)
+      diff_slowest = Transit.calculate_time_diff(stop_time_slowest.arrival_time, start_slowest.arrival_time)
+
+      Map.put(stop_time, :diff, diff_fastest)
+      |> Map.put(:diff_100, diff_slowest)
+    end)
+
+    fastest_trip = %{fastest_trip | stop_times: stop_times}
+
+    render conn, "stop_times_comparison.html", date: date, slowest_trip: slowest_trip, trips: trips, fastest_trip: fastest_trip
+  end
+
+  def get_trips(trips, headsign, shape_id) do
+    Enum.filter(trips, fn(trip) ->
+      trip.headsign == headsign && trip.shape_id == shape_id
+    end)
+  end
+
+  def get_trips(trips, nil, nil) do
     {_, trips} = Enum.group_by(trips, fn(trip) ->
       {trip.headsign, trip.shape_id}
     end)
@@ -88,39 +99,6 @@ defmodule PropertiesWeb.TransitController do
     end)
     |> List.last()
 
-    trips = trips
-            |> Enum.map(fn(trip) ->
-              Transit.Trip.preload_stop_time_stops(trip)
-            end)
-            |> Enum.sort_by(fn(trip) ->
-              Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
-            end)
-
-    percentile_10 = Enum.count(trips) * 0.10
-                      |> round()
-
-    percentile_10 = Enum.at(trips, percentile_10)
-
-    percentile_100 = List.last(trips)
-
-    starting_stop_id = Map.get(params, "starting_stop_id", List.first(percentile_10.stop_times).stop_id)
-
-
-    start_10 = Enum.find(percentile_10.stop_times, &(&1.stop_id == starting_stop_id))
-    start_100 = Enum.find(percentile_100.stop_times, &(&1.stop_id == starting_stop_id))
-
-    stop_times = Enum.map(percentile_10.stop_times, fn(stop_time) ->
-      stop_time_100 = Enum.find(percentile_100.stop_times, &(&1.stop_id == stop_time.stop_id))
-
-      diff_10 = Transit.calculate_time_diff(stop_time.arrival_time, start_10.arrival_time)
-      diff_100 = Transit.calculate_time_diff(stop_time_100.arrival_time, start_100.arrival_time)
-
-      Map.put(stop_time, :diff, diff_10)
-      |> Map.put(:diff_100, diff_100)
-    end)
-
-    percentile_10 = %{percentile_10 | stop_times: stop_times}
-
-    render conn, "stop_times_comparison.html", percentile_10: percentile_10, percentile_100: percentile_100, trips: trips, stop_times: percentile_10.stop_times
+    trips
   end
 end

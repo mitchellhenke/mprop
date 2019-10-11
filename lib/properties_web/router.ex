@@ -42,7 +42,7 @@ defmodule PropertiesWeb.Router do
     get "/transit", TransitController, :index
     get "/transit/:id", TransitController, :trips
     get "/transit/stop_times/:id", TransitController, :stop_times
-    get "/transit/stop_times_cumulative/:id", TransitController, :stop_times_cumulative
+    get "/transit/route_headsign_shape/:id", TransitController, :route_headsign_shape
     get "/transit/stop_times_comparison/:id", TransitController, :stop_times_comparison
   end
 end
