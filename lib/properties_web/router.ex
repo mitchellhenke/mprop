@@ -40,6 +40,7 @@ defmodule PropertiesWeb.Router do
     get "/map", MapController, :index
     get "/properties/:id", PropertyController, :show
     get "/transit", TransitController, :index
+    get "/transit/dashboard", TransitController, :dashboard
     get "/transit/:id", TransitController, :trips
     get "/transit/stop_times/:id", TransitController, :stop_times
     get "/transit/route_headsign_shape/:id", TransitController, :route_headsign_shape
