@@ -1,0 +1,31 @@
+<div>
+  <h1>MCTS Bus Routes</div>
+  <h2><%= @date %></h2>
+  <%= Enum.map(@data, fn({{slowest1, fastest1}, {slowest2, fastest2}}) -> %>
+    <div class="row">
+      <div class="col-lg-12">
+        <h3><%= fastest1.route_id %></h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-6">
+        <h4><%= fastest1.headsign %></h3>
+        <div>
+          Fastest Trip: <%= human_readable_time(List.first(fastest1.stop_times).arrival_time)  <> " - #{seconds_to_human_readable(fastest1.total_time)}" %>
+        </div>
+        <div>
+          Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest1.total_time)}" %>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <h4><%= fastest2.headsign %></h3>
+        <div>
+          Fastest Trip: <%= human_readable_time(List.first(fastest2.stop_times).arrival_time)  <> " - #{seconds_to_human_readable(fastest2.total_time)}" %>
+        </div>
+        <div>
+          Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest2.total_time)}" %>
+        </div>
+      </div>
+    </div>
+  <% end) %>
+</div>
