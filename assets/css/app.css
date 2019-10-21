@@ -56,3 +56,18 @@ summary {
 .phx-error {
   background: #ffe6f0!important;
 }
+
+.transit-dashboard .row:nth-of-type(even) {
+  padding-bottom: 1rem;
+}
+
+.transit-dashboard .row:nth-of-type(odd) {
+  padding-top: 1rem;
+}
+
+.transit-dashboard .row:nth-of-type(4n) {
+  background-color: #efefef;
+}
+.transit-dashboard .row:nth-of-type(4n-1) {
+  background-color: #efefef;
+}

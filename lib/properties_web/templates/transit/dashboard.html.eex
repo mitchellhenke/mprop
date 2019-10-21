@@ -1,5 +1,5 @@
-<div>
-  <h1>MCTS Bus Routes</div>
+<div class="transit-dashboard">
+  <h1>MCTS Bus Routes</h1>
   <h2><%= @date %></h2>
   <%= Enum.map(@data, fn({{slowest1, fastest1}, {slowest2, fastest2}}) -> %>
     <div class="row">
@@ -27,6 +27,5 @@
         </div>
       </div>
     </div>
-    <hr/>
   <% end) %>
 </div>
