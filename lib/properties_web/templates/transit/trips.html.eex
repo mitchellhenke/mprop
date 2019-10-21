@@ -13,7 +13,7 @@
         <tr>
           <th scope="row"><%= List.first(trip.stop_times).departure_time %></th>
           <th scope="row"><%= trip.total_time %></th>
-          <th scope="row"><%= link(trip.headsign, to: Routes.transit_path(@conn, :route_headsign_shape, trip.id)) %></th>
+          <th scope="row"><%= link(trip.headsign, to: Routes.transit_path(@conn, :stop_times_comparison, trip.route_id, shape_id: trip.shape_id, headsign: trip.headsign)) %></th>
         </tr>
       <% end) %>
     </tbody>
