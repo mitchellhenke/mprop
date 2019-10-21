@@ -9,23 +9,24 @@
     </div>
     <div class="row">
       <div class="col-lg-6">
-        <h4><%= fastest1.headsign %></h3>
+        <div class="font-weight-bold"><%= fastest1.headsign %></div>
         <div>
           Fastest Trip: <%= human_readable_time(List.first(fastest1.stop_times).arrival_time)  <> " - #{seconds_to_human_readable(fastest1.total_time)}" %>
         </div>
         <div>
-          Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest1.total_time)}" %>
+          Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest1.total_time)} (#{percent_difference(fastest1.total_time, slowest1.total_time)}% slower)" %>
         </div>
       </div>
       <div class="col-lg-6">
-        <h4><%= fastest2.headsign %></h3>
+        <div class="font-weight-bold"><%= fastest2.headsign %></div>
         <div>
           Fastest Trip: <%= human_readable_time(List.first(fastest2.stop_times).arrival_time)  <> " - #{seconds_to_human_readable(fastest2.total_time)}" %>
         </div>
         <div>
-          Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest2.total_time)}" %>
+          Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest2.total_time)} (#{percent_difference(fastest2.total_time, slowest2.total_time)}% slower)" %>
         </div>
       </div>
     </div>
+    <hr/>
   <% end) %>
 </div>

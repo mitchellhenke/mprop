@@ -35,4 +35,10 @@ defmodule PropertiesWeb.TransitView do
 
   def zeroed_int2(int) when int >= 10, do: Integer.to_string(int)
   def zeroed_int2(int), do: <<?0, Integer.to_string(int)::1-bytes>>
+
+  def percent_difference(fastest, slowest) do
+    (slowest - fastest) / fastest
+    |> Kernel.*(100)
+    |> round()
+  end
 end
