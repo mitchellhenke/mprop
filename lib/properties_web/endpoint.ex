@@ -4,8 +4,8 @@ defmodule PropertiesWeb.Endpoint do
   socket "/socket", PropertiesWeb.UserSocket,
     websocket: [compress: true]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, check_origin: ["https://mprop.mitchellhenke.com",
-    "https://salty-beach-73298.herokuapp.com", "http://localhost:4000", "http://localhost:4000"]]
+  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, check_origin: ["https://civic.mitchellhenke.com",
+    "https://mke-civics.herokuapp.com", "http://localhost:4000", "http://localhost:4000"]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
