@@ -1,8 +1,23 @@
 <div class="transit-dashboard">
-  <h1>MCTS Bus Routes</h1>
-  <h2><%= @date %></h2>
-  <%= Enum.map(@data, fn({{slowest1, fastest1}, {slowest2, fastest2}}) -> %>
-    <div class="row">
+  <div class="row">
+    <div class="col-lg-12">
+      <h1>The Bus Is Slower Than It Has to Be</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p>The Milwaukee bus system takes people all over the city around the clock. Unfortunately, many of those buses have to move much slower than they could during periods of heavy vehicle congestion.</p>
+      <p>The charts below show how much slower the bus is relative to its fastest for each route throughout the day.</p>
+      <ul class="legend">
+        <li><span class="green"></span> 0%-9%</li>
+        <li><span class="yellow"></span> 10%-19%</li>
+        <li><span class="orange"></span> 20%-29%</li>
+        <li><span class="red"></span> 30+%</li>
+      </ul>
+    </div>
+  </div>
+  <%= Enum.map(@data, fn({{slowest1, fastest1, graph1}, {slowest2, fastest2, graph2}}) -> %>
+    <div class="route row" style="background-color: <%= background_color(percent_difference(fastest1.total_time, slowest1.total_time), percent_difference(fastest2.total_time, slowest2.total_time)) %>">
       <div class="col-lg-12">
         <h3><%= fastest1.route_id %></h2>
       </div>
@@ -16,6 +31,13 @@
         <div>
           Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest1.total_time)} (#{percent_difference(fastest1.total_time, slowest1.total_time)}% slower)" %>
         </div>
+        <div style="height: 30px; <%= graph1 %>"></div>
+        <div class="time-box">
+          <div>12am</div>
+          <div>6am</div>
+          <div>12pm</div>
+          <div>6pm</div>
+        </div>
       </div>
       <div class="col-lg-6">
         <div class="font-weight-bold"><%= fastest2.headsign %></div>
@@ -24,6 +46,13 @@
         </div>
         <div>
           Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).arrival_time) <> " - #{seconds_to_human_readable(slowest2.total_time)} (#{percent_difference(fastest2.total_time, slowest2.total_time)}% slower)" %>
+        </div>
+        <div style="height: 30px; <%= graph2 %>"></div>
+        <div class="time-box">
+          <div>12am</div>
+          <div>6am</div>
+          <div>12pm</div>
+          <div>6pm</div>
         </div>
       </div>
     </div>

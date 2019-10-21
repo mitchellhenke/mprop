@@ -1,5 +1,6 @@
 defmodule PropertiesWeb.TransitController do
   use PropertiesWeb, :controller
+  alias PropertiesWeb.TransitView
 
   def index(conn, _params) do
     routes = ConCache.get(:transit_cache, "all_routes")
@@ -85,16 +86,23 @@ defmodule PropertiesWeb.TransitController do
   end
 
   def dashboard(conn, params) do
-    date = Map.get(params, "date", Date.utc_today)
+    date = ~D[2019-10-22]
     data = ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
       routes = ConCache.get(:transit_cache, "all_routes")
                |> Enum.filter(&(&1.id != "137" && &1.id != "219"))
 
-      data = Enum.map(routes, fn(route) ->
+      Enum.map(routes, fn(route) ->
         Task.async(fn -> get_slowest_and_fastest_trips_for_route(route.id, date) end)
       end)
       |> Enum.map(fn(task) ->
         Task.await(task)
+      end)
+      |> Enum.sort_by(fn({{slowest1, fastest1, _all1}, {slowest2, fastest2, _all2}}) ->
+        Enum.max([TransitView.percent_difference(fastest1.total_time, slowest1.total_time),
+          TransitView.percent_difference(fastest2.total_time, slowest2.total_time)]) * - 1
+      end)
+      |> Enum.map(fn({{slowest1, fastest1, all1}, {slowest2, fastest2, all2}}) ->
+        {{slowest1, fastest1, TransitView.graph(fastest1, all1)}, {slowest2, fastest2, TransitView.graph(fastest2, all2)}}
       end)
 
     end)
@@ -130,7 +138,7 @@ defmodule PropertiesWeb.TransitController do
 
     fastest_trip = %{fastest_trip | stop_times: stop_times}
 
-    {slowest_trip, fastest_trip}
+    {slowest_trip, fastest_trip, trips}
   end
 
   def get_slowest_and_fastest_trips_for_route(route_id, date) do
@@ -141,10 +149,10 @@ defmodule PropertiesWeb.TransitController do
             end)
     [{headsign1, shape_id1}, {headsign2, shape_id2}] = get_top_2_headsign_shape_ids(trips)
 
-    {slowest1, fastest1} = get_slowest_and_fastest_trips(trips, headsign1, shape_id1)
-    {slowest2, fastest2} = get_slowest_and_fastest_trips(trips, headsign2, shape_id2)
+    {slowest1, fastest1, all1} = get_slowest_and_fastest_trips(trips, headsign1, shape_id1)
+    {slowest2, fastest2, all2} = get_slowest_and_fastest_trips(trips, headsign2, shape_id2)
 
-    {{slowest1, fastest1}, {slowest2, fastest2}}
+    {{slowest1, fastest1, all1}, {slowest2, fastest2, all2}}
   end
 
   def get_top_2_headsign_shape_ids(trips) do

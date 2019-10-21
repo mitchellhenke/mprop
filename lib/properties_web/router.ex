@@ -39,8 +39,8 @@ defmodule PropertiesWeb.Router do
     live "/parking_tickets", ParkingTicketsLiveView
     get "/map", MapController, :index
     get "/properties/:id", PropertyController, :show
-    get "/transit", TransitController, :index
-    get "/transit/dashboard", TransitController, :dashboard
+    get "/transit", TransitController, :dashboard
+    get "/transit/dashboard", TransitController, :index
     get "/transit/:id", TransitController, :trips
     get "/transit/stop_times/:id", TransitController, :stop_times
     get "/transit/route_headsign_shape/:id", TransitController, :route_headsign_shape

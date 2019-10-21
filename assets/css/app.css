@@ -35,7 +35,6 @@ summary {
 .legend {
   text-align: left;
   line-height: 18px;
-  color: #555;
 }
 .legend i {
   width: 18px;
@@ -58,16 +57,29 @@ summary {
 }
 
 .transit-dashboard .row:nth-of-type(even) {
-  padding-bottom: 1rem;
+  padding-bottom: 2rem;
+  padding-top: 1rem;
 }
 
 .transit-dashboard .row:nth-of-type(odd) {
   padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
-.transit-dashboard .row:nth-of-type(4n) {
-  background-color: #efefef;
+.transit-dashboard .legend { list-style: none; line-height: 15px; }
+.transit-dashboard .legend li { float: left; margin-right: 10px; }
+.transit-dashboard .legend span { border: 1px solid #ccc; float: left; width: 12px; height: 12px; margin: 2px; }
+
+.transit-dashboard .legend .red { background-color: rgba(219, 119, 112, 1.0); }
+.transit-dashboard .legend .orange { background-color: rgba(214, 124, 92, 1.0); }
+.transit-dashboard .legend .yellow { background-color: rgba(219, 191, 112,1.0); }
+.transit-dashboard .legend .green { background-color: rgba(148, 184, 154,1.0); }
+
+.transit-dashboard .time-box {
+  display: flex;
 }
-.transit-dashboard .row:nth-of-type(4n-1) {
-  background-color: #efefef;
+
+.transit-dashboard .time-box > * {
+  font-size: 0.75rem;
+  flex: 1 1 auto;
 }
