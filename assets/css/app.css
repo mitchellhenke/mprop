@@ -70,7 +70,7 @@ summary {
 .transit-dashboard .legend li { float: left; margin-right: 10px; }
 .transit-dashboard .legend span { border: 1px solid #ccc; float: left; width: 12px; height: 12px; margin: 2px; }
 
-.transit-dashboard .legend .red { background-color: rgba(219, 119, 112, 1.0); }
+.transit-dashboard .legend .red { background-color: rgba(255, 86, 72, 1.0); }
 .transit-dashboard .legend .orange { background-color: rgba(214, 124, 92, 1.0); }
 .transit-dashboard .legend .yellow { background-color: rgba(219, 191, 112,1.0); }
 .transit-dashboard .legend .green { background-color: rgba(148, 184, 154,1.0); }

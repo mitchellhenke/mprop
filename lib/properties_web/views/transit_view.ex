@@ -47,7 +47,7 @@ defmodule PropertiesWeb.TransitView do
 
     cond do
       diff >= 30 ->
-        "rgba(219, 119, 112, 1.0)"
+        "rgba(255, 86, 72, 1.0)"
       diff >= 20 ->
         "rgba(214, 124, 92, 1.0)"
       diff >= 10 ->
@@ -62,7 +62,7 @@ defmodule PropertiesWeb.TransitView do
       is_nil(percent_difference) ->
         "rgba(255, 255, 255, 0.0)"
       percent_difference >= 30 ->
-        "rgba(219, 119, 112, 0.9)"
+        "rgba(255, 86, 72, 0.9)"
       percent_difference  >= 20 ->
         "rgba(214, 124, 92, 0.9)"
       percent_difference  >= 10 ->
