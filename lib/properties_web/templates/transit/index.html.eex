@@ -10,8 +10,8 @@
     <tbody>
       <%= Enum.map(@routes, fn(route) -> %>
         <tr>
-          <th scope="row"><%= route.id %> </th>
-          <td><%= link route.long_name, to: Routes.transit_path(@conn, :route_headsign_shape, route.id)%></td>
+          <th scope="row"><%= route.route_id %> </th>
+          <td><%= link route.route_long_name, to: Routes.transit_path(@conn, :route_headsign_shape, route.route_id)%></td>
         </tr>
       <% end) %>
     </tbody>

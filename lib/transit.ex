@@ -53,14 +53,14 @@ defmodule Transit do
         |> String.split(",")
 
       %Route{
-        id: Enum.at(values, 0) |> String.trim(),
-        short_name: Enum.at(values, 2) |> String.trim(),
-        long_name: Enum.at(values, 3) |> String.trim(),
-        description: Enum.at(values, 4) |> String.trim(),
-        type: Enum.at(values, 5) |> String.trim(),
-        url: Enum.at(values, 6) |> String.trim(),
-        color: Enum.at(values, 7) |> String.trim(),
-        text_color: Enum.at(values, 8) |> String.trim()
+        route_id: Enum.at(values, 0) |> String.trim(),
+        route_short_name: Enum.at(values, 2) |> String.trim(),
+        route_long_name: Enum.at(values, 3) |> String.trim(),
+        route_desc: Enum.at(values, 4) |> String.trim(),
+        route_type: Enum.at(values, 5) |> String.trim(),
+        route_url: Enum.at(values, 6) |> String.trim(),
+        route_color: Enum.at(values, 7) |> String.trim(),
+        route_text_color: Enum.at(values, 8) |> String.trim()
       }
     end)
     |> Enum.to_list()
@@ -81,10 +81,10 @@ defmodule Transit do
         |> String.split(",")
 
       %Trip{
-        id: Enum.at(values, 2) |> String.trim(),
+        trip_id: Enum.at(values, 2) |> String.trim(),
         route_id: Enum.at(values, 0) |> String.trim(),
         service_id: Enum.at(values, 1) |> String.trim(),
-        headsign: Enum.at(values, 3) |> String.trim(),
+        trip_headsign: Enum.at(values, 3) |> String.trim(),
         direction_id: Enum.at(values, 4) |> String.trim(),
         block_id: Enum.at(values, 5) |> String.trim(),
         shape_id: Enum.at(values, 6) |> String.trim(),
@@ -110,14 +110,14 @@ defmodule Transit do
         |> String.split(",")
 
       stop = %Stop{
-        id: Enum.at(values, 0) |> String.trim(),
-        code: Enum.at(values, 1) |> String.trim(),
-        name: Enum.at(values, 2) |> String.trim(),
-        description: Enum.at(values, 3) |> String.trim(),
-        latitude: Enum.at(values, 4) |> String.trim(),
-        longitude: Enum.at(values, 5) |> String.trim(),
+        stop_id: Enum.at(values, 0) |> String.trim(),
+        stop_code: Enum.at(values, 1) |> String.trim(),
+        stop_name: Enum.at(values, 2) |> String.trim(),
+        stop_desc: Enum.at(values, 3) |> String.trim(),
+        stop_lat: Enum.at(values, 4) |> String.trim(),
+        stop_lon: Enum.at(values, 5) |> String.trim(),
         zone_id: Enum.at(values, 6) |> String.trim(),
-        url: Enum.at(values, 7) |> String.trim(),
+        stop_url: Enum.at(values, 7) |> String.trim(),
         timepoint: Enum.at(values, 8) |> String.trim()
       }
 
@@ -337,8 +337,8 @@ defmodule Transit do
       stop_times = Map.fetch!(stop_times_map, trip.id)
                    |> Enum.sort_by(&(&1.stop_sequence))
 
-      first = List.first(stop_times).departure_time
-      last = List.last(stop_times).arrival_time
+      first = List.first(stop_times).elixir_departure_time
+      last = List.last(stop_times).elixir_arrival_time
 
       total_time = Transit.calculate_time_diff(first, last)
 

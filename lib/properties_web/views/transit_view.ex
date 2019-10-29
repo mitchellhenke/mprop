@@ -75,7 +75,7 @@ defmodule PropertiesWeb.TransitView do
   def graph(fastest, trips) do
     hour_map = Enum.reduce(0..23, %{}, fn(hour, map) ->
       hourly_maxes = Enum.filter(trips, fn(trip) ->
-        List.first(trip.stop_times).departure_time.hour == hour
+        List.first(trip.stop_times).elixir_departure_time.hour == hour
       end)
       |> Enum.map(&(&1.total_time))
 

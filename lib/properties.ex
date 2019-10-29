@@ -28,8 +28,6 @@ defmodule Properties do
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
       Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn ->
-        Transit.download_gtfs()
-        Transit.fill_cache()
       end)
       {:ok, pid}
     end

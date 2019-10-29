@@ -46,15 +46,15 @@ defmodule Properties.Mixfile do
       {:corsica, "~> 1.0"},
       {:erlsom, git: "git://github.com/willemdj/erlsom.git"},
       {:hackney, "~> 1.6"},
-      {:ecto_sql, "~> 3.0"},
-      {:postgrex, "~> 0.14.0"},
+      {:ecto_sql, "~> 3.2"},
+      {:postgrex, "~> 0.15.0"},
       {:jason, "~> 1.0"},
       {:nimble_parsec, "~> 0.5.1"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.1"},
       {:oauther, "~> 1.1"},
-      {:nimble_csv, "~> 0.6.0"},
+      {:nimble_csv, "~> 0.6.0"}
     ]
   end
 

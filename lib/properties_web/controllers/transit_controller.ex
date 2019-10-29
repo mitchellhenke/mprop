@@ -1,9 +1,10 @@
 defmodule PropertiesWeb.TransitController do
   use PropertiesWeb, :controller
   alias PropertiesWeb.TransitView
+  alias Transit.{Route, Trip}
 
   def index(conn, _params) do
-    routes = ConCache.get(:transit_cache, "all_routes")
+    routes = Route.list_all()
     render conn, "index.html", routes: routes
   end
 
@@ -16,7 +17,7 @@ defmodule PropertiesWeb.TransitController do
               ConCache.get(:transit_cache, "trips_#{trip_id}")
             end)
             |> Enum.sort_by(fn(trip) ->
-              List.first(trip.stop_times).departure_time
+              {trip.direction_id, List.first(trip.stop_times).departure_time}
             end)
 
     render conn, "trips.html", route: route, trips: trips, date: date
@@ -25,14 +26,11 @@ defmodule PropertiesWeb.TransitController do
   def route_headsign_shape(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today)
-    route = ConCache.get(:transit_cache, "routes_#{route_id}")
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
-            |> Enum.map(fn(trip_id) ->
-              ConCache.get(:transit_cache, "trips_#{trip_id}")
-            end)
+    route = Route.get_by_id!(route_id)
+    trips = Trip.get_by_route_id_and_date(route_id, date)
 
     groups = Enum.group_by(trips, fn(trip) ->
-      {trip.headsign, trip.shape_id}
+      {trip.trip_headsign, trip.shape_id}
     end)
     |> Enum.sort_by(fn({{_headsign, _shape_id}, trips}) ->
       Enum.count(trips) * -1
@@ -46,20 +44,15 @@ defmodule PropertiesWeb.TransitController do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today)
     _route = ConCache.get(:transit_cache, "routes_#{route_id}")
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
-            |> Enum.map(fn(trip_id) ->
-              ConCache.get(:transit_cache, "trips_#{trip_id}")
-            end)
+    trips = Trip.get_by_route_id_and_date(route_id, date)
+            |> Trip.preload_stop_times()
 
     headsign = Map.get(params, "headsign")
     shape_id = Map.get(params, "shape_id")
 
     trips = get_trips(trips, headsign, shape_id)
-            |> Enum.map(fn(trip) ->
-              Transit.Trip.preload_stop_time_stops(trip)
-            end)
             |> Enum.sort_by(fn(trip) ->
-              Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
+              Transit.calculate_time_diff(List.first(trip.stop_times).elixir_departure_time, List.last(trip.stop_times).elixir_arrival_time)
             end)
 
     fastest_trip = List.first(trips)
@@ -73,8 +66,8 @@ defmodule PropertiesWeb.TransitController do
     stop_times = Enum.map(fastest_trip.stop_times, fn(stop_time) ->
       stop_time_slowest = Enum.find(slowest_trip.stop_times, &(&1.stop_id == stop_time.stop_id))
 
-      diff_fastest = Transit.calculate_time_diff(stop_time.arrival_time, start_fastest.arrival_time)
-      diff_slowest = Transit.calculate_time_diff(stop_time_slowest.arrival_time, start_slowest.arrival_time)
+      diff_fastest = Transit.calculate_time_diff(stop_time.elixir_arrival_time, start_fastest.elixir_arrival_time)
+      diff_slowest = Transit.calculate_time_diff(stop_time_slowest.elixir_arrival_time, start_slowest.elixir_arrival_time)
 
       Map.put(stop_time, :diff, diff_fastest)
       |> Map.put(:diff_100, diff_slowest)
@@ -88,14 +81,11 @@ defmodule PropertiesWeb.TransitController do
   def dashboard(conn, params) do
     date = ~D[2019-10-22]
     data = ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
-      routes = ConCache.get(:transit_cache, "all_routes")
-               |> Enum.filter(&(&1.id != "137" && &1.id != "219"))
+      routes = Route.list_all()
+             |> Enum.filter(&(&1.route_id != "  137" && &1.route_id != "  219"))
 
       Enum.map(routes, fn(route) ->
-        Task.async(fn -> get_slowest_and_fastest_trips_for_route(route.id, date) end)
-      end)
-      |> Enum.map(fn(task) ->
-        Task.await(task)
+        get_slowest_and_fastest_trips_for_route(route.route_id, date)
       end)
       |> Enum.sort_by(fn({{slowest1, fastest1, _all1}, {slowest2, fastest2, _all2}}) ->
         Enum.max([TransitView.percent_difference(fastest1.total_time, slowest1.total_time),
@@ -111,11 +101,8 @@ defmodule PropertiesWeb.TransitController do
 
   def get_slowest_and_fastest_trips(trips, headsign, shape_id) do
     trips = get_trips(trips, headsign, shape_id)
-            |> Enum.map(fn(trip) ->
-              Transit.Trip.preload_stop_time_stops(trip)
-            end)
             |> Enum.sort_by(fn(trip) ->
-              Transit.calculate_time_diff(List.first(trip.stop_times).departure_time, List.last(trip.stop_times).arrival_time)
+              Transit.calculate_time_diff(List.first(trip.stop_times).elixir_departure_time, List.last(trip.stop_times).elixir_arrival_time)
             end)
 
     fastest_trip = List.first(trips)
@@ -129,8 +116,8 @@ defmodule PropertiesWeb.TransitController do
     stop_times = Enum.map(fastest_trip.stop_times, fn(stop_time) ->
       stop_time_slowest = Enum.find(slowest_trip.stop_times, &(&1.stop_id == stop_time.stop_id))
 
-      diff_fastest = Transit.calculate_time_diff(stop_time.arrival_time, start_fastest.arrival_time)
-      diff_slowest = Transit.calculate_time_diff(stop_time_slowest.arrival_time, start_slowest.arrival_time)
+      diff_fastest = Transit.calculate_time_diff(stop_time.elixir_arrival_time, start_fastest.elixir_arrival_time)
+      diff_slowest = Transit.calculate_time_diff(stop_time_slowest.elixir_arrival_time, start_slowest.elixir_arrival_time)
 
       Map.put(stop_time, :diff, diff_fastest)
       |> Map.put(:diff_100, diff_slowest)
@@ -142,11 +129,10 @@ defmodule PropertiesWeb.TransitController do
   end
 
   def get_slowest_and_fastest_trips_for_route(route_id, date) do
-    _route = ConCache.get(:transit_cache, "routes_#{route_id}")
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
-            |> Enum.map(fn(trip_id) ->
-              ConCache.get(:transit_cache, "trips_#{trip_id}")
-            end)
+    _route = Route.get_by_id!(route_id)
+    trips = Trip.get_by_route_id_and_date(route_id, date)
+            |> Trip.preload_stop_times()
+
     [{headsign1, shape_id1}, {headsign2, shape_id2}] = get_top_2_headsign_shape_ids(trips)
 
     {slowest1, fastest1, all1} = get_slowest_and_fastest_trips(trips, headsign1, shape_id1)
@@ -157,7 +143,7 @@ defmodule PropertiesWeb.TransitController do
 
   def get_top_2_headsign_shape_ids(trips) do
     Enum.group_by(trips, fn(trip) ->
-      {trip.headsign, trip.shape_id}
+      {trip.trip_headsign, trip.shape_id}
     end)
     |> Enum.sort_by(fn({{_headsign, _shape_id}, trips}) ->
       Enum.count(trips) * -1
@@ -170,7 +156,7 @@ defmodule PropertiesWeb.TransitController do
 
   def get_trips(trips, nil, nil) do
     {_, trips} = Enum.group_by(trips, fn(trip) ->
-      {trip.headsign, trip.shape_id}
+      {trip.trip_headsign, trip.shape_id}
     end)
     |> Enum.sort_by(fn({{_headsign, _shape_id}, trips}) ->
       Enum.count(trips)
@@ -182,7 +168,7 @@ defmodule PropertiesWeb.TransitController do
 
   def get_trips(trips, headsign, shape_id) do
     Enum.filter(trips, fn(trip) ->
-      trip.headsign == headsign && trip.shape_id == shape_id
+      trip.trip_headsign == headsign && trip.shape_id == shape_id
     end)
   end
 end
