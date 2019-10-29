@@ -18,6 +18,7 @@ config :properties, PropertiesWeb.Endpoint,
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 
 config :properties,
+  mcts_key: System.get_env("MCTS_KEY"),
   twitter_consumer_key: System.get_env("TWITTER_CONSUMER_KEY"),
   twitter_consumer_secret: System.get_env("TWITTER_CONSUMER_SECRET"),
   twitter_access_token: System.get_env("TWITTER_ACCESS_TOKEN"),

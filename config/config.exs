@@ -9,6 +9,9 @@ use Mix.Config
 config :properties,
   ecto_repos: [Properties.Repo]
 
+config :properties,
+  mcts_key: System.get_env("MCTS_KEY")
+
 # Configures the endpoint
 config :properties, PropertiesWeb.Endpoint,
   url: [host: "localhost"],
