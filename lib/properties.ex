@@ -26,11 +26,7 @@ defmodule Properties do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Properties.Supervisor]
 
-    with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      Task.Supervisor.async_nolink(Properties.TaskSupervisor, fn ->
-      end)
-      {:ok, pid}
-    end
+    Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration

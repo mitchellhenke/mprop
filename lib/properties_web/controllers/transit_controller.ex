@@ -78,7 +78,7 @@ defmodule PropertiesWeb.TransitController do
     render conn, "stop_times_comparison.html", date: date, slowest_trip: slowest_trip, fastest_trip: fastest_trip
   end
 
-  def dashboard(conn, params) do
+  def dashboard(conn, _params) do
     date = ~D[2019-10-22]
     data = ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
       routes = Route.list_all()
