@@ -4,14 +4,16 @@ defmodule Transit.RealtimeScraper do
 
   # 52 seconds
 
-  @routes1 ["BLU","GOL","GRE","PUR","RED","RR1","RR2","RR3","12","14"]
-  @routes2 ["15","17","19","21","22","23","28","30","30X","31"]
-  @routes3 ["33","35","40","40U","42U","43","44","44U","46","48"]
-  @routes4 ["49","49U","51","52","53","54","55","56","57","60"]
-  @routes5 ["63","64","67","76","79","80","137","143","219","223"]
-  @routes6 ["276"]
+  # @routes1 ["BLU","GOL","GRE","PUR","RED","RR1","RR2","RR3","12","14"]
+  # @routes2 ["15","17","19","21","22","23","28","30","30X","31"]
+  # @routes3 ["33","35","40","40U","42U","43","44","44U","46","48"]
+  # @routes4 ["49","49U","51","52","53","54","55","56","57","60"]
+  # @routes5 ["63","64","67","76","79","80","137","143","219","223"]
+  # @routes6 ["276"]
 
-  @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
+  # @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
+
+  @detailed_routes1 ["BLU","GOL","GRE","PUR","RED","51","14","30X","30","15"]
 
   def start_link(_ \\ nil) do
     GenServer.start_link(__MODULE__, nil)
@@ -26,13 +28,11 @@ defmodule Transit.RealtimeScraper do
   @impl true
   def handle_info(:get_all_positions, state) do
     start_time = System.monotonic_time()
-    Enum.each(@all_routes, fn(route_ids) ->
-      request_locations(route_ids)
-    end)
+    request_locations(@detailed_routes1)
     end_time = System.monotonic_time()
 
     diff = System.convert_time_unit(end_time - start_time, :native, :millisecond)
-    time_to_wait = max(52_000 - diff, 0)
+    time_to_wait = max(15_000 - diff, 0)
 
     Process.send_after(self(), :get_all_positions, time_to_wait)
     {:noreply, state}
