@@ -13,7 +13,7 @@ defmodule Transit.RealtimeScraper do
 
   # @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
 
-  @detailed_routes1 ["BLU","GOL","GRE","PUR","RED","51","14","30X","30","15"]
+  @detailed_routes1 ["GRE", "15"]
 
   def start_link(_ \\ nil) do
     GenServer.start_link(__MODULE__, nil)
@@ -32,40 +32,42 @@ defmodule Transit.RealtimeScraper do
     end_time = System.monotonic_time()
 
     diff = System.convert_time_unit(end_time - start_time, :native, :millisecond)
-    time_to_wait = max(15_000 - diff, 0)
+    time_to_wait = max(30_000 - diff, 0)
 
     Process.send_after(self(), :get_all_positions, time_to_wait)
     {:noreply, state}
   end
 
   defparsec :parse_datetime,
-    integer(4)
-    |> integer(2)
-    |> integer(2)
-    |> ignore(string(" "))
-    |> integer(2)
-    |> ignore(string(":"))
-    |> integer(2)
-    |> ignore(string(":"))
-    |> integer(2)
+            integer(4)
+            |> integer(2)
+            |> integer(2)
+            |> ignore(string(" "))
+            |> integer(2)
+            |> ignore(string(":"))
+            |> integer(2)
+            |> ignore(string(":"))
+            |> integer(2)
 
   def request_locations(route_ids) do
     rt = Enum.join(route_ids, ",")
 
-    params = %{
-      rt: rt,
-      tmres: "s",
-      format: "json",
-      key: Application.fetch_env!(:properties, :mcts_key)
-    }
-    |> URI.encode_query()
+    params =
+      %{
+        rt: rt,
+        tmres: "s",
+        format: "json",
+        key: Application.fetch_env!(:properties, :mcts_key)
+      }
+      |> URI.encode_query()
 
-    with {:ok, 200, _headers, client_ref} <-:hackney.get("http://realtime.ridemcts.com/bustime/api/v3/getvehicles?#{params}"),
+    with {:ok, 200, _headers, client_ref} <-
+           :hackney.get("http://realtime.ridemcts.com/bustime/api/v3/getvehicles?#{params}"),
          {:ok, body} <- :hackney.body(client_ref),
          {:ok, json} <- Jason.decode(body),
          {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
          {:ok, vehicles} <- Map.fetch(bustime_response, "vehicle") do
-      Enum.map(vehicles, fn(vehicle) ->
+      Enum.map(vehicles, fn vehicle ->
         %{
           "rt" => route,
           "pid" => _pattern_id,
@@ -79,19 +81,18 @@ defmodule Transit.RealtimeScraper do
           "hdg" => bearing
         } = vehicle
 
-        {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
-          parse_datetime(timestamp)
-
+        {:ok, [year, month, day, hour, minute, second], _, _, _, _} = parse_datetime(timestamp)
 
         datetime = DateTime.utc_now()
 
-        datetime = %{ datetime |
-          year: year,
-          month: month,
-          day: day,
-          hour: hour,
-          minute: minute,
-          second: second
+        datetime = %{
+          datetime
+          | year: year,
+            month: month,
+            day: day,
+            hour: hour,
+            minute: minute,
+            second: second
         }
 
         attrs = %{
@@ -109,6 +110,65 @@ defmodule Transit.RealtimeScraper do
 
         Transit.Realtime.changeset(%Transit.Realtime{}, attrs)
         |> Properties.Repo.insert()
+      end)
+      |> Enum.reduce(MapSet.new(), fn result, set ->
+        case result do
+          {:ok, %Transit.Realtime{vehicle_id: vehicle_id}} ->
+            MapSet.put(set, vehicle_id)
+
+          _ ->
+            set
+        end
+      end)
+      |> Enum.chunk_every(10)
+      |> IO.inspect(label: "hi")
+      |> Enum.each(fn vehicle_ids ->
+        vid = Enum.join(vehicle_ids, ",")
+
+        params =
+          %{
+            vid: vid,
+            tmres: "s",
+            format: "json",
+            key: Application.fetch_env!(:properties, :mcts_key)
+          }
+          |> URI.encode_query()
+
+        with {:ok, 200, _headers, client_ref} <-
+               :hackney.get(
+                 "http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}"
+               ),
+             {:ok, body} <- :hackney.body(client_ref),
+             {:ok, json} <- Jason.decode(body),
+             {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
+             {:ok, predictions} <- Map.fetch(bustime_response, "prd") do
+          Enum.each(predictions, fn prediction ->
+            %{
+              "rt" => route,
+              "vid" => vehicle_id,
+              "tmstmp" => timestamp,
+              "tatripid" => trip_id,
+              "stpid" => stop_id
+            } = prediction
+
+            {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
+              parse_datetime(timestamp)
+
+            datetime = DateTime.utc_now()
+
+            datetime = %{
+              datetime
+              | year: year,
+                month: month,
+                day: day,
+                hour: hour,
+                minute: minute,
+                second: second
+            }
+
+            Transit.Realtime.update_stop_id(datetime, vehicle_id, trip_id, route, stop_id)
+          end)
+        end
       end)
     end
   end

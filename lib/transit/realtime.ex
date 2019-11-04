@@ -49,4 +49,13 @@ defmodule Transit.Realtime do
     ])
     |> Ecto.Changeset.unique_constraint(:timestamp, name: :position_time_bus)
   end
+
+
+  def update_stop_id(timestamp, vehicle_id, trip_id, route_id, stop_id) do
+    from(rt in Transit.Realtime, where: rt.timestamp == ^timestamp and
+      rt.trip_id == ^trip_id and rt.route_id == ^route_id and
+      rt.vehicle_id == ^vehicle_id
+    )
+    |> Repo.update_all(set: [stop_id: stop_id])
+  end
 end
