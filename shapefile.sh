@@ -8,3 +8,6 @@ psql -d milwaukee_properties -f off_street_paths.sql
 
 shp2pgsql -s 32054 .data/bike_lanes/Milwaukee_BikeLanesDIME_2019.shp bike_lane_shapefiles > bike_lanes.sql
 psql -d milwaukee_properties -f bike_lanes.sql
+
+shp2pgsql -s 32054 ./WestBend-StormInlets.shp west_bend_storm_shapefiles > west_bend_storm.sql
+psql -d milwaukee_properties -f west_bend_storm.sql

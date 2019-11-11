@@ -1,12 +1,9 @@
-ALTER TABLE shapefiles ADD COLUMN geom_point geometry(Point,32054);
-update shapefiles SET geom_point = ST_Centroid(geom);
-
-alter table shapefiles alter column geom_point TYPE geometry(Point, 4326) USING ST_Transform(ST_SetSRID(geom_point, 32054), 4326);
-
-
 ALTER TABLE shapefiles
  ALTER COLUMN geom TYPE geometry(MultiPolygon, 4326)
    USING ST_Transform(geom, 4326);
+
+ALTER TABLE shapefiles ADD COLUMN geom_point geometry(Point,4326);
+update shapefiles SET geom_point = ST_Centroid(geom);
 
 ALTER TABLE bike_lane_shapefiles
  ALTER COLUMN geom TYPE geometry(MultiLineString, 4326)
@@ -14,6 +11,18 @@ ALTER TABLE bike_lane_shapefiles
 
 ALTER TABLE off_street_path_shapefiles
  ALTER COLUMN geom TYPE geometry(MultiLineString, 4326)
+   USING ST_Transform(geom, 4326);
+
+ALTER TABLE west_bend_storm_shapefiles
+ ALTER COLUMN geom TYPE geometry(Point, 4326)
+   USING ST_Transform(geom, 4326);
+
+ALTER TABLE mke_inlets
+ ALTER COLUMN geom TYPE geometry(Point, 4326)
+   USING ST_Transform(geom, 4326);
+
+ALTER TABLE mke_poly_inlets
+ ALTER COLUMN geom TYPE geometry(MultiPolygon, 4326)
    USING ST_Transform(geom, 4326);
 
 CREATE INDEX shapefiles_geom_point_index on shapefiles using GIST (geography(geom_point));
