@@ -121,7 +121,6 @@ defmodule Transit.RealtimeScraper do
         end
       end)
       |> Enum.chunk_every(10)
-      |> IO.inspect(label: "hi")
       |> Enum.each(fn vehicle_ids ->
         vid = Enum.join(vehicle_ids, ",")
 
