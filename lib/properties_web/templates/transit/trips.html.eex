@@ -11,9 +11,9 @@
     <tbody>
       <%= Enum.map(@trips, fn(trip) -> %>
         <tr>
-          <th scope="row"><%= List.first(trip.stop_times).departure_time %></th>
+          <th scope="row"><%= List.first(trip.stop_times).elixir_departure_time %></th>
           <th scope="row"><%= trip.total_time %></th>
-          <th scope="row"><%= link(trip.headsign, to: Routes.transit_path(@conn, :stop_times_comparison, trip.route_id, shape_id: trip.shape_id, headsign: trip.headsign)) %></th>
+          <th scope="row"><%= link(trip.trip_headsign, to: Routes.transit_path(@conn, :stop_times_comparison, trip.route_id, shape_id: trip.shape_id, headsign: trip.trip_headsign)) %></th>
         </tr>
       <% end) %>
     </tbody>

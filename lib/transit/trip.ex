@@ -1,6 +1,7 @@
 defmodule Transit.Trip do
   use Ecto.Schema
-  import Ecto.Query, only: [from: 1, from: 2]
+  import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   alias Properties.Repo
 
   @schema_prefix "gtfs"
@@ -19,13 +20,10 @@ defmodule Transit.Trip do
     has_many :stop_times, Transit.StopTime, references: :trip_id, foreign_key: :trip_id
   end
 
-  def preload_stop_time_stops(trip) do
-    stop_times = Enum.map(trip.stop_times, fn(stop_time) ->
-      stop = ConCache.get(:transit_cache, "stops_#{stop_time.stop_id}")
-      %{stop_time | stop: stop}
-    end)
-
-    %{trip | stop_times: stop_times}
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [:trip_id, :route_id, :service_id, :trip_headsign, :direction_id, :block_id, :shape_id])
+    |> validate_required([:trip_id, :route_id, :service_id, :trip_headsign, :direction_id, :block_id, :shape_id])
   end
 
   def get_by_route_id_and_date(route_id, date) do

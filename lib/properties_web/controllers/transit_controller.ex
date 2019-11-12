@@ -11,13 +11,11 @@ defmodule PropertiesWeb.TransitController do
   def trips(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today)
-    route = ConCache.get(:transit_cache, "routes_#{route_id}")
-    trips = ConCache.get(:transit_cache, "trips_by_route_date_#{route_id}_#{date}")
-            |> Enum.map(fn(trip_id) ->
-              ConCache.get(:transit_cache, "trips_#{trip_id}")
-            end)
+    route = Route.get_by_id!(route_id)
+    trips = Trip.get_by_route_id_and_date(route_id, date)
+            |> Trip.preload_stop_times()
             |> Enum.sort_by(fn(trip) ->
-              {trip.direction_id, List.first(trip.stop_times).departure_time}
+              {trip.direction_id, List.first(trip.stop_times).elixir_departure_time}
             end)
 
     render conn, "trips.html", route: route, trips: trips, date: date
@@ -79,10 +77,10 @@ defmodule PropertiesWeb.TransitController do
   end
 
   def dashboard(conn, _params) do
-    date = ~D[2019-10-22]
+    date = ~D[2019-11-11]
     data = ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
       routes = Route.list_all()
-             |> Enum.filter(&(&1.route_id != "  137" && &1.route_id != "  219"))
+             |> Enum.filter(&(&1.route_id != "137" && &1.route_id != "219"))
 
       Enum.map(routes, fn(route) ->
         get_slowest_and_fastest_trips_for_route(route.route_id, date)

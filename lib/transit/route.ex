@@ -1,5 +1,6 @@
 defmodule Transit.Route do
   use Ecto.Schema
+  import Ecto.Changeset
   import Ecto.Query, only: [from: 1, from: 2]
   alias Properties.Repo
 
@@ -14,6 +15,12 @@ defmodule Transit.Route do
     field :route_url, :string
     field :route_color, :string
     field :route_text_color, :string
+  end
+
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [:route_id, :route_short_name, :route_long_name, :route_desc, :route_type, :route_url, :route_color, :route_text_color])
+    |> validate_required([:route_id, :route_short_name, :route_long_name, :route_type])
   end
 
   def list_all do
