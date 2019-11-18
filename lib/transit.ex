@@ -3,7 +3,7 @@ defmodule Transit do
   Documentation for Transit.
   """
   require Logger
-  alias Transit.{CalendarDate, Route, Trip, Stop, StopTime}
+  alias Transit.{CalendarDate, Route, Trip, Shape, Stop, StopTime}
 
   def calculate_time_diff(time1, time2) do
     seconds_in_12_hours = 12*60*60
@@ -70,6 +70,7 @@ defmodule Transit do
     load_trips(Path.join([directory, "trips.txt"]))
     load_stops(Path.join([directory, "stops.txt"]))
     load_stop_times(Path.join([directory, "stop_times.txt"]))
+    load_shapes(Path.join([directory, "shapes.txt"]))
   end
 
   def load_calendar_dates(file) do
@@ -191,6 +192,26 @@ defmodule Transit do
       }
 
       {:ok, _} = StopTime.changeset(%StopTime{},  params)
+      |> Properties.Repo.insert()
+    end, max_concurrency: 20)
+    |> Enum.to_list()
+  end
+
+  def load_shapes(file) do
+    File.stream!(file)
+    |> Stream.drop(1)
+    |> Task.async_stream(fn(row) ->
+      values = String.trim(row)
+        |> String.split(",")
+
+      params = %{
+        shape_id: Enum.at(values, 0) |> String.trim(),
+        shape_pt_lat: Enum.at(values, 1) |> String.trim(),
+        shape_pt_lon: Enum.at(values, 2) |> String.trim(),
+        shape_pt_sequence: Enum.at(values, 3) |> String.trim(),
+      }
+
+      {:ok, _} = Shape.changeset(%Shape{},  params)
       |> Properties.Repo.insert()
     end, max_concurrency: 20)
     |> Enum.to_list()

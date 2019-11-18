@@ -54,6 +54,16 @@ defmodule Properties.Repo.Migrations.Gtfs do
       add :timepoint, :integer
     end
 
+    create table("shapes", prefix: "gtfs") do
+      add :shape_id, :text
+      add :shape_pt_lat, :float
+      add :shape_pt_lon, :float
+      add :shape_pt_sequence, :integer
+    end
+
     create index(:stop_times, [:trip_id], prefix: "gtfs")
+    create index(:trips, [:trip_id], prefix: "gtfs")
+    create index(:stops, [:stop_id], prefix: "gtfs")
+    create index(:shapes, [:shape_id], prefix: "gtfs")
   end
 end
