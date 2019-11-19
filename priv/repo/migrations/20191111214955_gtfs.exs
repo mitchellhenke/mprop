@@ -28,6 +28,7 @@ defmodule Properties.Repo.Migrations.Gtfs do
       add :direction_id, :integer
       add :block_id, :text
       add :shape_id, :text
+      add :length_meters, :float
     end
 
     create table("stops", prefix: "gtfs") do

@@ -80,14 +80,13 @@ defmodule PropertiesWeb.TransitController do
     date = ~D[2019-11-11]
     data = ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
       routes = Route.list_all()
-             |> Enum.filter(&(&1.route_id != "137" && &1.route_id != "219"))
+             |> Enum.filter(&(&1.route_id != "137" && &1.route_id != "219" && !String.starts_with?(&1.route_id, "RR")))
 
       Enum.map(routes, fn(route) ->
         get_slowest_and_fastest_trips_for_route(route.route_id, date)
       end)
-      |> Enum.sort_by(fn({{slowest1, fastest1, _all1}, {slowest2, fastest2, _all2}}) ->
-        Enum.max([TransitView.percent_difference(fastest1.total_time, slowest1.total_time),
-          TransitView.percent_difference(fastest2.total_time, slowest2.total_time)]) * - 1
+      |> Enum.sort_by(fn({{slowest1, _fastest1, _all1}, {slowest2, _fastest2, _all2}}) ->
+        Enum.min([slowest1.length_meters / slowest1.total_time, slowest2.length_meters / slowest2.total_time])
       end)
       |> Enum.map(fn({{slowest1, fastest1, all1}, {slowest2, fastest2, all2}}) ->
         {{slowest1, fastest1, TransitView.graph(fastest1, all1)}, {slowest2, fastest2, TransitView.graph(fastest2, all2)}}

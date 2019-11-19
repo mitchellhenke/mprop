@@ -13,8 +13,10 @@ defmodule Transit.Trip do
     field :direction_id, :integer
     field :block_id, :string
     field :shape_id, :string
+    field :length_meters, :float
 
     field :total_time, :time, virtual: true
+    field :speed_mph, :time, virtual: true
 
     belongs_to :route, Transit.Route, references: :route_id, foreign_key: :route_id, type: :string
     has_many :stop_times, Transit.StopTime, references: :trip_id, foreign_key: :trip_id
@@ -45,7 +47,10 @@ defmodule Transit.Trip do
       last = List.last(trip.stop_times).elixir_arrival_time
 
       total_time = Transit.calculate_time_diff(first, last)
-      %{trip | total_time: total_time}
+
+      speed_mph = Float.round((trip.length_meters / 1609.34) * 60 * 60 / total_time, 1)
+
+      %{trip | total_time: total_time, speed_mph: speed_mph}
     end)
   end
 end

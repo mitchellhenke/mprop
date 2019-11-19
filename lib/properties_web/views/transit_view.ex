@@ -42,64 +42,60 @@ defmodule PropertiesWeb.TransitView do
     |> round()
   end
 
-  def background_color(percent_difference1, percent_difference2 \\ 0) do
-    diff = Enum.max([percent_difference1, percent_difference2])
+  def background_color(low_speed1, low_speed2 \\ 100) do
+    min = Enum.min([low_speed1, low_speed2])
 
     cond do
-      diff >= 30 ->
+      min <= 12  ->
         "rgba(255, 86, 72, 1.0)"
-      diff >= 20 ->
+      min <= 14 ->
         "rgba(214, 124, 92, 1.0)"
-      diff >= 10 ->
+      min <= 16 ->
         "rgba(219, 191, 112, 1.0)"
       true ->
         "rgba(148, 184, 154, 1.0)"
     end
   end
 
-  def chart_color(percent_difference) do
+  def chart_color(low_speed) do
     cond do
-      is_nil(percent_difference) ->
+      is_nil(low_speed) ->
         "rgba(255, 255, 255, 0.0)"
-      percent_difference >= 30 ->
+      low_speed <= 12 ->
         "rgba(255, 86, 72, 0.9)"
-      percent_difference  >= 20 ->
+      low_speed  <= 14 ->
         "rgba(214, 124, 92, 0.9)"
-      percent_difference  >= 10 ->
+      low_speed  <= 16 ->
         "rgba(219, 191, 112, 0.9)"
       true ->
         "rgba(148, 184, 154, 0.9)"
     end
   end
 
-  def graph(fastest, trips) do
+  def graph(_fastest, trips) do
     hour_map = Enum.reduce(0..23, %{}, fn(hour, map) ->
-      hourly_maxes = Enum.filter(trips, fn(trip) ->
+      hourly_mins = Enum.filter(trips, fn(trip) ->
         List.first(trip.stop_times).elixir_departure_time.hour == hour
       end)
-      |> Enum.map(&(&1.total_time))
+      |> Enum.map(&(&1.speed_mph))
 
-      max = case hourly_maxes do
+      min = case hourly_mins do
         [] ->
           nil
-        hourly_maxes ->
-          Enum.max(hourly_maxes)
+        hourly_mins ->
+          Enum.min(hourly_mins)
       end
 
-      chart_color = case max do
-        nil ->
-          chart_color(nil)
-        max_duration ->
-          percent_difference(fastest.total_time, max_duration)
-          |> chart_color()
-      end
+      chart_color = chart_color(min)
 
       chart_height = cond do
-        is_nil(max) -> "0%"
+        is_nil(min) -> "0%"
         true ->
-          diff = percent_difference(fastest.total_time, max)
-                 |> max(10)
-          "#{round(diff / 50.0 * 100)}%"
+          height = (min - 9.6) / 6.4
+                   |> min(1)
+                   |> max(0.1)
+
+          "#{round(height * 100)}%"
       end
 
 

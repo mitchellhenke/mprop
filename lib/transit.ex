@@ -3,7 +3,9 @@ defmodule Transit do
   Documentation for Transit.
   """
   require Logger
+  import Ecto.Query, only: [from: 2]
   alias Transit.{CalendarDate, Route, Trip, Shape, Stop, StopTime}
+  alias Properties.Repo
 
   def calculate_time_diff(time1, time2) do
     seconds_in_12_hours = 12*60*60
@@ -95,7 +97,7 @@ defmodule Transit do
       }
 
       CalendarDate.changeset(%CalendarDate{},  params)
-      |> Properties.Repo.insert()
+      |> Repo.insert()
     end)
     |> Enum.to_list()
   end
@@ -119,7 +121,7 @@ defmodule Transit do
       }
 
       Route.changeset(%Route{},  params)
-      |> Properties.Repo.insert()
+      |> Repo.insert()
     end)
     |> Enum.to_list()
   end
@@ -142,7 +144,7 @@ defmodule Transit do
       }
 
       {:ok, _} = Trip.changeset(%Trip{},  params)
-                 |> Properties.Repo.insert()
+                 |> Repo.insert()
     end)
     |> Enum.to_list()
   end
@@ -167,7 +169,7 @@ defmodule Transit do
       }
 
       Stop.changeset(%Stop{},  params)
-      |> Properties.Repo.insert()
+      |> Repo.insert()
     end)
     |> Enum.to_list()
   end
@@ -192,7 +194,7 @@ defmodule Transit do
       }
 
       {:ok, _} = StopTime.changeset(%StopTime{},  params)
-      |> Properties.Repo.insert()
+      |> Repo.insert()
     end, max_concurrency: 20)
     |> Enum.to_list()
   end
@@ -212,7 +214,7 @@ defmodule Transit do
       }
 
       {:ok, _} = Shape.changeset(%Shape{},  params)
-      |> Properties.Repo.insert()
+      |> Repo.insert()
     end, max_concurrency: 20)
     |> Enum.to_list()
   end
@@ -233,5 +235,20 @@ defmodule Transit do
     days = div(seconds, 24 * 60 * 60)
     seconds = rem(seconds, 24 * 60 * 60)
     %{months: 0, days: days, secs: seconds}
+  end
+
+  def update_trip_lengths do
+    shape_ids = from(s in Transit.Shape, distinct: s.shape_id, select: s.shape_id)
+                |> Repo.all()
+
+    Enum.each(shape_ids, fn(shape_id) ->
+      length = from(s in Transit.Shape, where: s.shape_id == ^shape_id, limit: 1,
+        select: fragment("ST_Length(ST_MakeLine(ARRAY(select ST_SetSRID(ST_MakePoint(shape_pt_lon, shape_pt_lat), 4326) from gtfs.shapes s2 where s2.shape_id = ? order by s2.shape_pt_sequence))::geography )", ^shape_id)
+      )
+      |> Repo.one
+
+      from(t in Transit.Trip, where: t.shape_id == ^shape_id)
+      |> Repo.update_all(set: [length_meters: length])
+    end)
   end
 end
