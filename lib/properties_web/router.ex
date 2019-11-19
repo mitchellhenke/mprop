@@ -25,7 +25,8 @@ defmodule PropertiesWeb.Router do
   scope "/api", PropertiesWeb do
     pipe_through :api # Use the default browser stack
 
-    get "/", AssessmentController, :index
+    get "/", PageController, :index
+    get "/assessments", AssessmentController, :index
     get "/assessments/:id", AssessmentController, :show
     get "/geocode", GeocodeController, :index
     get "/neighborhood", MapController, :neighborhood
@@ -35,10 +36,14 @@ defmodule PropertiesWeb.Router do
   scope "/", PropertiesWeb do
     pipe_through :browser # Use the default browser stack
 
-    live "/", PropertiesLiveView
+    get "/", PageController, :index
     live "/parking_tickets", ParkingTicketsLiveView
+
     get "/map", MapController, :index
+
+    live "/properties", PropertiesLiveView
     get "/properties/:id", PropertyController, :show
+
     get "/transit", TransitController, :dashboard
     get "/transit/dashboard", TransitController, :index
     get "/transit/:id", TransitController, :trips
