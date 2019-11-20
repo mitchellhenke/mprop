@@ -46,11 +46,11 @@ defmodule PropertiesWeb.TransitView do
     min = Enum.min([low_speed1, low_speed2])
 
     cond do
-      min <= 12  ->
+      min < 12  ->
         "rgba(255, 86, 72, 1.0)"
-      min <= 14 ->
+      min < 14 ->
         "rgba(214, 124, 92, 1.0)"
-      min <= 16 ->
+      min < 16 ->
         "rgba(219, 191, 112, 1.0)"
       true ->
         "rgba(148, 184, 154, 1.0)"
@@ -61,11 +61,11 @@ defmodule PropertiesWeb.TransitView do
     cond do
       is_nil(low_speed) ->
         "rgba(255, 255, 255, 0.0)"
-      low_speed <= 12 ->
+      low_speed < 12 ->
         "rgba(255, 86, 72, 0.9)"
-      low_speed  <= 14 ->
+      low_speed  < 14 ->
         "rgba(214, 124, 92, 0.9)"
-      low_speed  <= 16 ->
+      low_speed  < 16 ->
         "rgba(219, 191, 112, 0.9)"
       true ->
         "rgba(148, 184, 154, 0.9)"

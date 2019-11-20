@@ -9,10 +9,10 @@
       <p>The Milwaukee bus system takes people all over the city around the clock. Unfortunately, many of those buses have to move much slower than they could during periods of heavy vehicle congestion.</p>
       <p>The charts below show how much slower the bus is relative to its fastest for each route throughout the day.</p>
       <ul class="legend">
-        <li><span class="green"></span> 0%-9%</li>
-        <li><span class="yellow"></span> 10%-19%</li>
-        <li><span class="orange"></span> 20%-29%</li>
-        <li><span class="red"></span> 30+%</li>
+        <li><span class="red"></span>9-11 mph</li>
+        <li><span class="orange"></span>12-13 mph</li>
+        <li><span class="yellow"></span>14-15 mph</li>
+        <li><span class="green"></span>16+ mph</li>
       </ul>
     </div>
   </div>
