@@ -7,7 +7,7 @@
   <div class="row">
     <div class="col-lg-12">
       <p>The Milwaukee bus system takes people all over the city around the clock. Unfortunately, many of those buses have to move much slower than they could during periods of heavy vehicle congestion.</p>
-      <p>The charts below show how much slower the bus is relative to its fastest for each route throughout the day.</p>
+      <p>The charts below show the speed of the bus for each route in each direction throughout the day.</p>
       <ul class="legend">
         <li><span class="red"></span>9-11 mph</li>
         <li><span class="orange"></span>12-13 mph</li>
