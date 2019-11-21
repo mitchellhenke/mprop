@@ -25,7 +25,6 @@ defmodule PropertiesWeb.Router do
   scope "/api", PropertiesWeb do
     pipe_through :api # Use the default browser stack
 
-    get "/", PageController, :index
     get "/assessments", AssessmentController, :index
     get "/assessments/:id", AssessmentController, :show
     get "/geocode", GeocodeController, :index
