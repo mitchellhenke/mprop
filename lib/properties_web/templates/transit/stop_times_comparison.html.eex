@@ -4,10 +4,10 @@
   <h3><%= @fastest_trip.trip_headsign %></h3>
   <h3><%= @date %></h3>
   <div>
-    Fastest Trip: <%= human_readable_time(List.first(@fastest_trip.stop_times).elixir_arrival_time)  <> " - #{seconds_to_human_readable(@fastest_trip.total_time)}" %>
+    Fastest Trip: <%= human_readable_time(List.first(@fastest_trip.stop_times).elixir_arrival_time)  <> " - #{seconds_to_human_readable(@fastest_trip.length_seconds)}" %>
   </div>
   <div>
-    Slowest Trip: <%= human_readable_time(List.first(@slowest_trip.stop_times).elixir_arrival_time) <> " - #{seconds_to_human_readable(@slowest_trip.total_time)}" %>
+    Slowest Trip: <%= human_readable_time(List.first(@slowest_trip.stop_times).elixir_arrival_time) <> " - #{seconds_to_human_readable(@slowest_trip.length_seconds)}" %>
   </div>
   <div>
   </div>
@@ -23,7 +23,7 @@
     <tbody>
       <%= Enum.map(@fastest_trip.stop_times, fn(stop_time) -> %>
         <tr>
-          <td id="<%= "stop-#{stop_time.stop_id}" %>"scope="row"><%= IO.inspect(stop_time); link(stop_time.stop.stop_name, to: Routes.transit_path(@conn, :stop_times_comparison, @fastest_trip.route_id, starting_stop_id: stop_time.stop_id, headsign: @fastest_trip.trip_headsign, shape_id: @fastest_trip.shape_id, date: "#{@date}") <> "#stop-#{stop_time.stop_id}") %></td>
+          <td id="<%= "stop-#{stop_time.stop_id}" %>"scope="row"><%= link(stop_time.stop.stop_name, to: Routes.transit_path(@conn, :stop_times_comparison, @fastest_trip.route_id, starting_stop_id: stop_time.stop_id, headsign: @fastest_trip.trip_headsign, shape_id: @fastest_trip.shape_id, date: "#{@date}") <> "#stop-#{stop_time.stop_id}") %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff) %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff_100) %></td>
           <td scope="row"><%= seconds_to_human_readable(stop_time.diff - stop_time.diff_100) %></td>

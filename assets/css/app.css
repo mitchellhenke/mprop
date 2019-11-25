@@ -83,3 +83,7 @@ summary {
   font-size: 0.75rem;
   flex: 1 1 auto;
 }
+
+table.bus-stop-search.property-results > tbody > tr:first-child > td:first-child {
+  font-weight: 700;
+}

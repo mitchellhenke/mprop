@@ -29,7 +29,7 @@
           Fastest Trip: <%= human_readable_time(List.first(fastest1.stop_times).elixir_arrival_time)  <> " - #{fastest1.speed_mph} mph" %>
         </div>
         <div>
-          Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).elixir_arrival_time) <> " - #{slowest1.speed_mph} mph (#{percent_difference(fastest1.total_time, slowest1.total_time)}% slower)" %>
+          Slowest Trip: <%= human_readable_time(List.first(slowest1.stop_times).elixir_arrival_time) <> " - #{slowest1.speed_mph} mph (#{percent_difference(fastest1.length_seconds, slowest1.length_seconds)}% slower)" %>
         </div>
         <div style="height: 30px; <%= graph1 %>"></div>
         <div class="time-box">
@@ -45,7 +45,7 @@
           Fastest Trip: <%= human_readable_time(List.first(fastest2.stop_times).elixir_arrival_time)  <> " - #{fastest2.speed_mph} mph" %>
         </div>
         <div>
-          Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).elixir_arrival_time) <> " - #{slowest2.speed_mph} mph (#{percent_difference(fastest2.total_time, slowest2.total_time)}% slower)" %>
+          Slowest Trip: <%= human_readable_time(List.first(slowest2.stop_times).elixir_arrival_time) <> " - #{slowest2.speed_mph} mph (#{percent_difference(fastest2.length_seconds, slowest2.length_seconds)}% slower)" %>
         </div>
         <div style="height: 30px; <%= graph2 %>"></div>
         <div class="time-box">

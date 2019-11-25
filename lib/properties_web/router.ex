@@ -43,6 +43,8 @@ defmodule PropertiesWeb.Router do
     live "/properties", PropertiesLiveView
     get "/properties/:id", PropertyController, :show
 
+    live "/transit/nearby_bus_stops", BusStopLiveView
+
     get "/transit", TransitController, :dashboard
     get "/transit/dashboard", TransitController, :index
     get "/transit/:id", TransitController, :trips

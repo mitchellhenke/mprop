@@ -14,8 +14,10 @@ defmodule Transit.Trip do
     field :block_id, :string
     field :shape_id, :string
     field :length_meters, :float
+    field :length_seconds, :integer
+    field :start_time, Interval
+    field :end_time, Interval
 
-    field :total_time, :time, virtual: true
     field :speed_mph, :time, virtual: true
 
     belongs_to :route, Transit.Route, references: :route_id, foreign_key: :route_id, type: :string
@@ -43,14 +45,9 @@ defmodule Transit.Trip do
                    |> Enum.sort_by(&(&1.stop_sequence))
       trip = %{trip | stop_times: stop_times}
 
-      first = List.first(trip.stop_times).elixir_departure_time
-      last = List.last(trip.stop_times).elixir_arrival_time
+      speed_mph = Float.round((trip.length_meters / 1609.34) * 60 * 60 / trip.length_seconds, 1)
 
-      total_time = Transit.calculate_time_diff(first, last)
-
-      speed_mph = Float.round((trip.length_meters / 1609.34) * 60 * 60 / total_time, 1)
-
-      %{trip | total_time: total_time, speed_mph: speed_mph}
+      %{trip | speed_mph: speed_mph}
     end)
   end
 end

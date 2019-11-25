@@ -73,6 +73,9 @@ defmodule Transit do
     load_stops(Path.join([directory, "stops.txt"]))
     load_stop_times(Path.join([directory, "stop_times.txt"]))
     load_shapes(Path.join([directory, "shapes.txt"]))
+    update_stop_and_shape_points()
+    update_trip_lengths()
+    update_trip_times()
   end
 
   def load_calendar_dates(file) do
@@ -237,18 +240,69 @@ defmodule Transit do
     %{months: 0, days: days, secs: seconds}
   end
 
+  def time_to_interval(time) do
+    seconds = (time.second) + (time.minute * 60) + (time.hour * 60 * 60)
+    days = div(seconds, 24 * 60 * 60)
+    seconds = rem(seconds, 24 * 60 * 60)
+    %Postgrex.Interval{months: 0, days: days, secs: seconds}
+  end
+
+  def update_stop_and_shape_points do
+    {:ok, result} =
+      Repo.query(
+        """
+        update gtfs.stops set geom_point = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat), 4326)
+        """
+      )
+    {:ok, result} =
+      Repo.query(
+        """
+        update gtfs.shapes set geom_point = ST_SetSRID(ST_MakePoint(shape_pt_lon, shape_pt_lat), 4326)
+        """
+      )
+  end
+
   def update_trip_lengths do
     shape_ids = from(s in Transit.Shape, distinct: s.shape_id, select: s.shape_id)
                 |> Repo.all()
 
     Enum.each(shape_ids, fn(shape_id) ->
       length = from(s in Transit.Shape, where: s.shape_id == ^shape_id, limit: 1,
-        select: fragment("ST_Length(ST_MakeLine(ARRAY(select ST_SetSRID(ST_MakePoint(shape_pt_lon, shape_pt_lat), 4326) from gtfs.shapes s2 where s2.shape_id = ? order by s2.shape_pt_sequence))::geography )", ^shape_id)
+        select: fragment("ST_Length(ST_MakeLine(ARRAY(select geom_point from gtfs.shapes s2 where s2.shape_id = ? order by s2.shape_pt_sequence))::geography )", ^shape_id)
       )
       |> Repo.one
 
       from(t in Transit.Trip, where: t.shape_id == ^shape_id)
       |> Repo.update_all(set: [length_meters: length])
+    end)
+  end
+
+  def update_trip_times do
+    trips = from(st in StopTime, select: %{trip_id: st.trip_id, start_time: min(st.arrival_time), end_time: max(st.arrival_time), time_seconds: fragment("extract(epoch from MAX(?)) - extract(epoch from MIN(?))", st.arrival_time, st.arrival_time)}, group_by: st.trip_id) |> Repo.all()
+
+    Enum.each(trips, fn(%{trip_id: trip_id, time_seconds: seconds, start_time: start_time, end_time: end_time}) ->
+      from(t in Trip, where: t.trip_id == ^trip_id)
+      |> Repo.update_all(set: [length_seconds: round(seconds), start_time: start_time, end_time: end_time])
+    end)
+  end
+
+  def routes_top_two(date) do
+    {:ok, result} =
+      Repo.query(
+        """
+        select * from (select *, rank() OVER (PARTITION BY sub.route_id order by count desc) from
+        (select t.route_id, t.trip_headsign, t.direction_id, t.shape_id, count(*) as count from gtfs.trips t
+        join gtfs.calendar_dates cd on cd.service_id = t.service_id
+        where cd.date = $1
+        group by t.route_id, t.trip_headsign, t.direction_id, t.shape_id) sub) sub2 where rank <= 2;
+        """, [date]
+      )
+
+    columns = Enum.map(result.columns, &String.to_atom(&1))
+
+    Enum.map(result.rows, fn row ->
+      Enum.zip(columns, row)
+      |> Enum.into(%{})
     end)
   end
 end

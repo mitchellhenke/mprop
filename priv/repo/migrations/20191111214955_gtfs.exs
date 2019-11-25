@@ -29,6 +29,9 @@ defmodule Properties.Repo.Migrations.Gtfs do
       add :block_id, :text
       add :shape_id, :text
       add :length_meters, :float
+      add :length_seconds, :integer
+      add :start_time, :interval
+      add :end_time, :interval
     end
 
     create table("stops", prefix: "gtfs") do
@@ -64,7 +67,15 @@ defmodule Properties.Repo.Migrations.Gtfs do
 
     create index(:stop_times, [:trip_id], prefix: "gtfs")
     create index(:trips, [:trip_id], prefix: "gtfs")
+    create index(:trips, [:service_id], prefix: "gtfs")
+    create index(:trips, [:route_id, :direction_id], prefix: "gtfs")
     create index(:stops, [:stop_id], prefix: "gtfs")
+    create index(:stop_times, [:stop_id], prefix: "gtfs")
+    create index(:stop_times, [:stop_id, :arrival_time], prefix: "gtfs")
     create index(:shapes, [:shape_id], prefix: "gtfs")
+    execute("alter table gtfs.stops add column geom_point geometry(Point, 4326)")
+    execute("alter table gtfs.shapes add column geom_point geometry(Point, 4326)")
+
+    create index(:stops, [:geom_point], prefix: "gtfs", using: :gist)
   end
 end

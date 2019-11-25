@@ -54,7 +54,8 @@ defmodule Properties.Mixfile do
       {:con_cache, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.1"},
       {:oauther, "~> 1.1"},
-      {:nimble_csv, "~> 0.6.0"}
+      {:nimble_csv, "~> 0.6.0"},
+      {:tzdata, "~> 1.0.1"}
     ]
   end
 
