@@ -65,6 +65,42 @@ defmodule Properties.Repo.Migrations.Gtfs do
       add :shape_pt_sequence, :integer
     end
 
+    create table("rt_vehicle_positions", prefix: "gtfs") do
+      add :timestamp, :utc_datetime
+      add :vehicle_id, :text
+      add :latitude, :float
+      add :longitude, :float
+      add :bearing, :float
+      add :progress, :integer
+      add :trip_start_date, :date
+      add :trip_id, :text
+      add :block, :text
+      add :stop_id, :text
+      add :route_id, :text
+      add :dist_along_route, :float
+      add :dist_from_stop, :float
+    end
+
+    create table("rt_vehicle_predictions", prefix: "gtfs") do
+      add :timestamp, :utc_datetime
+      add :prediction_timestamp, :utc_datetime
+      add :vehicle_id, :text
+      add :route_id, :text
+      add :trip_id, :text
+      add :stop_id, :text
+      add :dist_from_stop, :float
+      add :delay, :boolean
+      add :block_id, :text
+    end
+
+    create unique_index(:rt_vehicle_positions, [:timestamp, :vehicle_id], prefix: "gtfs")
+    create index(:rt_vehicle_positions, [:trip_id], prefix: "gtfs")
+    create index(:rt_vehicle_positions, [:vehicle_id], prefix: "gtfs")
+
+    create unique_index(:rt_vehicle_predictions, [:timestamp, :vehicle_id], prefix: "gtfs")
+    create index(:rt_vehicle_predictions, [:trip_id], prefix: "gtfs")
+    create index(:rt_vehicle_predictions, [:vehicle_id], prefix: "gtfs")
+
     create index(:stop_times, [:trip_id], prefix: "gtfs")
     create index(:trips, [:trip_id], prefix: "gtfs")
     create index(:trips, [:service_id], prefix: "gtfs")

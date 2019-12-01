@@ -1,9 +1,10 @@
-defmodule Transit.Realtime do
+defmodule Transit.RealtimePosition do
   use Ecto.Schema
   import Ecto.Query, only: [from: 1, from: 2]
   import Ecto.Changeset
   alias Properties.Repo
 
+  @schema_prefix "gtfs"
   @primary_key false
   schema "rt_vehicle_positions" do
     field(:timestamp, :utc_datetime)
@@ -47,12 +48,12 @@ defmodule Transit.Realtime do
       :route_id,
       :trip_id
     ])
-    |> Ecto.Changeset.unique_constraint(:timestamp, name: :position_time_bus)
+    |> Ecto.Changeset.unique_constraint(:timestamp, name: "rt_vehicle_positions_timestamp_vehicle_id_index")
   end
 
 
   def update_stop_id(timestamp, vehicle_id, trip_id, route_id, stop_id) do
-    from(rt in Transit.Realtime, where: rt.timestamp == ^timestamp and
+    from(rt in Transit.RealtimePosition, where: rt.timestamp == ^timestamp and
       rt.trip_id == ^trip_id and rt.route_id == ^route_id and
       rt.vehicle_id == ^vehicle_id
     )

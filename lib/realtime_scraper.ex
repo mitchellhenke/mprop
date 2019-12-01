@@ -13,7 +13,7 @@ defmodule Transit.RealtimeScraper do
 
   # @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
 
-  @detailed_routes1 ["GRE", "15"]
+  @detailed_routes1 ["GRE", "15", "21"]
 
   def start_link(_ \\ nil) do
     GenServer.start_link(__MODULE__, nil)
@@ -32,7 +32,7 @@ defmodule Transit.RealtimeScraper do
     end_time = System.monotonic_time()
 
     diff = System.convert_time_unit(end_time - start_time, :native, :millisecond)
-    time_to_wait = max(30_000 - diff, 0)
+    time_to_wait = max(2_000 - diff, 0)
 
     Process.send_after(self(), :get_all_positions, time_to_wait)
     {:noreply, state}
@@ -83,11 +83,10 @@ defmodule Transit.RealtimeScraper do
 
         {:ok, [year, month, day, hour, minute, second], _, _, _, _} = parse_datetime(timestamp)
 
-        datetime = DateTime.utc_now()
+        {:ok, datetime} = DateTime.now("America/Chicago")
 
         datetime = %{
-          datetime
-          | year: year,
+          datetime | year: year,
             month: month,
             day: day,
             hour: hour,
@@ -108,12 +107,12 @@ defmodule Transit.RealtimeScraper do
           dist_along_route: dist_along_route
         }
 
-        Transit.Realtime.changeset(%Transit.Realtime{}, attrs)
+        Transit.RealtimePosition.changeset(%Transit.RealtimePosition{}, attrs)
         |> Properties.Repo.insert()
       end)
       |> Enum.reduce(MapSet.new(), fn result, set ->
         case result do
-          {:ok, %Transit.Realtime{vehicle_id: vehicle_id}} ->
+          {:ok, %Transit.RealtimePosition{vehicle_id: vehicle_id}} ->
             MapSet.put(set, vehicle_id)
 
           _ ->
@@ -141,19 +140,34 @@ defmodule Transit.RealtimeScraper do
              {:ok, json} <- Jason.decode(body),
              {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
              {:ok, predictions} <- Map.fetch(bustime_response, "prd") do
+
+          predictions = Enum.group_by(predictions, fn(%{"vid" => vid}) ->
+            vid
+          end)
+          |> Enum.map(fn({_vid, predictions}) ->
+            Enum.sort_by(predictions, fn(pred) ->
+              Map.get(pred, "tmstmp")
+            end)
+            |> List.first()
+          end)
+
           Enum.each(predictions, fn prediction ->
             %{
               "rt" => route,
               "vid" => vehicle_id,
               "tmstmp" => timestamp,
+              "prdtm" => prediction_timestamp,
               "tatripid" => trip_id,
-              "stpid" => stop_id
+              "stpid" => stop_id,
+              "dstp" => dist_from_stop,
+              "dly" => delay,
+              "tablockid" => block_id,
             } = prediction
 
             {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
               parse_datetime(timestamp)
 
-            datetime = DateTime.utc_now()
+            {:ok, datetime} = DateTime.now("America/Chicago")
 
             datetime = %{
               datetime
@@ -165,7 +179,35 @@ defmodule Transit.RealtimeScraper do
                 second: second
             }
 
-            Transit.Realtime.update_stop_id(datetime, vehicle_id, trip_id, route, stop_id)
+            {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
+              parse_datetime(prediction_timestamp)
+
+            {:ok, prediction_datetime} = DateTime.now("America/Chicago")
+
+            prediction_datetime = %{
+             prediction_datetime
+              | year: year,
+                month: month,
+                day: day,
+                hour: hour,
+                minute: minute,
+                second: second
+            }
+
+            attrs = %{
+              timestamp: datetime,
+              prediction_timestamp: prediction_datetime,
+              vehicle_id: vehicle_id,
+              trip_id: trip_id,
+              block_id: block_id,
+              route_id: route,
+              stop_id: stop_id,
+              dist_from_stop: dist_from_stop,
+              delay: delay
+            }
+
+            Transit.RealtimePrediction.changeset(%Transit.RealtimePrediction{}, attrs)
+            |> Properties.Repo.insert()
           end)
         end
       end)
