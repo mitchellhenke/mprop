@@ -32,15 +32,21 @@ defmodule PropertiesWeb.BusStopLiveView do
         <h1>Milwaukee Nearby Bus Stops</h1>
         <p>Type in an address, and you'll see bus stops for the top result on the given day and hour within the radius.</p>
         <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
-           <div class="row mb-2">
-            <%= label f, :date, class: "col-sm-1 justify-content-start form-control-label" %>
-            <%= date_input f, :date, class: "form-control col-sm-2" %>
-            <%= label f, :time, class: "col-sm-1 justify-content-start form-control-label" %>
-            <%= time_input f, :time, class: "form-control col-sm-2" %>
-            <%= label f, :radius_miles, "Radius (miles)", class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :radius_miles, class: "form-control col-sm-1" %>
+           <div class="form-row">
+              <div class="form-group col-md-3">
+                <%= label f, :date %>
+                <%= date_input f, :date, class: "form-control" %>
+              </div>
+              <div class="form-group col-md-3">
+                <%= label f, :time %>
+                <%= time_input f, :time, class: "form-control" %>
+              </div>
+              <div class="form-group col-md-3">
+                <%= label f, :radius_miles, "Radius (miles)" %>
+                <%= number_input f, :radius_miles, class: "form-control" %>
+              </div>
            </div>
-          <div class="row mb-2">
+          <div class="form-row">
             <div class="col-sm-3">
               <%= PropertiesWeb.ViewHelper.error_tag f, :date %>
             </div>
@@ -51,13 +57,15 @@ defmodule PropertiesWeb.BusStopLiveView do
               <%= PropertiesWeb.ViewHelper.error_tag f, :radius_miles %>
             </div>
           </div>
-          <div class="row mb-2">
-            <%= label f, :text_query, "Address Search", class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= text_input f, :text_query, class: "form-control col-sm-10" %>
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <%= label f, :text_query, "Address Search" %>
+              <%= text_input f, :text_query, class: "form-control" %>
+            </div>
           </div>
         <% end %>
 
-        <table class="table table-hover mt-2 bus-stop-search property-results">
+        <table class="table table-hover mt-2 mb-2 bus-stop-search property-results">
           <thead>
           </thead>
           <tbody>
@@ -71,13 +79,14 @@ defmodule PropertiesWeb.BusStopLiveView do
           </tbody>
         </table>
 
+        <h2><%= bus_stops_near_header(@properties) %></h2>
         <table class="table table-hover mt-2">
           <thead>
             <tr>
               <th>Route</th>
               <th>Direction</th>
               <th>Stop Location</th>
-              <th>Distance (m)</th>
+              <th>Distance (miles)</th>
             </tr>
           </thead>
           <tbody>
@@ -93,7 +102,7 @@ defmodule PropertiesWeb.BusStopLiveView do
                   <%= stop.stop_name %>
                 </td>
                 <td>
-                  <%= round(stop.distance) %>m
+                  <%= Float.round(stop.distance / 1609.34, 2) %> miles
                 </td>
               </tr>
             <% end %>
@@ -163,5 +172,11 @@ defmodule PropertiesWeb.BusStopLiveView do
       [] ->
         []
     end
+  end
+
+  def bus_stops_near_header([]), do: "Bus Stops"
+  def bus_stops_near_header([property | _]) do
+    address = Assessment.address(property)
+    "Bus Stops near #{address}"
   end
 end
