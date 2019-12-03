@@ -43,7 +43,7 @@ defmodule PropertiesWeb.BusStopLiveView do
               </div>
               <div class="form-group col-md-3">
                 <%= label f, :radius_miles, "Radius (miles)" %>
-                <%= number_input f, :radius_miles, class: "form-control" %>
+                <%= number_input f, :radius_miles, class: "form-control", step: "0.01" %>
               </div>
            </div>
           <div class="form-row">
