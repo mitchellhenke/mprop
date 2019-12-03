@@ -30,7 +30,10 @@ defmodule PropertiesWeb.BusStopLiveView do
     ~L"""
       <div>
         <h1>Milwaukee Nearby Bus Stops</h1>
-        <p>Type in an address, and you'll see bus stops for the top result on the given day and hour within the radius.</p>
+        <p>
+          Type in an address, and you'll see bus stops for the top result on the given day and hour within the radius.<br>
+          The page link also updates as you change the search, so you can share it with others!
+       </p>
         <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
            <div class="form-row">
               <div class="form-group col-md-3">
@@ -67,6 +70,9 @@ defmodule PropertiesWeb.BusStopLiveView do
 
         <table class="table table-hover mt-2 mb-2 bus-stop-search property-results">
           <thead>
+            <tr>
+              <th>Search Results</th>
+            </tr>
           </thead>
           <tbody>
             <%= for properties <- Enum.chunk_every(@properties, 2)  do %>
