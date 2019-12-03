@@ -1,11 +1,11 @@
 defmodule PropertiesWeb.BusStopLiveView do
   defmodule Params do
-    defstruct [:date, :time, :text_query, :radius_meters]
+    defstruct [:date, :time, :text_query, :radius_miles]
 
     def change(params) do
       types = %{
         text_query: :string,
-        radius_meters: :integer,
+        radius_miles: :float,
         date: :date,
         time: :time
       }
@@ -13,9 +13,9 @@ defmodule PropertiesWeb.BusStopLiveView do
       data = %Params{}
 
       {data, types}
-      |> Ecto.Changeset.cast(params, [:text_query, :radius_meters, :date, :time])
-      |> Ecto.Changeset.validate_required([:radius_meters, :date, :time])
-      |> Ecto.Changeset.validate_number(:radius_meters, less_than_or_equal_to: 2_000, greater_than: 0)
+      |> Ecto.Changeset.cast(params, [:text_query, :radius_miles, :date, :time])
+      |> Ecto.Changeset.validate_required([:radius_miles, :date, :time])
+      |> Ecto.Changeset.validate_number(:radius_miles, less_than_or_equal_to: 1.25, greater_than: 0)
     end
   end
   use Phoenix.LiveView
@@ -37,8 +37,8 @@ defmodule PropertiesWeb.BusStopLiveView do
             <%= date_input f, :date, class: "form-control col-sm-2" %>
             <%= label f, :time, class: "col-sm-1 justify-content-start form-control-label" %>
             <%= time_input f, :time, class: "form-control col-sm-2" %>
-            <%= label f, :radius_meters, "Radius (m)", class: "col-sm-2 justify-content-start form-control-label" %>
-            <%= number_input f, :radius_meters, class: "form-control col-sm-1" %>
+            <%= label f, :radius_miles, "Radius (miles)", class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :radius_miles, class: "form-control col-sm-1" %>
            </div>
           <div class="row mb-2">
             <div class="col-sm-3">
@@ -48,7 +48,7 @@ defmodule PropertiesWeb.BusStopLiveView do
               <%= PropertiesWeb.ViewHelper.error_tag f, :time %>
             </div>
             <div class="col-sm-6">
-              <%= PropertiesWeb.ViewHelper.error_tag f, :radius_meters %>
+              <%= PropertiesWeb.ViewHelper.error_tag f, :radius_miles %>
             </div>
           </div>
           <div class="row mb-2">
@@ -107,7 +107,7 @@ defmodule PropertiesWeb.BusStopLiveView do
     {:ok, now} = DateTime.now("America/Chicago")
     time = DateTime.to_time(now)
     date = DateTime.to_date(now)
-    default_params = %{"date" => date, "time" => time, "radius_meters" => 400}
+    default_params = %{"date" => date, "time" => time, "radius_miles" => 0.25}
     params = Map.merge(default_params, params)
     changeset = Params.change(params)
     case Ecto.Changeset.apply_action(changeset, :insert) do
@@ -135,7 +135,7 @@ defmodule PropertiesWeb.BusStopLiveView do
   def mount(_session, socket) do
     socket = assign(socket, :properties, [])
              |> assign(:stops, [])
-             |> assign(:changeset, Params.change(%{date: Date.utc_today(), time: Time.utc_now(), radius_meters: 400}))
+             |> assign(:changeset, Params.change(%{date: Date.utc_today(), time: Time.utc_now(), radius_miles: 0.25}))
     {:ok, socket}
   end
 
@@ -157,8 +157,9 @@ defmodule PropertiesWeb.BusStopLiveView do
   def get_stops(properties, params) do
     case properties do
       [property | _rest] ->
+        meters = params.radius_miles * 1609.34
         point = %Geo.Point{coordinates: {property.longitude, property.latitude}, srid: 4326}
-        Stop.get_nearest(point, params.radius_meters, params.date, params.time)
+        Stop.get_nearest(point, meters, params.date, params.time)
       [] ->
         []
     end
