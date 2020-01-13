@@ -13,7 +13,7 @@ defmodule Transit.RealtimeScraper do
 
   # @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
 
-  @detailed_routes1 ["GRE", "15", "21"]
+  @detailed_routes1 ["GRE", "15", "21", "30", "30X", "51", "35", "67"]
 
   def start_link(_ \\ nil) do
     GenServer.start_link(__MODULE__, nil)
