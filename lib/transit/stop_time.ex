@@ -19,12 +19,14 @@ defmodule Transit.StopTime do
 
     belongs_to :trip, Transit.Trip, references: :trip_id, foreign_key: :trip_id, type: :string
     belongs_to :stop, Transit.Stop, references: :stop_id, foreign_key: :stop_id, type: :string
+    belongs_to :feed, Transit.Feed
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence, :stop_headsign, :pickup_type, :drop_off_type, :timepoint])
-    |> validate_required([:stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence, :timepoint])
+    |> cast(params, [:feed_id, :stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence, :stop_headsign, :pickup_type, :drop_off_type, :timepoint])
+    |> validate_required([:feed_id, :stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence])
+    |> assoc_constraint(:feed)
   end
 
 

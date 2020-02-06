@@ -11,12 +11,15 @@ defmodule Transit.Shape do
     field :shape_pt_lat, :float
     field :shape_pt_lon, :float
     field :shape_pt_sequence, :integer
+
+    belongs_to :feed, Transit.Feed
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence])
-    |> validate_required([:shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence])
+    |> cast(params, [:feed_id, :shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence])
+    |> validate_required([:feed_id, :shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence])
+    |> assoc_constraint(:feed)
   end
 
   def list_all do

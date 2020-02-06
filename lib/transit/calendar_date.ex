@@ -8,11 +8,14 @@ defmodule Transit.CalendarDate do
     field :service_id, :string
     field :date, :date
     field :exception_type, :integer
+
+    belongs_to :feed, Transit.Feed
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:service_id, :date, :exception_type])
-    |> validate_required([:service_id, :date, :exception_type])
+    |> cast(params, [:feed_id, :service_id, :date, :exception_type])
+    |> validate_required([:feed_id, :service_id, :date, :exception_type])
+    |> assoc_constraint(:feed)
   end
 end

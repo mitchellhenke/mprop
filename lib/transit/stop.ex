@@ -15,12 +15,15 @@ defmodule Transit.Stop do
     field :stop_desc, :string
     field :stop_code, :string
     field :timepoint, :string
+
+    belongs_to :feed, Transit.Feed
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:stop_id, :stop_name, :stop_lat, :stop_lon, :zone_id, :stop_url, :stop_desc, :timepoint])
-    |> validate_required([:stop_id, :stop_name, :stop_lat, :stop_lon])
+    |> cast(params, [:feed_id, :stop_id, :stop_name, :stop_lat, :stop_lon, :zone_id, :stop_url, :stop_desc, :timepoint])
+    |> validate_required([:feed_id, :stop_id, :stop_name, :stop_lat, :stop_lon])
+    |> assoc_constraint(:feed)
   end
 
   def get_nearest(point, radius_meters, date, time) do

@@ -51,7 +51,7 @@ defmodule Transit.Segment do
   }
 
   def get_segments(_date_time) do
-    date = ~D[2019-12-13]
+    date = ~D[2020-02-03]
     time = ~T[17:00:00.0]
 
     # t.route_id, t.trip_headsign, t.direction_id, t.shape_id

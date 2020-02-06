@@ -4,7 +4,7 @@ defmodule Transit do
   """
   require Logger
   import Ecto.Query, only: [from: 2]
-  alias Transit.{CalendarDate, Route, Trip, Shape, Stop, StopTime}
+  alias Transit.{CalendarDate, Feed, Route, Trip, Shape, ShapeGeom, Stop, StopTime}
   alias Properties.Repo
 
   def calculate_time_diff(time1, time2) do
@@ -50,38 +50,45 @@ defmodule Transit do
       |> round()
   end
 
-  def download_gtfs do
-    url = "http://kamino.mcts.org/gtfs/google_transit.zip"
-    directory = "/tmp/gtfs"
-    destination = "/tmp/gtfs/transit.zip"
+  def download_and_import_gtfs(url, date) do
+    with {:ok, feed} <- Feed.find_or_create(date),
+         {:ok, directory} <- download_gtfs(url, feed),
+         :ok <- import_gtfs(directory, feed) do
+      :ok
+    end
+  end
+
+  def download_gtfs(url, feed) do
+    directory = "/tmp/gtfs_#{feed.date}"
+    destination = "/tmp/gtfs_#{feed.date}/transit.zip"
     with :ok <- File.mkdir_p(directory),
          {:ok, 200, _headers, client_ref} <- :hackney.get(url, [], "", follow_redirect: true),
          {:ok, body} <- :hackney.body(client_ref),
          :ok <- File.write(destination, body),
          {:ok, _files} <- :zip.unzip(String.to_charlist(destination), [cwd: directory]) do
-      IO.inspect("DONE")
+      {:ok, directory}
     else
       e ->
         Logger.error(inspect(e))
     end
   end
 
-  def import_gtfs(directory) do
-    load_calendar_dates(Path.join([directory, "calendar_dates.txt"]))
-    load_routes(Path.join([directory, "routes.txt"]))
-    load_trips(Path.join([directory, "trips.txt"]))
-    load_stops(Path.join([directory, "stops.txt"]))
-    load_stop_times(Path.join([directory, "stop_times.txt"]))
-    load_shapes(Path.join([directory, "shapes.txt"]))
-    update_stop_and_shape_points()
-    update_trip_lengths()
-    update_trip_times()
+  def import_gtfs(directory, feed) do
+    load_calendar_dates(Path.join([directory, "calendar_dates.txt"]), feed)
+    load_routes(Path.join([directory, "routes.txt"]), feed)
+    load_trips(Path.join([directory, "trips.txt"]), feed)
+    load_stops(Path.join([directory, "stops.txt"]), feed)
+    load_stop_times(Path.join([directory, "stop_times.txt"]), feed)
+    load_shapes(Path.join([directory, "shapes.txt"]), feed)
+    update_stop_and_shape_points(feed)
+    update_trip_lengths(feed)
+    update_trip_times(feed)
   end
 
-  def load_calendar_dates(file) do
+  def load_calendar_dates(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
-    |> Stream.each(fn(row) ->
+    |> Task.async_stream(fn(row) ->
       values = String.trim(row)
                |> String.split(",")
 
@@ -96,19 +103,20 @@ defmodule Transit do
       params = %{
         service_id: Enum.at(values, 0) |> String.trim(),
         date: Date.from_iso8601!("#{year}-#{month}-#{day}"),
-        exception_type: Enum.at(values, 2) |> String.trim()
+        exception_type: Enum.at(values, 2) |> String.trim(),
+        feed_id: feed.id
       }
 
       CalendarDate.changeset(%CalendarDate{},  params)
       |> Repo.insert()
-    end)
+    end, max_concurrency: 20)
     |> Enum.to_list()
   end
 
-  def load_routes(file) do
+  def load_routes(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
-    |> Stream.each(fn(row) ->
+    |> Task.async_stream(fn(row) ->
       values = String.trim(row)
         |> String.split(",")
 
@@ -120,19 +128,20 @@ defmodule Transit do
         route_type: Enum.at(values, 5) |> String.trim(),
         route_url: Enum.at(values, 6) |> String.trim(),
         route_color: Enum.at(values, 7) |> String.trim(),
-        route_text_color: Enum.at(values, 8) |> String.trim()
+        route_text_color: Enum.at(values, 8) |> String.trim(),
+        feed_id: feed.id
       }
 
       Route.changeset(%Route{},  params)
       |> Repo.insert()
-    end)
+    end, max_concurrency: 20)
     |> Enum.to_list()
   end
 
-  def load_trips(file) do
+  def load_trips(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
-    |> Stream.each(fn(row) ->
+    |> Task.async_stream(fn(row) ->
       values = String.trim(row)
         |> String.split(",")
 
@@ -144,18 +153,19 @@ defmodule Transit do
         direction_id: Enum.at(values, 4) |> String.trim(),
         block_id: Enum.at(values, 5) |> String.trim(),
         shape_id: Enum.at(values, 6) |> String.trim(),
+        feed_id: feed.id
       }
 
       {:ok, _} = Trip.changeset(%Trip{},  params)
                  |> Repo.insert()
-    end)
+    end, max_concurrency: 20)
     |> Enum.to_list()
   end
 
-  def load_stops(file) do
+  def load_stops(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
-    |> Stream.each(fn(row) ->
+    |> Task.async_stream(fn(row) ->
       values = String.trim(row)
         |> String.split(",")
 
@@ -168,21 +178,25 @@ defmodule Transit do
         stop_lon: Enum.at(values, 5) |> String.trim(),
         zone_id: Enum.at(values, 6) |> String.trim(),
         stop_url: Enum.at(values, 7) |> String.trim(),
-        timepoint: Enum.at(values, 8) |> String.trim()
+        timepoint: Enum.at(values, 8) |> String.trim(),
+        feed_id: feed.id
       }
 
       Stop.changeset(%Stop{},  params)
       |> Repo.insert()
-    end)
+    end, max_concurrency: 20)
     |> Enum.to_list()
   end
 
-  def load_stop_times(file) do
+  def load_stop_times(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
     |> Task.async_stream(fn(row) ->
       values = String.trim(row)
         |> String.split(",")
+
+      timepoint = "#{Enum.at(values, 8)}"
+                  |> String.trim()
 
       params = %{
         trip_id: Enum.at(values, 0) |> String.trim(),
@@ -193,7 +207,8 @@ defmodule Transit do
         stop_headsign: Enum.at(values, 5) |> String.trim(),
         pickup_type: Enum.at(values, 6) |> String.trim(),
         drop_off_type: Enum.at(values, 7) |> String.trim(),
-        timepoint: Enum.at(values, 8) |> String.trim()
+        timepoint: timepoint,
+        feed_id: feed.id
       }
 
       {:ok, _} = StopTime.changeset(%StopTime{},  params)
@@ -202,7 +217,7 @@ defmodule Transit do
     |> Enum.to_list()
   end
 
-  def load_shapes(file) do
+  def load_shapes(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
     |> Task.async_stream(fn(row) ->
@@ -214,6 +229,7 @@ defmodule Transit do
         shape_pt_lat: Enum.at(values, 1) |> String.trim(),
         shape_pt_lon: Enum.at(values, 2) |> String.trim(),
         shape_pt_sequence: Enum.at(values, 3) |> String.trim(),
+        feed_id: feed.id
       }
 
       {:ok, _} = Shape.changeset(%Shape{},  params)
@@ -247,41 +263,53 @@ defmodule Transit do
     %Postgrex.Interval{months: 0, days: days, secs: seconds}
   end
 
-  def update_stop_and_shape_points do
-    {:ok, result} =
+  def update_stop_and_shape_points(feed) do
+    {:ok, _result} =
       Repo.query(
         """
-        update gtfs.stops set geom_point = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat), 4326)
-        """
+        update gtfs.stops set geom_point = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat), 4326) where feed_id = $1
+        """, [feed.id]
       )
-    {:ok, result} =
+    {:ok, _result} =
       Repo.query(
         """
-        update gtfs.shapes set geom_point = ST_SetSRID(ST_MakePoint(shape_pt_lon, shape_pt_lat), 4326)
-        """
+        update gtfs.shapes set geom_point = ST_SetSRID(ST_MakePoint(shape_pt_lon, shape_pt_lat), 4326) where feed_id = $1
+        """, [feed.id]
       )
   end
 
-  def update_trip_lengths do
-    shape_ids = from(s in Transit.Shape, distinct: s.shape_id, select: s.shape_id)
+  def update_trip_lengths(feed) do
+    feed_id = feed.id
+    shape_ids = from(s in Transit.Shape, distinct: s.shape_id, select: s.shape_id, where: s.feed_id == ^feed_id)
                 |> Repo.all()
 
     Enum.each(shape_ids, fn(shape_id) ->
-      length = from(s in Transit.Shape, where: s.shape_id == ^shape_id, limit: 1,
-        select: fragment("ST_Length(ST_MakeLine(ARRAY(select geom_point from gtfs.shapes s2 where s2.shape_id = ? order by s2.shape_pt_sequence))::geography )", ^shape_id)
-      )
-      |> Repo.one
+      result = """
+      SELECT ST_MakeLine(ARRAY(select geom_point from gtfs.shapes s2 where s2.shape_id = $1 AND s2.feed_id = $2 order by s2.shape_pt_sequence)),
+      ST_Length(ST_MakeLine(ARRAY(select geom_point from gtfs.shapes s2 where s2.shape_id = $3 AND s2.feed_id = $4 order by s2.shape_pt_sequence))::geography)
+      from gtfs.shapes s where s.shape_id = $5 AND s.feed_id = $6 limit 1;
+      """
+      |> Repo.query!([shape_id, feed_id, shape_id, feed_id, shape_id, feed_id])
 
-      from(t in Transit.Trip, where: t.shape_id == ^shape_id)
-      |> Repo.update_all(set: [length_meters: length])
+      [[linestring, length_meters]] = result.rows
+      params = %{
+        shape_id: shape_id,
+        feed_id: feed_id,
+        length_meters: length_meters,
+        geom_line: linestring
+      }
+
+      ShapeGeom.changeset(%ShapeGeom{}, params)
+      |> Repo.insert()
     end)
   end
 
-  def update_trip_times do
-    trips = from(st in StopTime, select: %{trip_id: st.trip_id, start_time: min(st.arrival_time), end_time: max(st.arrival_time), time_seconds: fragment("extract(epoch from MAX(?)) - extract(epoch from MIN(?))", st.arrival_time, st.arrival_time)}, group_by: st.trip_id) |> Repo.all()
+  def update_trip_times(feed) do
+    feed_id = feed.id
+    trips = from(st in StopTime, select: %{trip_id: st.trip_id, start_time: min(st.arrival_time), end_time: max(st.arrival_time), time_seconds: fragment("extract(epoch from MAX(?)) - extract(epoch from MIN(?))", st.arrival_time, st.arrival_time)}, where: st.feed_id == ^feed_id, group_by: st.trip_id) |> Repo.all()
 
     Enum.each(trips, fn(%{trip_id: trip_id, time_seconds: seconds, start_time: start_time, end_time: end_time}) ->
-      from(t in Trip, where: t.trip_id == ^trip_id)
+      from(t in Trip, where: t.trip_id == ^trip_id and t.feed_id == ^feed_id)
       |> Repo.update_all(set: [length_seconds: round(seconds), start_time: start_time, end_time: end_time])
     end)
   end
