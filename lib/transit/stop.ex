@@ -34,10 +34,10 @@ defmodule Transit.Stop do
         select DISTINCT ON (t.route_id, t.direction_id) t.trip_headsign, t.direction_id, s.stop_id,
         s.stop_name, (ABS(ST_X(s.geom_point) - ST_X($1)) * 81228.4367802347 + ABS(ST_Y(s.geom_point) - ST_Y($1)) * 111320) as distance,
         t.route_id from gtfs.stops s
-        JOIN gtfs.stop_times st on st.stop_id = s.stop_id
-        JOIN gtfs.trips t on t.trip_id = st.trip_id
-        JOIN gtfs.calendar_dates cd on cd.service_id = t.service_id
-        WHERE cd.date = $2 AND cd.feed_id = $3
+        JOIN gtfs.stop_times st on st.stop_id = s.stop_id AND st.feed_id = $3
+        JOIN gtfs.trips t on t.trip_id = st.trip_id AND t.feed_id = $3
+        JOIN gtfs.calendar_dates cd on cd.service_id = t.service_id AND cd.feed_id = $3
+        WHERE cd.date = $2 AND s.feed_id = $3
         AND ST_DWithin(s.geom_point::geography, $1::geography, $4)
         AND (ABS(ST_X(s.geom_point) - ST_X($1)) * 81228.4367802347 + ABS(ST_Y(s.geom_point) - ST_Y($1)) * 111320) <= $4
         AND st.arrival_time > ($5 - interval '30 minutes')

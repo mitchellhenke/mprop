@@ -142,7 +142,7 @@ defmodule Properties.Repo.Migrations.Gtfs do
     execute("alter table gtfs.shapes add column geom_point geometry(Point, 4326)")
     execute("alter table gtfs.shape_geoms add column geom_line geometry(LineString, 4326)")
 
-    create index(:stops, [:feed_id, :geom_point], prefix: "gtfs", using: :gist)
+    create index(:stops, ["feed_id", "geography(geom_point)"], prefix: "gtfs", using: :gist)
     create unique_index(:feeds, [:date], prefix: "gtfs")
   end
 end
