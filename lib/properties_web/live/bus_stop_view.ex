@@ -20,7 +20,7 @@ defmodule PropertiesWeb.BusStopLiveView do
   end
   use Phoenix.LiveView
   alias Properties.Assessment
-  alias Transit.Stop
+  alias Transit.{Feed, Stop}
   alias Properties.Repo
   use Phoenix.HTML
 
@@ -31,8 +31,11 @@ defmodule PropertiesWeb.BusStopLiveView do
       <div>
         <h1>Milwaukee Nearby Bus Stops</h1>
         <p>
-          Type in an address, and you'll see bus stops for the top result on the given day and hour within the radius.<br>
-          The page link also updates as you change the search, so you can share it with others!
+          Type in an address, and you'll see nearby bus stops that have a bus scheduled within 30 minutes on either side of the given time.<br>
+          The page link also updates as you change the search, so you can share it with others!<br>
+       </p>
+        <p>
+          For further information on planning a trip, visit <%= link("https://www.ridemcts.com/trip-planner", to: "https://www.ridemcts.com/trip-planner") %>.
        </p>
         <%= form_for @changeset, "#", [phx_change: :change], fn f -> %>
            <div class="form-row">
@@ -174,7 +177,8 @@ defmodule PropertiesWeb.BusStopLiveView do
       [property | _rest] ->
         meters = params.radius_miles * 1609.34
         point = %Geo.Point{coordinates: {property.longitude, property.latitude}, srid: 4326}
-        Stop.get_nearest(point, meters, params.date, params.time)
+        feed = Feed.get_first_after_date(params.date)
+        Stop.get_nearest(point, meters, params.date, params.time, feed.id)
       [] ->
         []
     end
