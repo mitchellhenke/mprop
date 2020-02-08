@@ -17,21 +17,28 @@ defmodule Properties.CSVParser do
       street: x["STREET"],
       street_type: x["STTYPE"],
       last_assessment_year: parse_int(x["YR_ASSMT"]),
-      last_assessment_amount: String.to_integer(x["C_A_TOTAL"]),
-      last_assessment_land: String.to_integer(x["C_A_LAND"]),
-      last_assessment_improvements: String.to_integer(x["C_A_IMPRV"]),
-      last_assessment_amount_exempt: String.to_integer(x["C_A_EXM_TOTAL"]),
-      last_assessment_land_exempt: String.to_integer(x["C_A_EXM_LAND"]),
-      last_assessment_improvements_exempt: String.to_integer(x["C_A_EXM_IMPRV"]),
+      last_assessment_amount: parse_int(x["C_A_TOTAL"]),
+      last_assessment_land: parse_int(x["C_A_LAND"]),
+      last_assessment_improvements: parse_int(x["C_A_IMPRV"]),
+      last_assessment_amount_exempt: parse_int(x["C_A_EXM_TOTAL"]),
+      last_assessment_land_exempt: parse_int(x["C_A_EXM_LAND"]),
+      last_assessment_improvements_exempt: parse_int(x["C_A_EXM_IMPRV"]),
       exemption_code: x["C_A_EXM_TYPE"],
-      building_area: parse_int(x["BLDG_AREA"]),
+      building_area: parse_float_as_int(x["BLDG_AREA"]),
       year_built: parse_int(x["YR_BUILT"]),
       number_of_bedrooms: parse_int(x["BEDROOMS"]),
       number_of_bathrooms: parse_int(x["BATHS"]),
       number_of_powder_rooms: parse_int(x["POWDER_ROOMS"]),
-      lot_area: parse_int(x["LOT_AREA"]),
+      lot_area: parse_float_as_int(x["LOT_AREA"]),
       building_type: x["BLDG_TYPE"],
       zip_code: x["GEO_ZIP_CODE"],
+      owner_name_1: x["OWNER_NAME_1"],
+      owner_name_2: x["OWNER_NAME_2"],
+      owner_name_3: x["OWNER_NAME_3"],
+      owner_mail_address: x["OWNER_MAIL_ADDR"],
+      owner_city_state: x["OWNER_CITY_STATE"],
+      owner_zip_code: x["OWNER_ZIP"],
+      owner_occupied: x["OWN_OCPD"],
       land_use: x["LAND_USE"],
       land_use_general: x["LAND_USE_GP"],
       fireplace: parse_int(x["FIREPLACE"]),
@@ -150,6 +157,13 @@ defmodule Properties.CSVParser do
 
   defp parse_int(""), do: nil
   defp parse_int(num), do: String.to_integer(num)
+
+  defp parse_float_as_int(float) do
+    case Float.parse(float) do
+      {float, _} -> round(float)
+      :error -> nil
+    end
+  end
 
   defp parse_date(""), do: nil
   defp parse_date(date) do

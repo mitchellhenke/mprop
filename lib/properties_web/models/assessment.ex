@@ -13,7 +13,9 @@ defmodule Properties.Assessment do
                     :number_of_powder_rooms, :lot_area, :zoning, :building_type,
                     :zip_code, :air_conditioning, :fireplace, :parking_type,
                     :number_units, :neighborhood, :geo_tract, :geo_block, :convey_datetime,
-                    :convey_type, :geo_alder, :year, :land_use, :land_use_general]
+                    :convey_type, :geo_alder, :year, :land_use, :land_use_general,
+                    :owner_name_1, :owner_name_2, :owner_name_3, :owner_mail_address,
+                    :owner_city_state, :owner_zip_code, :owner_occupied]
 
 schema "assessments" do
     field :tax_key, :string
@@ -55,6 +57,13 @@ schema "assessments" do
     field :convey_datetime, :naive_datetime
     field :convey_type, :string
     field :year, :integer
+    field :owner_name_1, :string
+    field :owner_name_2, :string
+    field :owner_name_3, :string
+    field :owner_mail_address, :string
+    field :owner_city_state, :string
+    field :owner_zip_code, :string
+    field :owner_occupied, :string
     field :distance, :float, virtual: true
     field :other_assessments, {:array, :map}, virtual: :true
     field :sales, {:array, :map}, virtual: :true
