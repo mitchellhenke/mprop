@@ -28,7 +28,10 @@ defmodule Transit.RealtimeScraper do
   @impl true
   def handle_info(:get_all_positions, state) do
     start_time = System.monotonic_time()
-    request_locations(@detailed_routes1)
+    Enum.chunk_every(@detailed_routes1, 10)
+    |> Enum.each(fn(routes) ->
+      request_locations(routes)
+    end)
     end_time = System.monotonic_time()
 
     diff = System.convert_time_unit(end_time - start_time, :native, :millisecond)

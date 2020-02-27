@@ -45,7 +45,8 @@ defmodule PropertiesWeb.TransitController do
   def stop_times_comparison(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today)
-    route = ConCache.get(:transit_cache, "routes_#{route_id}")
+    feed = Transit.Feed.get_first_after_date(date)
+    route = Route.get_by_id!(feed, route_id)
     trips = Trip.get_by_route_and_date(route, date)
             |> Trip.preload_stop_times()
 
