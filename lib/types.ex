@@ -3,10 +3,11 @@ Postgrex.Types.define(Properties.PostgresTypes,
               json: Jason)
 
 defmodule Interval do
+  use Ecto.Type
+
   @moduledoc """
   This implements Interval support for Postgrex that used to be in Ecto but no longer is.
   """
-  @behaviour Ecto.Type
 
   @impl true
   def type, do: Postgrex.Interval

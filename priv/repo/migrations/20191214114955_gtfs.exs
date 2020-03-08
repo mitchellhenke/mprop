@@ -59,6 +59,7 @@ defmodule Properties.Repo.Migrations.Gtfs do
       add :stop_desc, :text
       add :stop_code, :text
       add :timepoint, :text
+      add :route_ids, {:array, :text}
     end
 
     create table("stop_times", prefix: "gtfs") do
