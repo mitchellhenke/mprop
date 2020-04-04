@@ -7,6 +7,7 @@ use Mix.Config
 
 # General application configuration
 config :properties,
+  gtfs_import_connections: String.from_integer(System.get_env("GTFS_IMPORT_CONNECTIONS") || "2"),
   ecto_repos: [Properties.Repo]
 
 config :properties,
