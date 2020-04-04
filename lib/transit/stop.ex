@@ -48,7 +48,8 @@ defmodule Transit.Stop do
       where:
         cd.date == ^calendar_date.date and cd.feed_id == ^calendar_date.feed_id and
           s.stop_id == ^stop.stop_id,
-      select: fragment("DISTINCT ?", t.route_id)
+      distinct: [t.route_id, t.direction_id],
+      select: fragment("? || ',' || ?", t.route_id, t.direction_id)
     )
     |> Repo.all()
   end
