@@ -7,6 +7,8 @@ defmodule Transit do
   alias Transit.{CalendarDate, Feed, Route, Trip, Shape, ShapeGeom, Stop, StopTime}
   alias Properties.Repo
 
+  @connections Application.compile_env!(:properties, :gtfs_import_connections)
+
   def calculate_time_diff(time1, time2) do
     seconds_in_12_hours = 12*60*60
     seconds_in_24_hours = 24*60*60
@@ -136,7 +138,7 @@ defmodule Transit do
 
       CalendarDate.changeset(%CalendarDate{},  params)
       |> Repo.insert!()
-    end, max_concurrency: 20)
+    end, max_concurrency: @connections)
     |> Enum.map(fn({:ok, calendar_date}) ->
       calendar_date
     end)
@@ -163,7 +165,7 @@ defmodule Transit do
 
       Route.changeset(%Route{},  params)
       |> Repo.insert!()
-    end, max_concurrency: 20)
+    end, max_concurrency: @connections)
     |> Enum.map(fn({:ok, route}) ->
       route
     end)
@@ -201,7 +203,7 @@ defmodule Transit do
         Trip.changeset(%Trip{}, params)
         |> Repo.insert!()
       end,
-      max_concurrency: 20
+      max_concurrency: @connections
     )
     |> Enum.map(fn {:ok, trip} ->
       trip
@@ -230,7 +232,7 @@ defmodule Transit do
 
       Stop.changeset(%Stop{},  params)
       |> Repo.insert!()
-    end, max_concurrency: 20)
+    end, max_concurrency: @connections)
     |> Enum.map(fn({:ok, route}) ->
       route
     end)
@@ -281,7 +283,7 @@ defmodule Transit do
 
         Repo.insert_all(StopTime, inserts)
       end,
-      max_concurrency: 20
+      max_concurrency: @connections
     )
     |> Enum.map(fn {:ok, stop_time} ->
       stop_time
@@ -305,7 +307,7 @@ defmodule Transit do
 
       Shape.changeset(%Shape{},  params)
       |> Repo.insert!()
-    end, max_concurrency: 20)
+    end, max_concurrency: @connections)
     |> Enum.map(fn({:ok, shapes}) ->
       shapes
     end)
