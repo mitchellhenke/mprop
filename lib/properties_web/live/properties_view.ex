@@ -193,7 +193,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
   def get_properties(params) do
     {point, radius} = build_point_and_radius(params.latitude, params.longitude, params.radius)
     query = from(p in Assessment,
-      where: p.year == 2018,
+      where: p.year == 2020,
       order_by: [desc: p.last_assessment_amount],
       limit: 20)
       |> Assessment.filter_by_address(params.text_query)
