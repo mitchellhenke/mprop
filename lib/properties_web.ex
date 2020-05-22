@@ -55,8 +55,7 @@ defmodule PropertiesWeb do
       alias PropertiesWeb.ViewHelper
       import PropertiesWeb.ErrorHelpers
       import PropertiesWeb.Gettext
-      import Phoenix.LiveView, only: [live_render: 2, live_render: 3,
-        live_link: 1, live_link: 2]
+      import Phoenix.LiveView.Helpers
     end
   end
 

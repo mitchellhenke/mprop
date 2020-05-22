@@ -1,11 +1,16 @@
 defmodule PropertiesWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :properties
 
+  @session_options [
+    store: :cookie,
+    key: "_properties_key",
+    signing_salt: "qgYk+r/a"
+  ]
+
   socket "/socket", PropertiesWeb.UserSocket,
     websocket: [compress: true]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, check_origin: ["https://civics.mitchellhenke.com",
-    "https://mke-civics.herokuapp.com", "http://localhost:4000", "http://localhost:4000"]]
+  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -38,10 +43,7 @@ defmodule PropertiesWeb.Endpoint do
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
-  plug Plug.Session,
-    store: :cookie,
-    key: "_properties_key",
-    signing_salt: "qgYk+r/a"
+  plug Plug.Session, @session_options
 
   plug PropertiesWeb.Router
 end

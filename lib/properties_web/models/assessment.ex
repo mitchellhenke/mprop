@@ -198,6 +198,10 @@ schema "assessments" do
      )
   end
 
+  def select_only_tax_key(query) do
+    from(a in query, select: a.tax_key)
+  end
+
   defp transform_text_query(text_query) do
     String.upcase(text_query)
     |> String.split()

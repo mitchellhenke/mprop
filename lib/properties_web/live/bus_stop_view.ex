@@ -143,14 +143,14 @@ defmodule PropertiesWeb.BusStopLiveView do
   end
 
   def handle_event("change", %{"params" => params}, socket) do
-    {:noreply, live_redirect(socket, replace: true, to: PropertiesWeb.Router.Helpers.live_path(socket, __MODULE__, params))}
+    {:noreply, push_patch(socket, replace: true, to: PropertiesWeb.Router.Helpers.live_path(socket, __MODULE__, params))}
   end
 
   def handle_event(_, _value, socket) do
     {:noreply, socket}
   end
 
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     socket = assign(socket, :properties, [])
              |> assign(:stops, [])
              |> assign(:changeset, Params.change(%{date: Date.utc_today(), time: Time.utc_now(), radius_miles: 0.25}))

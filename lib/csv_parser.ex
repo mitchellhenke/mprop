@@ -198,33 +198,34 @@ defmodule Properties.CSVParser do
       address = "#{house_number_low} #{street_name}"
       full_address = "#{house_number_low}-#{house_number_high} #{street_name} #{city}"
 
-      assessments =
-        from(a in Properties.Assessment, where: a.year == 2020, limit: 2)
-        |> Properties.Assessment.filter_by_address(address)
-        |> Properties.Repo.all()
+      Properties.Repo.transaction fn ->
+        tax_keys =
+          from(a in Properties.Assessment, where: a.year == 2020, limit: 2)
+          |> Properties.Assessment.filter_by_address(address)
+          |> Properties.Assessment.select_only_tax_key()
+          |> Properties.Repo.all()
 
-      if :random.uniform() > 0.999 do
-        IO.inspect(address)
+        case tax_keys do
+          [tax_key] ->
+            sf = Properties.ShapeFile.get_by_tax_key(tax_key)
+
+            if sf do
+              Properties.LeadServiceLine.maybe_insert(tax_key, full_address, sf.geom)
+            else
+              Properties.LeadServiceLine.maybe_insert(tax_key, full_address, nil)
+              IO.inspect(tax_key)
+            end
+
+          _tax_keys = [_tax_key1  | [_tax_key2 | _]] ->
+            nil
+
+          [] ->
+            nil
+        end
       end
-
-      case assessments do
-        [assessment] ->
-          sf = Properties.ShapeFile.get_by_tax_key(assessment.tax_key)
-
-          if sf do
-            Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address, sf.geom)
-          else
-            Properties.LeadServiceLine.maybe_insert(assessment.tax_key, full_address, nil)
-            IO.inspect(assessment.tax_key)
-          end
-
-        _assessments = [_assessment1 | [_assessment2 | _]] ->
-          nil
-
-        [] ->
-          nil
-      end
-    end)
+    end,
+    max_concurrency: 10,
+    timeout: :infinity)
     |> Stream.run()
   end
 

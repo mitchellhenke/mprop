@@ -37,4 +37,4 @@ end
 #       WHEN 'PL' THEN 'PLACE'
 #       ELSE ''
 #       END
-#       , ''));
+#       , '')) where year = 2020;

@@ -97,7 +97,7 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
     {:noreply, socket}
   end
 
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     socket = assign(socket, :tickets, [])
     |> assign(:changeset, Params.change(%{}))
 

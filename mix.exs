@@ -4,7 +4,7 @@ defmodule Properties.Mixfile do
   def project do
     [app: :properties,
      version: "0.0.1",
-     elixir: "~> 1.6",
+     elixir: "~> 1.10",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -32,10 +32,10 @@ defmodule Properties.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.9"},
-      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix, "~> 1.5.0"},
+      {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
-      {:plug_cowboy, "~> 2.0"},
+      {:plug_cowboy, "~> 2.1"},
       {:plug, "~> 1.7"},
       {:phoenix_html, "~> 2.6"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
@@ -52,7 +52,7 @@ defmodule Properties.Mixfile do
       {:nimble_parsec, "~> 0.5.1"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
-      {:phoenix_live_view, "~> 0.1"},
+      {:phoenix_live_view, "~> 0.13.0"},
       {:oauther, "~> 1.1"},
       {:nimble_csv, "~> 0.6.0"},
       {:tzdata, "~> 1.0.1"}

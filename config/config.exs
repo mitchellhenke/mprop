@@ -19,8 +19,7 @@ config :properties, PropertiesWeb.Endpoint,
   http: [compress: true],
   secret_key_base: "5UUQajanov7iRJdsiR1T4JRYaniTXCTgBGtFXGmhvWJ20PHHQWCI2NR63B0664b4",
   render_errors: [view: PropertiesWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Properties.PubSub,
-    adapter: Phoenix.PubSub.PG2],
+  pubsub_server: Properties.PubSub,
   live_view: [
     signing_salt: "TlvpvGFzpO3J55/oVoHzGhOeFfZHU4f1"
   ]

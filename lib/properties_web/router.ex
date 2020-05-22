@@ -5,10 +5,10 @@ defmodule PropertiesWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
+    plug :fetch_live_flash
+    plug :put_root_layout, {PropertiesWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Phoenix.LiveView.Flash
-    plug :put_layout, {PropertiesWeb.LayoutView, :app}
   end
 
   pipeline :api do

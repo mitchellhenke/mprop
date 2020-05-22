@@ -5,21 +5,15 @@ defmodule Properties do
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
-    import Supervisor.Spec
-
-    # Define workers and child supervisors to be supervised
     children = [
-      # Start the Ecto repository
-      supervisor(Task.Supervisor, [[name: Properties.TaskSupervisor]]),
-      supervisor(Properties.Repo, []),
-      worker(Transit.RealtimeScraper, []),
+      {Task.Supervisor, name: Properties.TaskSupervisor},
+      Properties.Repo,
+      {Phoenix.PubSub, name: Properties.PubSub},
+      # worker(Transit.RealtimeScraper, []),
       Supervisor.child_spec({ConCache, name: :near_cache, ttl_check_interval: false}, id: :con_cache_near_cache),
       Supervisor.child_spec({ConCache, name: :lead_service_render_cache, ttl_check_interval: false}, id: :con_cache_lead_service_render_cache),
       Supervisor.child_spec({ConCache, name: :transit_cache, ttl_check_interval: false}, id: :con_cache_transit_cache),
-      # Start the endpoint when the application starts
-      supervisor(PropertiesWeb.Endpoint, []),
-      # Start your own worker by calling: Properties.Worker.start_link(arg1, arg2, arg3)
-      # worker(Properties.Worker, [arg1, arg2, arg3]),
+      PropertiesWeb.Endpoint,
     ]
 
 

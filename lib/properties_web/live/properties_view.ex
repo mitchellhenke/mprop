@@ -181,7 +181,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
     {:noreply, socket}
   end
 
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     socket = assign(socket, :properties, [])
     |> assign(:changeset, Params.change(%{}))
 
