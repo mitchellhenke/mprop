@@ -139,8 +139,7 @@ defmodule Transit.RealtimeScraper do
           {:ok, %Transit.RealtimePosition{vehicle_id: vehicle_id}} ->
             MapSet.put(set, vehicle_id)
 
-          e ->
-            Logger.error("Error adding realtime position: #{inspect(e)}")
+          _ ->
             set
         end
       end)
