@@ -9,7 +9,7 @@ defmodule Properties do
       {Task.Supervisor, name: Properties.TaskSupervisor},
       Properties.Repo,
       {Phoenix.PubSub, name: Properties.PubSub},
-      # worker(Transit.RealtimeScraper, []),
+      worker(Transit.RealtimeScraper, []),
       Supervisor.child_spec({ConCache, name: :near_cache, ttl_check_interval: false}, id: :con_cache_near_cache),
       Supervisor.child_spec({ConCache, name: :lead_service_render_cache, ttl_check_interval: false}, id: :con_cache_lead_service_render_cache),
       Supervisor.child_spec({ConCache, name: :transit_cache, ttl_check_interval: false}, id: :con_cache_transit_cache),
