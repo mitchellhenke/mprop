@@ -1,4 +1,5 @@
 defmodule Transit.RealtimeScraper do
+  require Logger
   import NimbleParsec
   use GenServer
 
@@ -13,7 +14,24 @@ defmodule Transit.RealtimeScraper do
 
   # @all_routes [@routes1, @routes2, @routes3, @routes4, @routes5, @routes6]
 
-  @detailed_routes1 ["GRE", "PUR", "BLU", "GOL", "RED", "12", "15", "19", "21", "22", "30", "30X", "51", "54", "57", "35", "67"]
+  @detailed_routes1 [
+    "GRE",
+    "PUR",
+    "BLU",
+    "GOL",
+    "RED",
+    "12",
+    "15",
+    "19",
+    "21",
+    "22",
+    "30",
+    "51",
+    "54",
+    "57",
+    "35",
+    "67"
+  ]
 
   def start_link(_ \\ nil) do
     GenServer.start_link(__MODULE__, nil)
@@ -28,10 +46,12 @@ defmodule Transit.RealtimeScraper do
   @impl true
   def handle_info(:get_all_positions, state) do
     start_time = System.monotonic_time()
+
     Enum.chunk_every(@detailed_routes1, 10)
-    |> Enum.each(fn(routes) ->
+    |> Enum.each(fn routes ->
       request_locations(routes)
     end)
+
     end_time = System.monotonic_time()
 
     diff = System.convert_time_unit(end_time - start_time, :native, :millisecond)
@@ -89,7 +109,8 @@ defmodule Transit.RealtimeScraper do
         {:ok, datetime} = DateTime.now("America/Chicago")
 
         datetime = %{
-          datetime | year: year,
+          datetime
+          | year: year,
             month: month,
             day: day,
             hour: hour,
@@ -118,7 +139,8 @@ defmodule Transit.RealtimeScraper do
           {:ok, %Transit.RealtimePosition{vehicle_id: vehicle_id}} ->
             MapSet.put(set, vehicle_id)
 
-          _ ->
+          e ->
+            Logger.error("Error adding realtime position: #{inspect(e)}")
             set
         end
       end)
@@ -135,6 +157,8 @@ defmodule Transit.RealtimeScraper do
           }
           |> URI.encode_query()
 
+        Logger.info("http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}")
+
         with {:ok, 200, _headers, client_ref} <-
                :hackney.get(
                  "http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}"
@@ -143,16 +167,16 @@ defmodule Transit.RealtimeScraper do
              {:ok, json} <- Jason.decode(body),
              {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
              {:ok, predictions} <- Map.fetch(bustime_response, "prd") do
-
-          predictions = Enum.group_by(predictions, fn(%{"vid" => vid}) ->
-            vid
-          end)
-          |> Enum.map(fn({_vid, predictions}) ->
-            Enum.sort_by(predictions, fn(pred) ->
-              Map.get(pred, "tmstmp")
+          predictions =
+            Enum.group_by(predictions, fn %{"vid" => vid} ->
+              vid
             end)
-            |> List.first()
-          end)
+            |> Enum.map(fn {_vid, predictions} ->
+              Enum.sort_by(predictions, fn pred ->
+                Map.get(pred, "tmstmp")
+              end)
+              |> List.first()
+            end)
 
           Enum.each(predictions, fn prediction ->
             %{
@@ -164,7 +188,7 @@ defmodule Transit.RealtimeScraper do
               "stpid" => stop_id,
               "dstp" => dist_from_stop,
               "dly" => delay,
-              "tablockid" => block_id,
+              "tablockid" => block_id
             } = prediction
 
             {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
@@ -188,7 +212,7 @@ defmodule Transit.RealtimeScraper do
             {:ok, prediction_datetime} = DateTime.now("America/Chicago")
 
             prediction_datetime = %{
-             prediction_datetime
+              prediction_datetime
               | year: year,
                 month: month,
                 day: day,
@@ -212,8 +236,14 @@ defmodule Transit.RealtimeScraper do
             Transit.RealtimePrediction.changeset(%Transit.RealtimePrediction{}, attrs)
             |> Properties.Repo.insert()
           end)
+        else
+          e ->
+          Logger.error("Error downloading realtime predictions: #{inspect(e)}")
         end
       end)
+    else
+      e ->
+      Logger.error("Error downloading realtime position: #{inspect(e)}")
     end
   end
 end
