@@ -156,8 +156,6 @@ defmodule Transit.RealtimeScraper do
           }
           |> URI.encode_query()
 
-        Logger.info("http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}")
-
         with {:ok, 200, _headers, client_ref} <-
                :hackney.get(
                  "http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}"
