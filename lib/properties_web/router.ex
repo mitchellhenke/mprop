@@ -20,6 +20,7 @@ defmodule PropertiesWeb.Router do
 
     get "/twitter", TwitterController, :crc
     post "/twitter", TwitterController, :index
+    post "/civ_webhook", PageController, :civ_webhook
   end
 
   scope "/api", PropertiesWeb do
@@ -35,6 +36,7 @@ defmodule PropertiesWeb.Router do
   scope "/", PropertiesWeb do
     pipe_through :browser # Use the default browser stack
 
+    get "/civ_turns", PageController, :civ_turns
     get "/", PageController, :index
     live "/parking_tickets", ParkingTicketsLiveView
 

@@ -52,10 +52,12 @@ defmodule Properties.Mixfile do
       {:nimble_parsec, "~> 0.5.1"},
       {:brotli, ">= 0.0.0"},
       {:con_cache, ">= 0.0.0"},
-      {:phoenix_live_view, "~> 0.13.0"},
+      {:phoenix_live_view, "~> 0.15.0"},
       {:oauther, "~> 1.1"},
       {:nimble_csv, "~> 0.6.0"},
-      {:tzdata, "~> 1.0.1"}
+      {:tzdata, "~> 1.0.1"},
+      {:redix, ">= 0.0.0"},
+      {:castore, ">= 0.0.0"}
     ]
   end
 
