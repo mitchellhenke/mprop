@@ -24,22 +24,29 @@ defmodule Properties.Twilio do
     )
   end
 
-  def send_message(conversation_sid, body) do
-    body = [
-      {"Body", body}
-    ]
+  def send_message(body) do
+    Enum.each(phone_numbers(), fn number ->
+      body = [
+        {"Body", body},
+        {"From", twilio_number()},
+        {"To", number}
+      ]
 
-    :hackney.post(
-      "https://conversations.twilio.com/v1/Conversations/#{conversation_sid}/Messages",
-      [auth_header()],
-      {:form, body}
-    )
+      account_sid = System.get_env("TWILIO_ACCOUNT_SID")
+      url = "https://api.twilio.com/2010-04-01/Accounts/#{account_sid}/Messages"
+
+      :hackney.post(
+        url,
+        [auth_header()],
+        {:form, body}
+      )
+    end)
   end
 
   defp auth_header do
     account_sid = System.get_env("TWILIO_ACCOUNT_SID")
     auth_token = System.get_env("TWILIO_AUTH_TOKEN")
-    authorization =  Base.encode64("#{account_sid}:#{auth_token}")
+    authorization = Base.encode64("#{account_sid}:#{auth_token}")
     {"Authorization", "Basic #{authorization}"}
   end
 
@@ -47,7 +54,14 @@ defmodule Properties.Twilio do
     "CH27ea089ce6d840bea12279f49360f374"
   end
 
-  def twilio_number do
+  defp twilio_number do
     "+15413591561"
+  end
+
+  defp phone_numbers do
+    [
+      "+14147596611",
+      "+12622259396"
+    ]
   end
 end

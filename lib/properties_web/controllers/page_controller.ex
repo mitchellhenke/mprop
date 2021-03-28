@@ -17,7 +17,6 @@ defmodule PropertiesWeb.PageController do
     url = PropertiesWeb.Router.Helpers.page_url(conn, :civ_turns, %{game: game_name})
 
     Properties.Twilio.send_message(
-      Properties.Twilio.test_game_conversation_sid(),
       "It is #{player_name}'s turn in #{game_name}. The current turn number is #{turn_number}. See turns at #{url}."
     )
 
