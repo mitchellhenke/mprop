@@ -108,21 +108,20 @@ defmodule PropertiesWeb.PageController do
     html(conn, html)
   end
 
-  def existing_turns(game_name) do
+  defp existing_turns(game_name) do
     data = Redix.command!(:redix, ["GET", "#{game_name}_game_data"])
     if data do
       :zlib.uncompress(data)
       |> :erlang.binary_to_term()
-      |> Enum.map(fn
-        ([game, player, turn, date_string]) -> [player, turn, NaiveDateTime.from_iso8601!(date_string)]
-        ([player, turn, date_string]) -> [player, turn, NaiveDateTime.from_iso8601!(date_string)]
+      |> Enum.map(fn([player, turn, date_string]) ->
+        [player, turn, NaiveDateTime.from_iso8601!(date_string)]
       end)
     else
       []
     end
   end
 
-  def save_turns(game_name, turns) do
+  defp save_turns(game_name, turns) do
     turns_binary = turns
                    |> Enum.map(fn([player, turn, time]) ->
                      [player, turn, NaiveDateTime.to_iso8601(time)]
@@ -147,7 +146,18 @@ defmodule PropertiesWeb.PageController do
     [_, _, first_turn_time] = List.last(turns)
 
     total_seconds = NaiveDateTime.diff(NaiveDateTime.utc_now(), first_turn_time)
+    format_time_diff(total_seconds)
+  end
 
+  defp time_diff_seconds(old_time, [[_, _, new_time]]) do
+    NaiveDateTime.diff(new_time, old_time)
+  end
+
+  defp time_diff_seconds(old_time, _) do
+    NaiveDateTime.diff(NaiveDateTime.utc_now(), old_time)
+  end
+
+  defp format_time_diff(total_seconds) do
     days = div(total_seconds, 86400)
 
     hours = rem(total_seconds, 86400)
@@ -158,43 +168,15 @@ defmodule PropertiesWeb.PageController do
     seconds = rem(total_seconds, 3600)
               |> rem(60)
 
-    if days > 0 do
-      "#{days}, #{hours} hours, #{minutes} minutes, #{seconds} seconds"
-    else
-      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    cond do
+      days > 0 ->
+        "#{days} days, #{hours} hours, #{minutes} minutes"
+      hours > 0 ->
+        "#{hours} hours, #{minutes} minutes"
+      minutes > 0 ->
+        "#{minutes} minutes, #{seconds} seconds"
+      true ->
+      "#{seconds} seconds"
     end
-  end
-
-  defp time_diff_seconds(old_time, [[_, _, _, new_time]]) do
-    NaiveDateTime.diff(new_time, old_time)
-  end
-
-  defp time_diff_seconds(old_time, _) do
-    NaiveDateTime.diff(NaiveDateTime.utc_now(), old_time)
-  end
-
-  defp format_time_diff(total_seconds) do
-    hours = div(total_seconds, 3600)
-
-    minutes = rem(total_seconds, 3600)
-              |> div(60)
-    seconds = rem(total_seconds, 3600)
-              |> rem(60)
-
-    if hours > 0 do
-      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
-    else
-      "#{minutes} minutes, #{seconds} seconds"
-    end
-  end
-
-  def convert_rows(game_name) do
-    existing_turns = existing_turns(game_name)
-    new_turns = Enum.map(existing_turns, fn
-      ([_game_name, player_name, turn_number, time]) -> [player_name, turn_number, time]
-      ([player_name, turn_number, time]) -> [player_name, turn_number, time]
-    end)
-
-    save_turns(game_name, new_turns)
   end
 end
