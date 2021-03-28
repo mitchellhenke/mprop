@@ -10,7 +10,7 @@ defmodule PropertiesWeb.PageController do
     %{"value1" => game_name, "value2" => player_name, "value3" => turn_number} =
       params
 
-    new_row = [game_name, player_name, turn_number, NaiveDateTime.utc_now()]
+    new_row = [player_name, turn_number, NaiveDateTime.utc_now()]
     existing_turns = existing_turns(game_name)
     save_turns(game_name, [new_row | existing_turns])
 
@@ -31,19 +31,19 @@ defmodule PropertiesWeb.PageController do
                      |> Enum.reverse()
                      |> Enum.chunk_every(2, 1)
                      |> Enum.reverse()
-                     |> Enum.map(fn([[game, player, turn, time] | next_turn]) ->
+                     |> Enum.map(fn([[player, turn, time] | next_turn]) ->
                        turn_time = time_diff_seconds(time, next_turn)
-                       [game, player, turn, time, turn_time]
+                       [player, turn, time, turn_time]
                      end)
 
-    player_averages = Enum.group_by(existing_turns, fn([_, player, _turn, _time, _turn_time]) ->
+    player_averages = Enum.group_by(existing_turns, fn([player, _turn, _time, _turn_time]) ->
       player
     end)
     |> Enum.map(fn({player, turns}) ->
       average_seconds = if Enum.count(turns) == 0 do
         0
       else
-        turn_times = Enum.map(turns, fn(turn) -> Enum.at(turn, 4) end)
+        turn_times = Enum.map(turns, fn(turn) -> Enum.at(turn, 3) end)
         (Enum.sum(turn_times) / Enum.count(turns))
         |> round()
       end
@@ -75,7 +75,7 @@ defmodule PropertiesWeb.PageController do
               </tr>
           </thead>
           <tbody>
-            <%= Enum.map(existing_turns, fn([_, player, turn, time, turn_time_seconds]) -> %>
+            <%= Enum.map(existing_turns, fn([player, turn, time, turn_time_seconds]) -> %>
               <tr>
               <td><%= player %></td>
               <td><%= turn %></td>
@@ -108,23 +108,24 @@ defmodule PropertiesWeb.PageController do
     html(conn, html)
   end
 
-  defp existing_turns(game_name) do
+  def existing_turns(game_name) do
     data = Redix.command!(:redix, ["GET", "#{game_name}_game_data"])
     if data do
       :zlib.uncompress(data)
       |> :erlang.binary_to_term()
-      |> Enum.map(fn([game, player, turn, date_string]) ->
-        [game, player, turn, NaiveDateTime.from_iso8601!(date_string)]
+      |> Enum.map(fn
+        ([game, player, turn, date_string]) -> [player, turn, NaiveDateTime.from_iso8601!(date_string)]
+        ([player, turn, date_string]) -> [player, turn, NaiveDateTime.from_iso8601!(date_string)]
       end)
     else
       []
     end
   end
 
-  defp save_turns(game_name, turns) do
+  def save_turns(game_name, turns) do
     turns_binary = turns
-                   |> Enum.map(fn([game, player, turn, time]) ->
-                     [game, player, turn, NaiveDateTime.to_iso8601(time)]
+                   |> Enum.map(fn([player, turn, time]) ->
+                     [player, turn, NaiveDateTime.to_iso8601(time)]
                    end)
                    |> :erlang.term_to_binary()
                    |> :zlib.compress()
@@ -143,7 +144,7 @@ defmodule PropertiesWeb.PageController do
   end
 
   defp total_game_time(turns) do
-    [_, _, _, first_turn_time] = List.last(turns)
+    [_, _, first_turn_time] = List.last(turns)
 
     total_seconds = NaiveDateTime.diff(NaiveDateTime.utc_now(), first_turn_time)
 
@@ -185,5 +186,15 @@ defmodule PropertiesWeb.PageController do
     else
       "#{minutes} minutes, #{seconds} seconds"
     end
+  end
+
+  def convert_rows(game_name) do
+    existing_turns = existing_turns(game_name)
+    new_turns = Enum.map(existing_turns, fn
+      ([_game_name, player_name, turn_number, time]) -> [player_name, turn_number, time]
+      ([player_name, turn_number, time]) -> [player_name, turn_number, time]
+    end)
+
+    save_turns(game_name, new_turns)
   end
 end
