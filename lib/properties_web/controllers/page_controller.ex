@@ -26,16 +26,26 @@ defmodule PropertiesWeb.PageController do
   def civ_turns(conn, params) do
     game_name = Map.get(params, "game", "My game")
     existing_turns = existing_turns(game_name)
+    total_game_time = total_game_time(existing_turns)
+    existing_turns = existing_turns
                      |> Enum.reverse()
                      |> Enum.chunk_every(2, 1)
                      |> Enum.reverse()
     html = ~E"""
     <!DOCTYPE html>
     <html lang="en">
+    <head>
+      <meta charset="utf-8"/>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
     <body>
       <h1>
         <%= game_name %>
       </h1>
+      <h2>
+        <%= total_game_time %>
+      </h2>
       <table>
           <thead>
               <tr>
@@ -93,6 +103,32 @@ defmodule PropertiesWeb.PageController do
     |> Calendar.strftime("%b %d, %Y %I:%M:%S %p")
   end
 
+  defp total_game_time([]) do
+    ""
+  end
+
+  defp total_game_time(turns) do
+    [_, _, _, first_turn_time] = List.last(turns)
+
+    total_seconds = NaiveDateTime.diff(NaiveDateTime.utc_now(), first_turn_time)
+
+    days = div(total_seconds, 86400)
+
+    hours = rem(total_seconds, 86400)
+            |> div(3600)
+
+    minutes = rem(total_seconds, 3600)
+              |> div(60)
+    seconds = rem(total_seconds, 3600)
+              |> rem(60)
+
+    if days > 0 do
+      "#{days}, #{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    else
+      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    end
+  end
+
   defp time_diff(old_time, [[_, _, _, new_time]]) do
     total_seconds = NaiveDateTime.diff(new_time, old_time)
     hours = div(total_seconds, 3600)
@@ -102,7 +138,11 @@ defmodule PropertiesWeb.PageController do
     seconds = rem(total_seconds, 3600)
               |> rem(60)
 
-    "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    if hours > 0 do
+      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    else
+      "#{minutes} minutes, #{seconds} seconds"
+    end
   end
 
   defp time_diff(old_time, _) do
@@ -114,6 +154,10 @@ defmodule PropertiesWeb.PageController do
     seconds = rem(total_seconds, 3600)
               |> rem(60)
 
-    "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    if hours > 0 do
+      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
+    else
+      "#{minutes} minutes, #{seconds} seconds"
+    end
   end
 end
