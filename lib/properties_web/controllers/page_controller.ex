@@ -27,6 +27,9 @@ defmodule PropertiesWeb.PageController do
   def civ_turns(conn, params) do
     game_name = Map.get(params, "game", "My game")
     existing_turns = existing_turns(game_name)
+                     |> Enum.reverse()
+                     |> Enum.chunk_every(2, 1)
+                     |> Enum.reverse()
     html = ~E"""
     <!DOCTYPE html>
     <html lang="en">
@@ -39,17 +42,17 @@ defmodule PropertiesWeb.PageController do
               <tr>
                   <th>Player</th>
                   <th>Turn</th>
-                  <th>Time</th>
-                  <th>Time</th>
+                  <th>Start Time</th>
+                  <th>Turn Length</th>
               </tr>
           </thead>
           <tbody>
-          <%= Enum.map(Enum.chunk_every(existing_turns, 2, 1), fn([[_, player, turn, time] | next]) -> %>
+          <%= Enum.map(existing_turns, fn([[_, player, turn, time] | next_turn]) -> %>
             <tr>
             <td><%= player %></td>
             <td><%= turn %></td>
             <td><%= format_naive_date_time(time) %></td>
-            <td><%= time_diff(time, next) %></td>
+            <td><%= time_diff(time, next_turn) %></td>
             </tr>
             <% end) %>
           </tbody>
@@ -91,7 +94,7 @@ defmodule PropertiesWeb.PageController do
     |> Calendar.strftime("%b %d, %Y %I:%M:%S %p")
   end
 
-  defp time_diff(new_time, [[_, _, _, old_time]]) do
+  defp time_diff(old_time, [[_, _, _, new_time]]) do
     total_seconds = NaiveDateTime.diff(new_time, old_time)
     hours = div(total_seconds, 3600)
 
@@ -103,7 +106,15 @@ defmodule PropertiesWeb.PageController do
     "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
   end
 
-  defp time_diff(_new_time, h) do
-    ""
+  defp time_diff(old_time, _) do
+    total_seconds = NaiveDateTime.diff(NaiveDateTime.utc_now(), old_time)
+    hours = div(total_seconds, 3600)
+
+    minutes = rem(total_seconds, 3600)
+              |> div(60)
+    seconds = rem(total_seconds, 3600)
+              |> rem(60)
+
+    "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
   end
 end
