@@ -31,6 +31,25 @@ defmodule PropertiesWeb.PageController do
                      |> Enum.reverse()
                      |> Enum.chunk_every(2, 1)
                      |> Enum.reverse()
+                     |> Enum.map(fn([[game, player, turn, time] | next_turn]) ->
+                       turn_time = time_diff_seconds(time, next_turn)
+                       [game, player, turn, time, turn_time]
+                     end)
+
+    player_averages = Enum.group_by(existing_turns, fn([_, player, _turn, _time, _turn_time]) ->
+      player
+    end)
+    |> Enum.map(fn({player, turns}) ->
+      average_seconds = if Enum.count(turns) == 0 do
+        0
+      else
+        turn_times = Enum.map(turns, fn(turn) -> Enum.at(turn, 4) end)
+        (Enum.sum(turn_times) / Enum.count(turns))
+        |> round()
+      end
+
+      [player, average_seconds]
+    end)
     html = ~E"""
     <!DOCTYPE html>
     <html lang="en">
@@ -56,13 +75,29 @@ defmodule PropertiesWeb.PageController do
               </tr>
           </thead>
           <tbody>
-          <%= Enum.map(existing_turns, fn([[_, player, turn, time] | next_turn]) -> %>
-            <tr>
-            <td><%= player %></td>
-            <td><%= turn %></td>
-            <td><%= format_naive_date_time(time) %></td>
-            <td><%= time_diff(time, next_turn) %></td>
-            </tr>
+            <%= Enum.map(existing_turns, fn([_, player, turn, time, turn_time_seconds]) -> %>
+              <tr>
+              <td><%= player %></td>
+              <td><%= turn %></td>
+              <td><%= format_naive_date_time(time) %></td>
+              <td><%= format_time_diff(turn_time_seconds) %></td>
+              </tr>
+            <% end) %>
+          </tbody>
+      </table>
+      <table>
+          <thead>
+              <tr>
+                  <th>Player</th>
+                  <th>Average Turn Length</th>
+              </tr>
+          </thead>
+          <tbody>
+            <%= Enum.map(player_averages, fn([player, average_turn_time_seconds]) -> %>
+              <tr>
+              <td><%= player %></td>
+              <td><%= format_time_diff(average_turn_time_seconds) %></td>
+              </tr>
             <% end) %>
           </tbody>
       </table>
@@ -129,24 +164,15 @@ defmodule PropertiesWeb.PageController do
     end
   end
 
-  defp time_diff(old_time, [[_, _, _, new_time]]) do
-    total_seconds = NaiveDateTime.diff(new_time, old_time)
-    hours = div(total_seconds, 3600)
-
-    minutes = rem(total_seconds, 3600)
-              |> div(60)
-    seconds = rem(total_seconds, 3600)
-              |> rem(60)
-
-    if hours > 0 do
-      "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
-    else
-      "#{minutes} minutes, #{seconds} seconds"
-    end
+  defp time_diff_seconds(old_time, [[_, _, _, new_time]]) do
+    NaiveDateTime.diff(new_time, old_time)
   end
 
-  defp time_diff(old_time, _) do
-    total_seconds = NaiveDateTime.diff(NaiveDateTime.utc_now(), old_time)
+  defp time_diff_seconds(old_time, _) do
+    NaiveDateTime.diff(NaiveDateTime.utc_now(), old_time)
+  end
+
+  defp format_time_diff(total_seconds) do
     hours = div(total_seconds, 3600)
 
     minutes = rem(total_seconds, 3600)
