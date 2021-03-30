@@ -50,10 +50,6 @@ defmodule Properties.Twilio do
     {"Authorization", "Basic #{authorization}"}
   end
 
-  def test_game_conversation_sid do
-    "CH27ea089ce6d840bea12279f49360f374"
-  end
-
   defp twilio_number do
     "+15413591561"
   end
