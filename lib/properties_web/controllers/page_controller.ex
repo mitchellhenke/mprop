@@ -135,7 +135,7 @@ defmodule PropertiesWeb.PageController do
   defp format_naive_date_time(naive_date) do
     DateTime.from_naive!(naive_date, "Etc/UTC")
     |> DateTime.shift_zone!("America/Chicago")
-    |> Calendar.strftime("%b %d, %Y %I:%M:%S %p")
+    |> Calendar.strftime("%b %d, %I:%M:%S %p")
   end
 
   defp total_game_time([]) do
