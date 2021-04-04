@@ -57,7 +57,8 @@ defmodule Properties.Twilio do
   defp phone_numbers do
     [
       "+14147596611",
-      "+12622259396"
+      "+12622259396",
+      "+12628127094"
     ]
   end
 end

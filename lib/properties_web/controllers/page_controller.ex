@@ -108,7 +108,7 @@ defmodule PropertiesWeb.PageController do
     html(conn, html)
   end
 
-  defp existing_turns(game_name) do
+  def existing_turns(game_name) do
     data = Redix.command!(:redix, ["GET", "#{game_name}_game_data"])
     if data do
       :zlib.uncompress(data)
@@ -121,7 +121,7 @@ defmodule PropertiesWeb.PageController do
     end
   end
 
-  defp save_turns(game_name, turns) do
+  def save_turns(game_name, turns) do
     turns_binary = turns
                    |> Enum.map(fn([player, turn, time]) ->
                      [player, turn, NaiveDateTime.to_iso8601(time)]
