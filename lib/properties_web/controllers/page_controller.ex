@@ -10,15 +10,17 @@ defmodule PropertiesWeb.PageController do
   def civ_webhook(conn, params) do
     %{"value1" => game_name, "value2" => player_name, "value3" => turn_number} = params
 
-    new_row = [player_name, turn_number, NaiveDateTime.utc_now()]
+    is_locked =
+      Redix.command!(:redix, [
+        "SETNX",
+        "#{game_name}_#{player_name}_#{turn_number}_lock",
+        "#{NaiveDateTime.utc_now()}"
+      ])
+
     existing_turns = existing_turns(game_name)
+    new_row = [player_name, turn_number, NaiveDateTime.utc_now()]
 
-    is_duplicate_turn =
-      Enum.any?(existing_turns, fn turn ->
-        match?([^player_name, ^turn_number, _], turn)
-      end)
-
-    if is_duplicate_turn do
+    if is_locked == 0 do
       Logger.info("skipping duplicate for #{game_name}, #{player_name}, #{turn_number}")
       save_turns("#{game_name}_backup", [new_row | existing_turns])
     else
@@ -31,6 +33,8 @@ defmodule PropertiesWeb.PageController do
         }."
       )
     end
+
+    Redix.command!(:redix, ["EXPIRE", "#{game_name}_#{player_name}_#{turn_number}_lock", "10"])
 
     send_resp(conn, 201, "")
   end
