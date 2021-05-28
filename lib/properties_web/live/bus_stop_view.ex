@@ -201,7 +201,7 @@ defmodule PropertiesWeb.BusStopLiveView do
       [property | _rest] ->
         meters = params.radius_miles * 1609.34
         point = %Geo.Point{coordinates: {property.longitude, property.latitude}, srid: 4326}
-        feed = Feed.get_first_after_date(params.date)
+        feed = Feed.get_first_before_date(params.date)
         Stop.get_nearest(point, meters, params.date, params.time, feed.id)
 
       [] ->

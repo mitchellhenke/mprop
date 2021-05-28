@@ -21,8 +21,8 @@ defmodule Transit.Feed do
     |> Repo.insert(on_conflict: {:replace, [:date]}, conflict_target: :date, returning: true)
   end
 
-  def get_first_after_date(date) do
-    from(f in Transit.Feed, where: f.date < ^date, order_by: [desc: f.date], limit: 1)
+  def get_first_before_date(date) do
+    from(f in Transit.Feed, where: f.date <= ^date, order_by: [desc: f.date], limit: 1)
     |> Repo.one()
   end
 end

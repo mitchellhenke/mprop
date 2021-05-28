@@ -5,7 +5,7 @@ defmodule PropertiesWeb.TransitController do
 
   def index(conn, params) do
     date = Map.get(params, "date", Date.utc_today())
-    feed = Transit.Feed.get_first_after_date(date)
+    feed = Transit.Feed.get_first_before_date(date)
     routes = Route.list_all(feed)
     render(conn, "index.html", routes: routes)
   end
@@ -13,7 +13,7 @@ defmodule PropertiesWeb.TransitController do
   def trips(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today())
-    feed = Transit.Feed.get_first_after_date(date)
+    feed = Transit.Feed.get_first_before_date(date)
     route = Route.get_by_id!(feed, route_id)
 
     trips =
@@ -29,7 +29,7 @@ defmodule PropertiesWeb.TransitController do
   def route_headsign_shape(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today())
-    feed = Transit.Feed.get_first_after_date(date)
+    feed = Transit.Feed.get_first_before_date(date)
     route = Route.get_by_id!(feed, route_id)
     trips = Trip.get_by_route_and_date(route, date)
 
@@ -48,7 +48,7 @@ defmodule PropertiesWeb.TransitController do
   def stop_times_comparison(conn, params) do
     route_id = Map.fetch!(params, "id")
     date = Map.get(params, "date", Date.utc_today())
-    feed = Transit.Feed.get_first_after_date(date)
+    feed = Transit.Feed.get_first_before_date(date)
     route = Route.get_by_id!(feed, route_id)
 
     trips =
@@ -106,9 +106,9 @@ defmodule PropertiesWeb.TransitController do
   end
 
   def dashboard(conn, params) do
-    date = Map.get(params, "date", ~D[2013-12-16])
+    date = Map.get(params, "date", Date.utc_today())
 
-    feed = Transit.Feed.get_first_after_date(date)
+    feed = Transit.Feed.get_first_before_date(date)
 
     data =
       ConCache.get_or_store(:transit_cache, "dashboard-#{date}", fn ->
