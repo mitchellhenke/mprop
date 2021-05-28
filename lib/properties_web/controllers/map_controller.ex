@@ -5,7 +5,6 @@ defmodule PropertiesWeb.MapController do
   plug PropertiesWeb.Plugs.Location when action in [:neighborhood]
   action_fallback PropertiesWeb.FallbackController
 
-
   def index(conn, _params) do
     render(conn, "index.html")
   end

@@ -2,8 +2,8 @@ defmodule Properties.Property do
   use Ecto.Schema
 
   schema "properties" do
-    field :tax_key, :string
-    has_many :assessments, Properties.Assessment
+    field(:tax_key, :string)
+    has_many(:assessments, Properties.Assessment)
     timestamps()
   end
 

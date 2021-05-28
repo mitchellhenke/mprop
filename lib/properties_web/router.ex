@@ -6,7 +6,6 @@ defmodule PropertiesWeb.Router do
     plug :fetch_session
     plug :fetch_flash
     plug :fetch_live_flash
-    plug :put_root_layout, {PropertiesWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -24,7 +23,8 @@ defmodule PropertiesWeb.Router do
   end
 
   scope "/api", PropertiesWeb do
-    pipe_through :api # Use the default browser stack
+    # Use the default browser stack
+    pipe_through :api
 
     get "/assessments", AssessmentController, :index
     get "/assessments/:id", AssessmentController, :show
@@ -34,7 +34,8 @@ defmodule PropertiesWeb.Router do
   end
 
   scope "/", PropertiesWeb do
-    pipe_through :browser # Use the default browser stack
+    # Use the default browser stack
+    pipe_through :browser
 
     get "/civ_turns", PageController, :civ_turns
     get "/", PageController, :index

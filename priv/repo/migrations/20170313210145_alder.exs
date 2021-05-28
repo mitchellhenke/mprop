@@ -3,7 +3,7 @@ defmodule Properties.Repo.Migrations.Alder do
 
   def change do
     alter table(:properties) do
-      add :geo_alder, :string
+      add(:geo_alder, :string)
     end
   end
 end

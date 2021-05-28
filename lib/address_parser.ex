@@ -60,45 +60,65 @@ defmodule Properties.AddressParser do
   end
 
   def validate_addresses() do
-    addresses = from(a in Properties.Assessment, where: a.year == 2017)
-    |> Properties.Repo.all()
-    |> Enum.map(fn(x) ->
-      "#{x.house_number_low} #{x.street_direction} #{x.street} #{x.street_type}"
-      |> String.trim()
-    end)
+    start = :erlang.monotonic_time()
 
-    IO.inspect("validating #{Enum.count(addresses)} at #{NaiveDateTime.utc_now()}")
-    results = Enum.map(addresses, fn address ->
-      {address, parse_address(address)}
-    end)
-    IO.inspect("done validating #{Enum.count(addresses)} at #{NaiveDateTime.utc_now()}")
-    results
+    addresses =
+      from(a in "lol_material_view", select: a.address, where: not is_nil(a.address))
+      |> Properties.Repo.all()
+
+    # |> Enum.map(fn(x) ->
+    #   "#{x.house_number_low} #{x.street_direction} #{x.street} #{x.street_type}"
+    #   |> String.trim()
+    # end)
+
+    results =
+      Enum.map(addresses, fn address ->
+        {address, parse_address(address)}
+      end)
+
+    end_time = :erlang.monotonic_time()
+
+    System.convert_time_unit(end_time - start, :native, :millisecond)
+    |> IO.inspect(label: "MILLISECONDS")
+
+    IO.inspect(Enum.count(addresses))
+    # IO.inspect("done validating #{Enum.count(addresses)} at #{NaiveDateTime.utc_now()}")
   end
 
-  @spec parse(String.t) :: String.t | {:error, term()}
+  @spec parse(String.t()) :: String.t() | {:error, term()}
   def parse(nil), do: {:error, :invalid_address}
   def parse(""), do: {:error, :invalid_address}
+
   def parse(address) do
     address = String.upcase(address)
+
     case parse_address(address) do
       {:ok, address_parts, _, _, _, _} ->
         street_number = Keyword.get(address_parts, :street_number)
         street_direction = Keyword.get(address_parts, :street_direction)
-        street_name = Keyword.get(address_parts, :street_name)
-                      |> Enum.join(" ")
 
-        street_type = Keyword.get(address_parts, :street_type)
-                      |> replace_street_type()
+        street_name =
+          Keyword.get(address_parts, :street_name)
+          |> Enum.join(" ")
+
+        street_type =
+          Keyword.get(address_parts, :street_type)
+          |> replace_street_type()
 
         street_name_results = Properties.Indexer.search(street_name)
 
-        {new_street_name, score} = case street_name_results do
-          [{best, score} | _] ->
-            {best, score}
-          [] -> {street_name, 1.0}
-        end
+        {new_street_name, score} =
+          case street_name_results do
+            [{best, score} | _] ->
+              {best, score}
 
-        {:ok, {String.trim("#{street_number} #{street_direction} #{new_street_name} #{street_type}"), score}}
+            [] ->
+              {street_name, 1.0}
+          end
+
+        {:ok,
+         {String.trim("#{street_number} #{street_direction} #{new_street_name} #{street_type}"),
+          score}}
 
       {:error, _, _, _, _, _} ->
         {:error, :invalid_address}

@@ -3,7 +3,7 @@ defmodule MilwaukeeProperties.Repo.Migrations.NumberUnits do
 
   def change do
     alter table(:properties) do
-      add :number_units, :integer
+      add(:number_units, :integer)
     end
   end
 end

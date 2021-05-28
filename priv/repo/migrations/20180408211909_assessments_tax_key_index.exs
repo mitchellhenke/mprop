@@ -3,6 +3,6 @@ defmodule Properties.Repo.Migrations.AssessmentsTaxKeyIndex do
   @disable_ddl_transaction true
 
   def change do
-    create index("assessments", [:tax_key], concurrently: true)
+    create(index("assessments", [:tax_key], concurrently: true))
   end
 end

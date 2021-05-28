@@ -7,12 +7,12 @@ defmodule Transit.Shape do
   @schema_prefix "gtfs"
   @primary_key false
   schema "shapes" do
-    field :shape_id, :string
-    field :shape_pt_lat, :float
-    field :shape_pt_lon, :float
-    field :shape_pt_sequence, :integer
+    field(:shape_id, :string)
+    field(:shape_pt_lat, :float)
+    field(:shape_pt_lon, :float)
+    field(:shape_pt_sequence, :integer)
 
-    belongs_to :feed, Transit.Feed
+    belongs_to(:feed, Transit.Feed)
   end
 
   def changeset(struct, params \\ %{}) do
@@ -29,6 +29,6 @@ defmodule Transit.Shape do
 
   def get_by_id!(id) do
     from(r in Transit.Shape, where: r.shape_id == ^id)
-    |> Repo.one!
+    |> Repo.one!()
   end
 end

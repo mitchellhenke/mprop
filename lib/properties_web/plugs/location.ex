@@ -9,4 +9,3 @@ defmodule PropertiesWeb.Plugs.Location do
     assign(conn, :location, location)
   end
 end
-

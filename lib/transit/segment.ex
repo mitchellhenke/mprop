@@ -29,57 +29,149 @@ defmodule Transit.Segment do
     # SOUTHRIDGE, South
     {"14", 1} => ["7754", "4526", "4539", "405", "410", "2066", "1093", "1162"],
     # OZAUKEE COUNTY EXP, North
-    {"143", 0} => ["381", "3057", "764", "744", "8348", "2399", "6682", "2752", "2756", "2754", "2796", "2755"],
+    {"143", 0} => [
+      "381",
+      "3057",
+      "764",
+      "744",
+      "8348",
+      "2399",
+      "6682",
+      "2752",
+      "2756",
+      "2754",
+      "2796",
+      "2755"
+    ],
     # DOWNTOWN MILWAUKEE, South
-    {"143", 1} => ["2755", "2796", "2754", "2756", "2752", "6683", "8069", "8420", "623", "7805", "3055", "5527"],
+    {"143", 1} => [
+      "2755",
+      "2796",
+      "2754",
+      "2756",
+      "2752",
+      "6683",
+      "8069",
+      "8420",
+      "623",
+      "7805",
+      "3055",
+      "5527"
+    ],
     # BAYSHORE, North
-    {"15", 0} => ["482", "1271", "1286", "1301", "1315", "722", "727", "736", "1243", "6064", "7754"],
+    {"15", 0} => [
+      "482",
+      "1271",
+      "1286",
+      "1301",
+      "1315",
+      "722",
+      "727",
+      "736",
+      "1243",
+      "6064",
+      "7754"
+    ],
     # CHICAGO/DREXEL, South
-    {"15", 1} => ["7754", "1027", "6026", "632", "641", "2776", "1427", "1439", "1454", "1469", "1544", "482"],
+    {"15", 1} => [
+      "7754",
+      "1027",
+      "6026",
+      "632",
+      "641",
+      "2776",
+      "1427",
+      "1439",
+      "1454",
+      "1469",
+      "1544",
+      "482"
+    ],
     # 1ST-MITCHELL, East
     {"17", 0} => ["7530", "1489", "2060", "1211", "2777"],
     # CANAL-ROUNDHOUSE, West
     {"17", 1} => ["2777", "1073", "2158", "7931", "7530"],
     # SILVER SPRING, North
-    {"19", 0} => ["1924", "7795", "2124", "2140", "334", "337", "1958", "1797", "1976", "6074", "7717"],
+    {"19", 0} => [
+      "1924",
+      "7795",
+      "2124",
+      "2140",
+      "334",
+      "337",
+      "1958",
+      "1797",
+      "1976",
+      "6074",
+      "7717"
+    ],
     # COLLEGE, South
-    {"19", 1} => ["7717", "1846", "1868", "4347", "1886", "286", "289", "2077", "2093", "7720", "1924"],
+    {"19", 1} => [
+      "7717",
+      "1846",
+      "1868",
+      "4347",
+      "1886",
+      "286",
+      "289",
+      "2077",
+      "2093",
+      "7720",
+      "1924"
+    ],
     # UWM, East
     {"21", 0} => ["7723", "2186", "2203", "2216", "2227", "3644", "3672", "2536"],
     # MAYFAIR, West
-    {"21", 1} => ["2536", "3672", "3668", "3682", "3693", "3705", "3721", "7723"],
+    {"21", 1} => ["2536", "3672", "3668", "3682", "3693", "3705", "3721", "7723"]
   }
 
   def get_segments(_date_time) do
-    date = ~D[2020-02-03]
+    date = ~D[2019-12-20]
     time = ~T[17:00:00.0]
 
     # t.route_id, t.trip_headsign, t.direction_id, t.shape_id
-    route_trips = Transit.routes_top_two(date)
-                  |> Enum.filter(&(&1.route_id != "137" && &1.route_id != "219" && !String.starts_with?(&1.route_id, "RR")))
+    route_trips =
+      Transit.routes_top_two(date)
+      |> Enum.filter(
+        &(&1.route_id != "137" && &1.route_id != "219" && !String.starts_with?(&1.route_id, "RR"))
+      )
 
-    Enum.map(route_trips, fn(route_trip = %{route_id: route_id, trip_headsign: headsign, direction_id: direction, shape_id: shape_id}) ->
-      stop_ids = Map.get(@stops_map, {route_id, direction})
-      if stop_ids do
-        trip = get_slowest_trip_for_hour(route_id, headsign, direction, shape_id, time)
-        if trip do
-          get_stuff(stop_ids, trip.trip_id, date, trip.start_time)
+    Enum.map(
+      route_trips,
+      fn route_trip = %{
+           route_id: route_id,
+           trip_headsign: headsign,
+           direction_id: direction,
+           shape_id: shape_id
+         } ->
+        stop_ids = Map.get(@stops_map, {route_id, direction})
+
+        if stop_ids do
+          trip = get_slowest_trip_for_hour(route_id, headsign, direction, shape_id, time)
+
+          if trip do
+            get_stuff(stop_ids, trip.trip_id, date, trip.start_time)
+          end
         end
       end
-    end)
-    |> Enum.reject(&(is_nil(&1)))
+    )
+    |> Enum.reject(&is_nil(&1))
     |> List.flatten()
   end
 
   def get_slowest_trip_for_hour(route_id, trip_headsign, direction_id, shape_id, time) do
     interval = Transit.time_to_interval(time)
-    from(t in Trip, where: t.route_id == ^route_id and t.trip_headsign == ^trip_headsign
-      and t.direction_id == ^direction_id and t.shape_id == ^shape_id and t.start_time <= ^interval and
-      t.end_time >= ^interval,
+
+    from(t in Trip,
+      where:
+        t.route_id == ^route_id and t.trip_headsign == ^trip_headsign and
+          t.direction_id == ^direction_id and t.shape_id == ^shape_id and
+          t.start_time <= ^interval and
+          t.end_time >= ^interval,
       order_by: [desc: t.length_seconds],
       limit: 1
     )
-    |> Repo.one
+    |> Repo.one()
   end
 
   def get_stuff(stop_ids, trip_id, date, start_time) do

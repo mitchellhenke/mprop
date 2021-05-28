@@ -1,7 +1,20 @@
 defmodule PropertiesWeb.PropertiesLiveView do
   defmodule Params do
-    defstruct [:year, :text_query, :min_bath, :max_bath, :num_units, :min_bed,
-      :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius]
+    defstruct [
+      :year,
+      :text_query,
+      :min_bath,
+      :max_bath,
+      :num_units,
+      :min_bed,
+      :max_bed,
+      :zip_code,
+      :land_use,
+      :parking_type,
+      :latitude,
+      :longitude,
+      :radius
+    ]
 
     def change(params) do
       types = %{
@@ -16,15 +29,27 @@ defmodule PropertiesWeb.PropertiesLiveView do
         radius: :float,
         zip_code: :string,
         land_use: :string,
-        parking_type: :string,
+        parking_type: :string
       }
 
       data = %Params{}
 
       {data, types}
-      |> Ecto.Changeset.cast(params, [:text_query, :min_bath, :max_bath,
-        :num_units, :min_bed, :max_bed, :zip_code, :land_use, :parking_type, :latitude, :longitude, :radius])
-        |> Ecto.Changeset.validate_number(:radius, less_than_or_equal_to: 2_000, greater_than: 0)
+      |> Ecto.Changeset.cast(params, [
+        :text_query,
+        :min_bath,
+        :max_bath,
+        :num_units,
+        :min_bed,
+        :max_bed,
+        :zip_code,
+        :land_use,
+        :parking_type,
+        :latitude,
+        :longitude,
+        :radius
+      ])
+      |> Ecto.Changeset.validate_number(:radius, less_than_or_equal_to: 2_000, greater_than: 0)
     end
 
     def update_location(changeset, params) do
@@ -32,7 +57,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Ecto.Changeset.validate_number(:radius, less_than_or_equal_to: 2_000, greater_than: 0)
     end
   end
-  use Phoenix.LiveView
+
+  use Phoenix.LiveView, layout: {PropertiesWeb.LayoutView, "live.html"}
   alias Properties.Assessment
   alias Properties.Repo
   use Phoenix.HTML
@@ -146,34 +172,51 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def handle_event("change", %{"params" => params}, socket) do
-   changeset = Params.change(params)
+    IO.inspect("LOL")
+    changeset = Params.change(params)
+
     case Ecto.Changeset.apply_action(changeset, :insert) do
       {:ok, params} ->
         properties = get_properties(params)
-        socket = assign(socket, :changeset, changeset)
-                 |> assign(:properties, properties)
+
+        socket =
+          assign(socket, :changeset, changeset)
+          |> assign(:properties, properties)
+
         {:noreply, socket}
+
       {:error, error_changeset} ->
         socket = assign(socket, :changeset, error_changeset)
         {:noreply, socket}
-   end
+    end
   end
 
   def handle_event("search_near_me:" <> tax_key, _value, socket) do
-    with %{latitude: lat, longitude: long} <- Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key)),
-         changeset <- Params.update_location(socket.assigns.changeset, %{latitude: lat, longitude: long, radius: 500}) do
+    with %{latitude: lat, longitude: long} <-
+           Enum.find(socket.assigns.properties, &(&1.tax_key == tax_key)),
+         changeset <-
+           Params.update_location(socket.assigns.changeset, %{
+             latitude: lat,
+             longitude: long,
+             radius: 500
+           }) do
       case Ecto.Changeset.apply_action(changeset, :insert) do
         {:ok, params} ->
           properties = get_properties(params)
-          socket = assign(socket, :changeset, changeset)
-                   |> assign(:properties, properties)
+
+          socket =
+            assign(socket, :changeset, changeset)
+            |> assign(:properties, properties)
+
           {:noreply, socket}
+
         {:error, error_changeset} ->
           socket = assign(socket, :changeset, error_changeset)
           {:noreply, socket}
       end
-    else _ ->
-      {:noreply, socket}
+    else
+      _ ->
+        {:noreply, socket}
     end
   end
 
@@ -182,8 +225,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, :properties, [])
-    |> assign(:changeset, Params.change(%{}))
+    socket =
+      assign(socket, :properties, [])
+      |> assign(:changeset, Params.change(%{}))
 
     properties = get_properties(%Params{})
     socket = assign(socket, :properties, properties)
@@ -192,10 +236,13 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
   def get_properties(params) do
     {point, radius} = build_point_and_radius(params.latitude, params.longitude, params.radius)
-    query = from(p in Assessment,
-      where: p.year == 2020,
-      order_by: [desc: p.last_assessment_amount],
-      limit: 20)
+
+    query =
+      from(p in Assessment,
+        where: p.year == 2020,
+        order_by: [desc: p.last_assessment_amount],
+        limit: 20
+      )
       |> Assessment.filter_by_address(params.text_query)
       |> Assessment.filter_greater_than(:bathrooms, params.min_bath)
       |> Assessment.filter_less_than(:bathrooms, params.max_bath)
@@ -208,16 +255,16 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.with_joined_shapefile()
       |> Assessment.select_latitude_longitude()
 
-    query = if point && radius do
-      query
-      |> Assessment.maybe_within(point, radius)
-    else
-      query
-    end
+    query =
+      if point && radius do
+        query
+        |> Assessment.maybe_within(point, radius)
+      else
+        query
+      end
 
     Repo.all(query, timeout: :infinity)
   end
-
 
   defp build_point_and_radius(latitude, longitude, radius_in_m) do
     if is_float(latitude) && is_float(longitude) && is_float(radius_in_m) do
@@ -225,9 +272,10 @@ defmodule PropertiesWeb.PropertiesLiveView do
     else
       {nil, nil}
     end
-
   end
+
   defp comma_separated_number(nil), do: nil
+
   defp comma_separated_number(num) do
     Regex.replace(@number_comma_regex, "#{num}", ",")
   end

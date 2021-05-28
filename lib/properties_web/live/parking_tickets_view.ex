@@ -5,7 +5,7 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
     def change(params) do
       types = %{
         date: :date,
-        license_plate: :string,
+        license_plate: :string
       }
 
       data = %Params{}
@@ -14,7 +14,8 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
       |> Ecto.Changeset.cast(params, [:date, :license_plate])
     end
   end
-  use Phoenix.LiveView
+
+  use Phoenix.LiveView, layout: {PropertiesWeb.LayoutView, "live.html"}
   alias Properties.ParkingTicket
   alias Properties.Repo
   use Phoenix.HTML
@@ -80,17 +81,22 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
   end
 
   def handle_event("change", %{"params" => params}, socket) do
-   changeset = Params.change(params)
+    changeset = Params.change(params)
+
     case Ecto.Changeset.apply_action(changeset, :insert) do
       {:ok, params} ->
         tickets = get_tickets(params)
-        socket = assign(socket, :changeset, changeset)
-                 |> assign(:tickets, tickets)
+
+        socket =
+          assign(socket, :changeset, changeset)
+          |> assign(:tickets, tickets)
+
         {:noreply, socket}
+
       {:error, error_changeset} ->
         socket = assign(socket, :changeset, error_changeset)
         {:noreply, socket}
-   end
+    end
   end
 
   def handle_event(_, _value, socket) do
@@ -98,8 +104,9 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
   end
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, :tickets, [])
-    |> assign(:changeset, Params.change(%{}))
+    socket =
+      assign(socket, :tickets, [])
+      |> assign(:changeset, Params.change(%{}))
 
     tickets = get_tickets(%Params{})
     socket = assign(socket, :tickets, tickets)
@@ -107,9 +114,11 @@ defmodule PropertiesWeb.ParkingTicketsLiveView do
   end
 
   def get_tickets(params) do
-    query = from(p in ParkingTicket,
-      order_by: [asc: p.date, asc: p.time],
-      limit: 2_000)
+    query =
+      from(p in ParkingTicket,
+        order_by: [asc: p.date, asc: p.time],
+        limit: 2_000
+      )
       |> ParkingTicket.filter_by_date(params.date)
       |> ParkingTicket.filter_by_license_plate(params.license_plate)
 

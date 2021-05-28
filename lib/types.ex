@@ -1,6 +1,8 @@
-Postgrex.Types.define(Properties.PostgresTypes,
-              [Geo.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
-              json: Jason)
+Postgrex.Types.define(
+  Properties.PostgresTypes,
+  [Geo.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
+  json: Jason
+)
 
 defmodule Interval do
   use Ecto.Type

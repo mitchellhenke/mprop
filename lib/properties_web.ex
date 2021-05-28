@@ -42,7 +42,8 @@ defmodule PropertiesWeb do
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/properties_web/templates",
+      use Phoenix.View,
+        root: "lib/properties_web/templates",
         namespace: PropertiesWeb
 
       # Import convenience functions from controllers

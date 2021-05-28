@@ -3,17 +3,19 @@ defmodule Properties.Repo.Migrations.AssessmentAddressSearch do
 
   def up do
     alter table("assessments") do
-      add :full_address_vector, :tsvector
+      add(:full_address_vector, :tsvector)
     end
 
-    execute "CREATE INDEX assessments_full_address_vector_gin_index ON assessments USING gin (full_address_vector);"
+    execute(
+      "CREATE INDEX assessments_full_address_vector_gin_index ON assessments USING gin (full_address_vector);"
+    )
   end
 
   def down do
-    execute "DROP INDEX assessments_full_address_vector_gin_index;"
+    execute("DROP INDEX assessments_full_address_vector_gin_index;")
 
     alter table("assessments") do
-      remove :full_address_vector
+      remove(:full_address_vector)
     end
   end
 end

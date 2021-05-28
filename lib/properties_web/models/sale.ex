@@ -2,12 +2,12 @@ defmodule Properties.Sale do
   use PropertiesWeb, :model
 
   schema "sales" do
-    belongs_to :property, Properties.Property
-    field :tax_key, :string
-    field :amount, :integer
-    field :date_time, :naive_datetime
-    field :style, :string
-    field :exterior, :string
+    belongs_to(:property, Properties.Property)
+    field(:tax_key, :string)
+    field(:amount, :integer)
+    field(:date_time, :naive_datetime)
+    field(:style, :string)
+    field(:exterior, :string)
 
     timestamps()
   end

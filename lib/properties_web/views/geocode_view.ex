@@ -12,7 +12,7 @@ defmodule PropertiesWeb.GeocodeView do
     %{
       address: Properties.Assessment.address(assessment),
       latitude: assessment.latitude,
-      longitude: assessment.longitude,
+      longitude: assessment.longitude
     }
   end
 end

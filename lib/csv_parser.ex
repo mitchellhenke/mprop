@@ -128,19 +128,22 @@ defmodule Properties.CSVParser do
       property = Properties.Repo.get_by(Properties.Property, tax_key: tax_key)
       last_sale_amount = String.replace(x["Sale_price"], ",", "")
 
-      last_sale_amount = if last_sale_amount == "NULL" do
-        0
-      else
-        last_sale_amount
-      end
+      last_sale_amount =
+        if last_sale_amount == "NULL" do
+          0
+        else
+          last_sale_amount
+        end
 
       # 3/11/2019
-      date = case String.split(x["Sale_date"], "/") do
-        [month, day, year] ->
-          "#{year}-#{String.pad_leading(month, 2, "0")}-#{String.pad_leading(day, 2, "0")} 00:00:00"
-        _ -> nil
-      end
+      date =
+        case String.split(x["Sale_date"], "/") do
+          [month, day, year] ->
+            "#{year}-#{String.pad_leading(month, 2, "0")}-#{String.pad_leading(day, 2, "0")} 00:00:00"
 
+          _ ->
+            nil
+        end
 
       attrs = %{
         property_id: (property && property.id) || nil,
@@ -192,40 +195,42 @@ defmodule Properties.CSVParser do
     |> Stream.filter(fn [_, _, _, _, city, _, _] ->
       city == "MILWAUKEE"
     end)
-    |> Task.async_stream(fn row ->
-      # House Number Low,EMPTY,House Number High,Street Name,City,State,Zip Code
-      [house_number_low, _, house_number_high, street_name, city, _state, _zip_code] = row
-      address = "#{house_number_low} #{street_name}"
-      full_address = "#{house_number_low}-#{house_number_high} #{street_name} #{city}"
+    |> Task.async_stream(
+      fn row ->
+        # House Number Low,EMPTY,House Number High,Street Name,City,State,Zip Code
+        [house_number_low, _, house_number_high, street_name, city, _state, _zip_code] = row
+        address = "#{house_number_low} #{street_name}"
+        full_address = "#{house_number_low}-#{house_number_high} #{street_name} #{city}"
 
-      Properties.Repo.transaction fn ->
-        tax_keys =
-          from(a in Properties.Assessment, where: a.year == 2020, limit: 2)
-          |> Properties.Assessment.filter_by_address(address)
-          |> Properties.Assessment.select_only_tax_key()
-          |> Properties.Repo.all()
+        Properties.Repo.transaction(fn ->
+          tax_keys =
+            from(a in Properties.Assessment, where: a.year == 2020, limit: 2)
+            |> Properties.Assessment.filter_by_address(address)
+            |> Properties.Assessment.select_only_tax_key()
+            |> Properties.Repo.all()
 
-        case tax_keys do
-          [tax_key] ->
-            sf = Properties.ShapeFile.get_by_tax_key(tax_key)
+          case tax_keys do
+            [tax_key] ->
+              sf = Properties.ShapeFile.get_by_tax_key(tax_key)
 
-            if sf do
-              Properties.LeadServiceLine.maybe_insert(tax_key, full_address, sf.geom)
-            else
-              Properties.LeadServiceLine.maybe_insert(tax_key, full_address, nil)
-              IO.inspect(tax_key)
-            end
+              if sf do
+                Properties.LeadServiceLine.maybe_insert(tax_key, full_address, sf.geom)
+              else
+                Properties.LeadServiceLine.maybe_insert(tax_key, full_address, nil)
+                IO.inspect(tax_key)
+              end
 
-          _tax_keys = [_tax_key1  | [_tax_key2 | _]] ->
-            nil
+            _tax_keys = [_tax_key1 | [_tax_key2 | _]] ->
+              nil
 
-          [] ->
-            nil
-        end
-      end
-    end,
-    max_concurrency: 10,
-    timeout: :infinity)
+            [] ->
+              nil
+          end
+        end)
+      end,
+      max_concurrency: 10,
+      timeout: :infinity
+    )
     |> Stream.run()
   end
 
@@ -238,6 +243,8 @@ defmodule Properties.CSVParser do
 
   defp parse_air("False"), do: 0
   defp parse_air("True"), do: 1
+  defp parse_air("0"), do: 0
+  defp parse_air("1"), do: 1
   defp parse_air(_), do: 0
 
   defp parse_int(int) do

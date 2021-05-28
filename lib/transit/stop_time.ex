@@ -6,37 +6,57 @@ defmodule Transit.StopTime do
   @primary_key false
 
   schema "stop_times" do
-    field :arrival_time, Interval
-    field :departure_time, Interval
-    field :stop_sequence, :integer
-    field :stop_headsign, :string
-    field :pickup_type, :integer
-    field :drop_off_type, :integer
-    field :timepoint, :integer
+    field(:arrival_time, Interval)
+    field(:departure_time, Interval)
+    field(:stop_sequence, :integer)
+    field(:stop_headsign, :string)
+    field(:pickup_type, :integer)
+    field(:drop_off_type, :integer)
+    field(:timepoint, :integer)
 
-    field :elixir_arrival_time, :time, virtual: true
-    field :elixir_departure_time, :time, virtual: true
+    field(:elixir_arrival_time, :time, virtual: true)
+    field(:elixir_departure_time, :time, virtual: true)
 
-    belongs_to :trip, Transit.Trip, references: :trip_id, foreign_key: :trip_id, type: :string
-    belongs_to :stop, Transit.Stop, references: :stop_id, foreign_key: :stop_id, type: :string
-    belongs_to :feed, Transit.Feed
+    belongs_to(:trip, Transit.Trip, references: :trip_id, foreign_key: :trip_id, type: :string)
+    belongs_to(:stop, Transit.Stop, references: :stop_id, foreign_key: :stop_id, type: :string)
+    belongs_to(:feed, Transit.Feed)
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:feed_id, :stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence, :stop_headsign, :pickup_type, :drop_off_type, :timepoint])
-    |> validate_required([:feed_id, :stop_id, :trip_id, :arrival_time, :departure_time, :stop_sequence])
+    |> cast(params, [
+      :feed_id,
+      :stop_id,
+      :trip_id,
+      :arrival_time,
+      :departure_time,
+      :stop_sequence,
+      :stop_headsign,
+      :pickup_type,
+      :drop_off_type,
+      :timepoint
+    ])
+    |> validate_required([
+      :feed_id,
+      :stop_id,
+      :trip_id,
+      :arrival_time,
+      :departure_time,
+      :stop_sequence
+    ])
     |> assoc_constraint(:feed)
   end
 
-
   def load_elixir_times(stop_times) when is_list(stop_times) do
-    Enum.map(stop_times, &(load_elixir_times(&1)))
+    Enum.map(stop_times, &load_elixir_times(&1))
   end
 
   def load_elixir_times(stop_time) do
-    %{stop_time | elixir_arrival_time: interval_to_time(stop_time.arrival_time),
-      elixir_departure_time: interval_to_time(stop_time.departure_time)}
+    %{
+      stop_time
+      | elixir_arrival_time: interval_to_time(stop_time.arrival_time),
+        elixir_departure_time: interval_to_time(stop_time.departure_time)
+    }
   end
 
   def seconds_between_stops(stop_times, stop_id_1, stop_id_2) do
@@ -52,11 +72,12 @@ defmodule Transit.StopTime do
     minutes = div(remaining, 60)
     seconds = rem(remaining, 60)
 
-    hours = if hours > 23 do
-      hours - 24
-    else
-      hours
-    end
+    hours =
+      if hours > 23 do
+        hours - 24
+      else
+        hours
+      end
 
     %Time{
       hour: hours,

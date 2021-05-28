@@ -235,12 +235,12 @@ defmodule Transit.RealtimeScraper do
           end)
         else
           e ->
-          Logger.error("Error downloading realtime predictions: #{inspect(e)}")
+            Logger.error("Error downloading realtime predictions: #{inspect(e)}")
         end
       end)
     else
       e ->
-      Logger.error("Error downloading realtime position: #{inspect(e)}")
+        Logger.error("Error downloading realtime position: #{inspect(e)}")
     end
   end
 end

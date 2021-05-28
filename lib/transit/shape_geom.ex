@@ -5,11 +5,11 @@ defmodule Transit.ShapeGeom do
   @schema_prefix "gtfs"
   @primary_key false
   schema "shape_geoms" do
-    field :shape_id, :string
-    field :length_meters, :float
-    field :geom_line, Geo.PostGIS.Geometry
+    field(:shape_id, :string)
+    field(:length_meters, :float)
+    field(:geom_line, Geo.PostGIS.Geometry)
 
-    belongs_to :feed, Transit.Feed
+    belongs_to(:feed, Transit.Feed)
   end
 
   def changeset(struct, params \\ %{}) do

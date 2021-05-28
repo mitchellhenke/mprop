@@ -23,17 +23,19 @@ defmodule PropertiesWeb.AssessmentView do
       other_assessments: maybe_render_assessments(assessment.other_assessments),
       sales: maybe_render_sales(assessment.sales),
       latitude: assessment.latitude,
-      longitude: assessment.longitude,
+      longitude: assessment.longitude
     }
   end
 
   def maybe_render_assessments(assessments) when is_list(assessments) do
     render_many(assessments, PropertiesWeb.AssessmentView, "show.json")
   end
+
   def maybe_render_assessments(_), do: nil
 
   def maybe_render_sales(assessments) when is_list(assessments) do
     render_many(assessments, PropertiesWeb.SaleView, "show.json")
   end
+
   def maybe_render_sales(_), do: nil
 end

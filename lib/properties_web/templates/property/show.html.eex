@@ -73,3 +73,55 @@
     </div>
   </div>
 </div>
+
+<div>
+  <h1>Similar Nearby Properties</h1>
+  <table class="table table-hover mt-2">
+    <thead>
+      <tr>
+        <th>Tax Key</th>
+        <th>Address</th>
+        <th>Bedrooms</th>
+        <th>Bathrooms</th>
+        <th>Lot Area</th>
+        <th>Property Area</th>
+        <th>Parking Type</th>
+        <th>Assessment</th>
+        <th>$/Sq. Ft</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for assessment <- @nearby_assessments do %>
+        <tr>
+          <td>
+            <%= Phoenix.HTML.Link.link(assessment.tax_key, to: PropertiesWeb.Router.Helpers.property_path(PropertiesWeb.Endpoint, :show, assessment.tax_key)) %>
+          </td>
+          <td>
+            <%= Properties.Assessment.address(assessment) %>
+          </td>
+          <td>
+            <%= assessment.number_of_bedrooms %>
+          </td>
+          <td>
+            <%= Properties.Assessment.bathroom_count(assessment) %>
+          </td>
+          <td>
+            <%= comma_separated_number(assessment.lot_area) %>
+          </td>
+          <td>
+            <%= comma_separated_number(assessment.building_area) %>
+          </td>
+          <td>
+            <%= assessment.parking_type %>
+          </td>
+          <td>
+            $<%= comma_separated_number(assessment.last_assessment_amount) %>
+          </td>
+          <td>
+            <%= assessment.last_assessment_amount / assessment.lot_area %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -7,17 +7,19 @@ defmodule PropertiesWeb.Endpoint do
     signing_salt: "qgYk+r/a"
   ]
 
-  socket "/socket", PropertiesWeb.UserSocket,
-    websocket: [compress: true]
+  socket "/socket", PropertiesWeb.UserSocket, websocket: [compress: true]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [compress: true, connect_info: [session: @session_options]]
+  socket "/live", Phoenix.LiveView.Socket,
+    websocket: [compress: true, connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phoenix.digest
   # when deploying your static files in production.
   plug Plug.Static,
-    at: "/", from: :properties, gzip: true,
+    at: "/",
+    from: :properties,
+    gzip: true,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the

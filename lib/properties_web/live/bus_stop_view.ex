@@ -15,10 +15,14 @@ defmodule PropertiesWeb.BusStopLiveView do
       {data, types}
       |> Ecto.Changeset.cast(params, [:text_query, :radius_miles, :date, :time])
       |> Ecto.Changeset.validate_required([:radius_miles, :date, :time])
-      |> Ecto.Changeset.validate_number(:radius_miles, less_than_or_equal_to: 1.25, greater_than: 0)
+      |> Ecto.Changeset.validate_number(:radius_miles,
+        less_than_or_equal_to: 1.25,
+        greater_than: 0
+      )
     end
   end
-  use Phoenix.LiveView
+
+  use Phoenix.LiveView, layout: {PropertiesWeb.LayoutView, "live.html"}
   alias Properties.Assessment
   alias Transit.{Feed, Stop}
   alias Properties.Repo
@@ -92,6 +96,7 @@ defmodule PropertiesWeb.BusStopLiveView do
         <table class="table table-hover mt-2">
           <thead>
             <tr>
+              <th>Stop</th>
               <th>Route</th>
               <th>Direction</th>
               <th>Stop Location</th>
@@ -101,6 +106,9 @@ defmodule PropertiesWeb.BusStopLiveView do
           <tbody>
             <%= for stop <- @stops do %>
               <tr>
+                <td>
+                  <%= stop.stop_id %>
+                </td>
                 <td>
                   <%= stop.route_id %>
                 </td>
@@ -128,14 +136,19 @@ defmodule PropertiesWeb.BusStopLiveView do
     default_params = %{"date" => date, "time" => time, "radius_miles" => 0.25}
     params = Map.merge(default_params, params)
     changeset = Params.change(params)
+
     case Ecto.Changeset.apply_action(changeset, :insert) do
       {:ok, params} ->
         properties = get_properties(params)
         stops = get_stops(properties, params)
-        socket = assign(socket, :changeset, changeset)
-                 |> assign(:stops, stops)
-                 |> assign(:properties, properties)
+
+        socket =
+          assign(socket, :changeset, changeset)
+          |> assign(:stops, stops)
+          |> assign(:properties, properties)
+
         {:noreply, socket}
+
       {:error, error_changeset} ->
         socket = assign(socket, :changeset, error_changeset)
         {:noreply, socket}
@@ -143,7 +156,11 @@ defmodule PropertiesWeb.BusStopLiveView do
   end
 
   def handle_event("change", %{"params" => params}, socket) do
-    {:noreply, push_patch(socket, replace: true, to: PropertiesWeb.Router.Helpers.live_path(socket, __MODULE__, params))}
+    {:noreply,
+     push_patch(socket,
+       replace: true,
+       to: PropertiesWeb.Router.Helpers.live_path(socket, __MODULE__, params)
+     )}
   end
 
   def handle_event(_, _value, socket) do
@@ -151,9 +168,14 @@ defmodule PropertiesWeb.BusStopLiveView do
   end
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, :properties, [])
-             |> assign(:stops, [])
-             |> assign(:changeset, Params.change(%{date: Date.utc_today(), time: Time.utc_now(), radius_miles: 0.25}))
+    socket =
+      assign(socket, :properties, [])
+      |> assign(:stops, [])
+      |> assign(
+        :changeset,
+        Params.change(%{date: Date.utc_today(), time: Time.utc_now(), radius_miles: 0.25})
+      )
+
     {:ok, socket}
   end
 
@@ -161,9 +183,11 @@ defmodule PropertiesWeb.BusStopLiveView do
     if is_nil(params.text_query) do
       []
     else
-      query = from(p in Assessment,
-        where: p.year == 2018,
-        limit: 6)
+      query =
+        from(p in Assessment,
+          where: p.year == 2018,
+          limit: 6
+        )
         |> Assessment.filter_by_address(params.text_query)
         |> Assessment.with_joined_shapefile()
         |> Assessment.select_latitude_longitude()
@@ -179,12 +203,14 @@ defmodule PropertiesWeb.BusStopLiveView do
         point = %Geo.Point{coordinates: {property.longitude, property.latitude}, srid: 4326}
         feed = Feed.get_first_after_date(params.date)
         Stop.get_nearest(point, meters, params.date, params.time, feed.id)
+
       [] ->
         []
     end
   end
 
   def bus_stops_near_header([]), do: "Bus Stops"
+
   def bus_stops_near_header([property | _]) do
     address = Assessment.address(property)
     "Bus Stops near #{address}"

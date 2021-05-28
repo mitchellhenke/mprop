@@ -7,23 +7,33 @@ defmodule Transit.Stop do
   @schema_prefix "gtfs"
   @primary_key false
   schema "stops" do
-    field :stop_id, :string
-    field :stop_name, :string
-    field :stop_lat, :float
-    field :stop_lon, :float
-    field :zone_id, :string
-    field :stop_url, :string
-    field :stop_desc, :string
-    field :stop_code, :string
-    field :timepoint, :string
-    field :route_ids, {:array, :string}
+    field(:stop_id, :string)
+    field(:stop_name, :string)
+    field(:stop_lat, :float)
+    field(:stop_lon, :float)
+    field(:zone_id, :string)
+    field(:stop_url, :string)
+    field(:stop_desc, :string)
+    field(:stop_code, :string)
+    field(:timepoint, :string)
+    field(:route_ids, {:array, :string})
 
-    belongs_to :feed, Transit.Feed
+    belongs_to(:feed, Transit.Feed)
   end
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:feed_id, :stop_id, :stop_name, :stop_lat, :stop_lon, :zone_id, :stop_url, :stop_desc, :timepoint])
+    |> cast(params, [
+      :feed_id,
+      :stop_id,
+      :stop_name,
+      :stop_lat,
+      :stop_lon,
+      :zone_id,
+      :stop_url,
+      :stop_desc,
+      :timepoint
+    ])
     |> validate_required([:feed_id, :stop_id, :stop_name, :stop_lat, :stop_lon])
     |> assoc_constraint(:feed)
   end
@@ -56,6 +66,7 @@ defmodule Transit.Stop do
 
   def get_nearest(point, radius_meters, date, time, feed_id) do
     interval = Transit.time_to_interval(time)
+
     {:ok, result} =
       Repo.query(
         """

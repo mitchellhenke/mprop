@@ -7,11 +7,11 @@ defmodule Transit.CalendarDate do
   @schema_prefix "gtfs"
   @primary_key false
   schema "calendar_dates" do
-    field :service_id, :string
-    field :date, :date
-    field :exception_type, :integer
+    field(:service_id, :string)
+    field(:date, :date)
+    field(:exception_type, :integer)
 
-    belongs_to :feed, Transit.Feed
+    belongs_to(:feed, Transit.Feed)
   end
 
   def changeset(struct, params \\ %{}) do

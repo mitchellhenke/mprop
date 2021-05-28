@@ -16,44 +16,51 @@ defmodule Properties.ParkingTicket do
   # ALTER TABLE parking_tickets ALTER COLUMN fine TYPE integer USING fine::integer;
 
   schema "parking_tickets" do
-    field :issue_number, :string
-    field :date, :date
-    field :time, :time
-    field :location, :string
-    field :license_plate, :string
-    field :license_plate_state, :string
-    field :make, :string
-    field :violation_code, :string
-    field :violation_description, :string
-    field :fine, :integer
+    field(:issue_number, :string)
+    field(:date, :date)
+    field(:time, :time)
+    field(:location, :string)
+    field(:license_plate, :string)
+    field(:license_plate_state, :string)
+    field(:make, :string)
+    field(:violation_code, :string)
+    field(:violation_description, :string)
+    field(:fine, :integer)
   end
 
   def filter_by_license_plate_state(query, nil), do: query
   def filter_by_license_plate_state(query, ""), do: query
+
   def filter_by_license_plate_state(query, license_plate_state) do
     from(p in query, where: p.license_plate_state == ^license_plate_state)
   end
 
   def filter_by_license_plate(query, nil), do: query
   def filter_by_license_plate(query, ""), do: query
+
   def filter_by_license_plate(query, license_plate) do
     from(p in query, where: p.license_plate == ^license_plate)
   end
 
   def filter_by_date(query, nil), do: query
+
   def filter_by_date(query, date) do
     from(p in query, where: p.date == ^date)
   end
 
   def filter_greater_than(query, _, nil), do: query
+
   def filter_greater_than(query, field, number) do
     from(p in query,
-       where: field(p, ^field) >= ^number)
+      where: field(p, ^field) >= ^number
+    )
   end
 
   def filter_less_than(query, _, nil), do: query
+
   def filter_less_than(query, field, number) do
     from(p in query,
-       where: field(p, ^field) <= ^number)
+      where: field(p, ^field) <= ^number
+    )
   end
 end

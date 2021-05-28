@@ -6,7 +6,7 @@ defmodule Transit.Feed do
 
   @schema_prefix "gtfs"
   schema "feeds" do
-    field :date, :date
+    field(:date, :date)
   end
 
   def changeset(struct, params \\ %{}) do
