@@ -48,17 +48,17 @@ defmodule PropertiesWeb.TransitView do
     |> round()
   end
 
-  def background_color(low_speed1, low_speed2 \\ 100) do
-    min = Enum.min([low_speed1, low_speed2])
+  def background_color(median1, median2 \\ 100) do
+    min = Enum.min([median1, median2])
 
     cond do
-      min < 12 ->
+      min < 13 ->
         "rgba(255, 86, 72, 1.0)"
 
-      min < 14 ->
+      min < 15 ->
         "rgba(214, 124, 92, 1.0)"
 
-      min < 16 ->
+      min < 17 ->
         "rgba(219, 191, 112, 1.0)"
 
       true ->

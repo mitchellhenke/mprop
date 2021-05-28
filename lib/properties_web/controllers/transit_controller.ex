@@ -123,18 +123,19 @@ defmodule PropertiesWeb.TransitController do
           get_slowest_and_fastest_trips_for_route(feed, route, date)
         end)
         |> Enum.reject(&is_nil(&1))
-        |> Enum.sort_by(fn {{slowest1, _fastest1, _all1}, {slowest2, _fastest2, _all2}} ->
-          Enum.min([
-            slowest1.shape_geom.length_meters / slowest1.length_seconds,
-            slowest2.shape_geom.length_meters / slowest2.length_seconds
-          ])
-        end)
-        # |> Enum.sort_by(fn({_, {slow, _, _}}) ->
-        #   slow.route_id
-        # end)
         |> Enum.map(fn {{slowest1, fastest1, all1}, {slowest2, fastest2, all2}} ->
-          {{slowest1, fastest1, TransitView.graph(fastest1, all1)},
-           {slowest2, fastest2, TransitView.graph(fastest2, all2)}}
+          median_speed_1 = median_trip_speed(all1)
+          median_speed_2 = median_trip_speed(all2)
+
+          {{slowest1, fastest1, median_speed_1, TransitView.graph(fastest1, all1)},
+           {slowest2, fastest2, median_speed_2, TransitView.graph(fastest2, all2)}}
+        end)
+        |> Enum.sort_by(fn {{_slowest1, _fastest1, median1, _all1},
+                            {_slowest2, _fastest2, median2, _all2}} ->
+          Enum.min([
+            median1,
+            median2
+          ])
         end)
       end)
 
@@ -237,5 +238,24 @@ defmodule PropertiesWeb.TransitController do
     Enum.filter(trips, fn trip ->
       trip.trip_headsign == headsign && trip.shape_id == shape_id
     end)
+  end
+
+  defp median_trip_speed(trips) do
+    trip_speeds =
+      Enum.map(trips, fn trip ->
+        trip.speed_mph
+      end)
+      |> Enum.sort()
+
+    length = Enum.count(trip_speeds)
+
+    if rem(length, 2) == 0 do
+      first_speed = Enum.at(trip_speeds, div(length + 2, 2))
+      second_speed = Enum.at(trip_speeds, div(length, 2))
+
+      (first_speed + second_speed) / 2
+    else
+      Enum.at(trip_speeds, div(length + 1, 2))
+    end
   end
 end

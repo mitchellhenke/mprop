@@ -49,7 +49,8 @@ defmodule Properties.AddressParser do
             |> ignore(string(" "))
             |> concat(street_direction)
             |> ignore(string(" "))
-            |> concat(street_name_and_type), inline: true
+            |> concat(street_name_and_type),
+            inline: true
 
   @doc """
   Broadway, Metro Auto Mall, and Back Bay are streets in Milwaukee
