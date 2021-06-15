@@ -116,6 +116,7 @@ defmodule PropertiesWeb.TransitController do
           Route.list_all(feed)
           |> Enum.filter(
             &(&1.route_id != "137" && &1.route_id != "219" && &1.route_id != "RS1" &&
+                &1.route_id != "BRW" &&
                 !String.starts_with?(&1.route_id, "RR"))
           )
 

@@ -100,7 +100,7 @@ defmodule Transit do
   end
 
   def load_calendar_dates(file, feed) do
-    max_date = Date.add(feed.date, 10)
+    max_date = Date.add(feed.date, 100)
 
     File.stream!(file)
     |> Stream.drop(1)
@@ -148,7 +148,8 @@ defmodule Transit do
         CalendarDate.changeset(%CalendarDate{}, params)
         |> Repo.insert!()
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
     |> Enum.map(fn {:ok, calendar_date} ->
       calendar_date
@@ -179,7 +180,8 @@ defmodule Transit do
         Route.changeset(%Route{}, params)
         |> Repo.insert!()
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
     |> Enum.map(fn {:ok, route} ->
       route
@@ -218,7 +220,8 @@ defmodule Transit do
         Trip.changeset(%Trip{}, params)
         |> Repo.insert!()
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
     |> Enum.map(fn {:ok, trip} ->
       trip
@@ -250,7 +253,8 @@ defmodule Transit do
         Stop.changeset(%Stop{}, params)
         |> Repo.insert!()
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
     |> Enum.map(fn {:ok, route} ->
       route
@@ -269,7 +273,7 @@ defmodule Transit do
 
       MapSet.member?(trip_id_set, trip_id)
     end)
-    |> Stream.chunk_every(50)
+    |> Stream.chunk_every(5000)
     |> Task.async_stream(
       fn rows ->
         inserts =
@@ -302,7 +306,8 @@ defmodule Transit do
 
         Repo.insert_all(StopTime, inserts)
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
     |> Enum.map(fn {:ok, stop_time} ->
       stop_time
@@ -312,27 +317,35 @@ defmodule Transit do
   def load_shapes(file, feed) do
     File.stream!(file)
     |> Stream.drop(1)
+    |> Stream.chunk_every(10_000)
     |> Task.async_stream(
-      fn row ->
-        values =
-          String.trim(row)
-          |> String.split(",")
+      fn rows ->
+        all_rows =
+          Enum.map(rows, fn row ->
+            values =
+              String.trim(row)
+              |> String.split(",")
 
-        params = %{
-          shape_id: Enum.at(values, 0) |> String.trim(),
-          shape_pt_lat: Enum.at(values, 1) |> String.trim(),
-          shape_pt_lon: Enum.at(values, 2) |> String.trim(),
-          shape_pt_sequence: Enum.at(values, 3) |> String.trim(),
-          feed_id: feed.id
-        }
+            params = %{
+              shape_id: Enum.at(values, 0) |> String.trim(),
+              shape_pt_lat: Enum.at(values, 1) |> String.trim(),
+              shape_pt_lon: Enum.at(values, 2) |> String.trim(),
+              shape_pt_sequence: Enum.at(values, 3) |> String.trim(),
+              feed_id: feed.id
+            }
 
-        Shape.changeset(%Shape{}, params)
-        |> Repo.insert!()
+            cs = Shape.changeset(%Shape{}, params)
+            true = cs.valid?
+            cs.changes
+          end)
+
+        Repo.insert_all(Shape, all_rows)
       end,
-      max_concurrency: @connections
+      max_concurrency: @connections,
+      timeout: :infinity
     )
-    |> Enum.map(fn {:ok, shapes} ->
-      shapes
+    |> Enum.map(fn {:ok, shape} ->
+      shape
     end)
   end
 
