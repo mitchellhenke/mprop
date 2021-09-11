@@ -126,7 +126,11 @@ defmodule Properties.Assessment do
   end
 
   def address(property) do
-    zip_code = String.slice(property.zip_code, 0, 5)
+    zip_code = if property.zip_code do
+      String.slice(property.zip_code, 0, 5)
+    else
+      nil
+    end
 
     if property.house_number_low != property.house_number_high do
       "#{property.house_number_low}-#{property.house_number_high} #{property.street_direction} #{

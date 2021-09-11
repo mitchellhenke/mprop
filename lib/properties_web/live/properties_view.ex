@@ -3,6 +3,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
     defstruct [
       :year,
       :text_query,
+      :min_year_built,
+      :max_year_built,
       :min_bath,
       :max_bath,
       :num_units,
@@ -19,6 +21,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
     def change(params) do
       types = %{
         text_query: :string,
+        min_year_built: :integer,
+        max_year_built: :integer,
         min_bath: :integer,
         max_bath: :integer,
         min_bed: :integer,
@@ -37,6 +41,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       {data, types}
       |> Ecto.Changeset.cast(params, [
         :text_query,
+        :min_year_built,
+        :max_year_built,
         :min_bath,
         :max_bath,
         :num_units,
@@ -110,6 +116,12 @@ defmodule PropertiesWeb.PropertiesLiveView do
             </div>
           </div>
           <div class="row mb-2">
+            <%= label f, :min_year_built, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :min_year_built, class: "form-control col-sm-2" %>
+            <%= label f, :max_year_built, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :max_year_built, class: "form-control col-sm-2" %>
+           </div>
+          <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
             <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
@@ -172,7 +184,6 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   def handle_event("change", %{"params" => params}, socket) do
-    IO.inspect("LOL")
     changeset = Params.change(params)
 
     case Ecto.Changeset.apply_action(changeset, :insert) do
@@ -244,6 +255,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
         limit: 20
       )
       |> Assessment.filter_by_address(params.text_query)
+      |> Assessment.filter_greater_than(:year_built, params.min_year_built)
+      |> Assessment.filter_less_than(:year_built, params.max_year_built)
       |> Assessment.filter_greater_than(:bathrooms, params.min_bath)
       |> Assessment.filter_less_than(:bathrooms, params.max_bath)
       |> Assessment.filter_greater_than(:number_of_bedrooms, params.min_bed)
