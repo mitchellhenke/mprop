@@ -13,6 +13,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       :zip_code,
       :land_use,
       :parking_type,
+      :building_type,
       :latitude,
       :longitude,
       :radius
@@ -33,7 +34,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
         radius: :float,
         zip_code: :string,
         land_use: :string,
-        parking_type: :string
+        parking_type: :string,
+        building_type: :string
       }
 
       data = %Params{}
@@ -51,6 +53,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
         :zip_code,
         :land_use,
         :parking_type,
+        :building_type,
         :latitude,
         :longitude,
         :radius
@@ -120,7 +123,9 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= number_input f, :min_year_built, class: "form-control col-sm-2" %>
             <%= label f, :max_year_built, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :max_year_built, class: "form-control col-sm-2" %>
-           </div>
+            <%= label f, :building_type, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= Phoenix.HTML.Form.select f, :building_type, building_type_options(), class: "form-control col-sm-2" %>
+          </div>
           <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
@@ -252,7 +257,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       from(p in Assessment,
         where: p.year == 2020,
         order_by: [desc: p.last_assessment_amount],
-        limit: 20
+        limit: 50
       )
       |> Assessment.filter_by_address(params.text_query)
       |> Assessment.filter_greater_than(:year_built, params.min_year_built)
@@ -265,6 +270,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
+      |> Assessment.maybe_filter_by(:building_type, params.building_type)
       |> Assessment.with_joined_shapefile()
       |> Assessment.select_latitude_longitude()
 
@@ -291,5 +297,32 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
   defp comma_separated_number(num) do
     Regex.replace(@number_comma_regex, "#{num}", ",")
+  end
+
+  defp building_type_options do
+    [
+      "": "",
+      "Ranch": "01",
+      "Bi-level": "02",
+      "Split-level": "03",
+      "Cape-Cod": "04",
+      "Colonial": "05",
+      "Tudor": "06",
+      "Townhouse": "07",
+      "Residence (Old-style)": "08",
+      "Mansion": "09",
+      "Cottage": "10",
+      "Duplex (Old-style)": "11",
+      "Duplex (New-style)": "12",
+      "Duplex Cottage": "13",
+      "Triplex": "15",
+      "Milwaukee Bungalow": "18",
+      "Bungalow (Old-style)": "22",
+      "Townhouse Apartment": "17",
+      "Apartment (4-6 Units)": "16",
+      "Apartment (7-9 Units)": "19",
+      "Apartment (10-15 Units)": "20",
+      "Apartment (10-15 Units)": "21",
+    ]
   end
 end
