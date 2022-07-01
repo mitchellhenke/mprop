@@ -148,98 +148,98 @@ defmodule Transit.RealtimeScraper do
       end)
       |> Enum.chunk_every(10)
       |> Enum.each(fn vehicle_ids ->
-        vid = Enum.join(vehicle_ids, ",")
+        # vid = Enum.join(vehicle_ids, ",")
 
-        params =
-          %{
-            vid: vid,
-            tmres: "s",
-            format: "json",
-            key: Application.fetch_env!(:properties, :mcts_key)
-          }
-          |> URI.encode_query()
+        # params =
+        #   %{
+        #     vid: vid,
+        #     tmres: "s",
+        #     format: "json",
+        #     key: Application.fetch_env!(:properties, :mcts_key)
+        #   }
+        #   |> URI.encode_query()
 
-        with {:ok, 200, _headers, client_ref} <-
-               :hackney.get(
-                 "http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}"
-               ),
-             {:ok, body} <- :hackney.body(client_ref),
-             {:ok, json} <- Jason.decode(body),
-             {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
-             {:ok, predictions} <- Map.fetch(bustime_response, "prd") do
-          predictions =
-            Enum.group_by(predictions, fn %{"vid" => vid} ->
-              vid
-            end)
-            |> Enum.map(fn {_vid, predictions} ->
-              Enum.sort_by(predictions, fn pred ->
-                Map.get(pred, "tmstmp")
-              end)
-              |> List.first()
-            end)
+        # with {:ok, 200, _headers, client_ref} <-
+        #        :hackney.get(
+        #          "http://realtime.ridemcts.com/bustime/api/v3/getpredictions?#{params}"
+        #        ),
+        #      {:ok, body} <- :hackney.body(client_ref),
+        #      {:ok, json} <- Jason.decode(body),
+        #      {:ok, bustime_response} <- Map.fetch(json, "bustime-response"),
+        #      {:ok, predictions} <- Map.fetch(bustime_response, "prd") do
+        #   predictions =
+        #     Enum.group_by(predictions, fn %{"vid" => vid} ->
+        #       vid
+        #     end)
+        #     |> Enum.map(fn {_vid, predictions} ->
+        #       Enum.sort_by(predictions, fn pred ->
+        #         Map.get(pred, "tmstmp")
+        #       end)
+        #       |> List.first()
+        #     end)
 
-          Enum.each(predictions, fn prediction ->
-            %{
-              "rt" => route,
-              "vid" => vehicle_id,
-              "tmstmp" => timestamp,
-              "prdtm" => prediction_timestamp,
-              "tatripid" => trip_id,
-              "stpid" => stop_id,
-              "dstp" => dist_from_stop,
-              "dly" => delay,
-              "tablockid" => block_id
-            } = prediction
+        #   Enum.each(predictions, fn prediction ->
+        #     %{
+        #       "rt" => route,
+        #       "vid" => vehicle_id,
+        #       "tmstmp" => timestamp,
+        #       "prdtm" => prediction_timestamp,
+        #       "tatripid" => trip_id,
+        #       "stpid" => stop_id,
+        #       "dstp" => dist_from_stop,
+        #       "dly" => delay,
+        #       "tablockid" => block_id
+        #     } = prediction
 
-            {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
-              parse_datetime(timestamp)
+        #     {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
+        #       parse_datetime(timestamp)
 
-            {:ok, datetime} = DateTime.now("America/Chicago")
+        #     {:ok, datetime} = DateTime.now("America/Chicago")
 
-            datetime = %{
-              datetime
-              | year: year,
-                month: month,
-                day: day,
-                hour: hour,
-                minute: minute,
-                second: second
-            }
+        #     datetime = %{
+        #       datetime
+        #       | year: year,
+        #         month: month,
+        #         day: day,
+        #         hour: hour,
+        #         minute: minute,
+        #         second: second
+        #     }
 
-            {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
-              parse_datetime(prediction_timestamp)
+        #     {:ok, [year, month, day, hour, minute, second], _, _, _, _} =
+        #       parse_datetime(prediction_timestamp)
 
-            {:ok, prediction_datetime} = DateTime.now("America/Chicago")
+        #     {:ok, prediction_datetime} = DateTime.now("America/Chicago")
 
-            prediction_datetime = %{
-              prediction_datetime
-              | year: year,
-                month: month,
-                day: day,
-                hour: hour,
-                minute: minute,
-                second: second
-            }
+        #     prediction_datetime = %{
+        #       prediction_datetime
+        #       | year: year,
+        #         month: month,
+        #         day: day,
+        #         hour: hour,
+        #         minute: minute,
+        #         second: second
+        #     }
 
-            attrs = %{
-              timestamp: datetime,
-              prediction_timestamp: prediction_datetime,
-              vehicle_id: vehicle_id,
-              trip_id: trip_id,
-              block_id: block_id,
-              route_id: route,
-              stop_id: stop_id,
-              dist_from_stop: dist_from_stop,
-              delay: delay
-            }
+        #     attrs = %{
+        #       timestamp: datetime,
+        #       prediction_timestamp: prediction_datetime,
+        #       vehicle_id: vehicle_id,
+        #       trip_id: trip_id,
+        #       block_id: block_id,
+        #       route_id: route,
+        #       stop_id: stop_id,
+        #       dist_from_stop: dist_from_stop,
+        #       delay: delay
+        #     }
 
-            Transit.RealtimePrediction.changeset(%Transit.RealtimePrediction{}, attrs)
-            |> Properties.Repo.insert()
-          end)
-        else
-          e ->
-            Logger.error("Error downloading realtime predictions: #{inspect(e)}")
-        end
+        #     Transit.RealtimePrediction.changeset(%Transit.RealtimePrediction{}, attrs)
+        #     |> Properties.Repo.insert()
+        #   end)
+        # else
+        #   e ->
+        #     Logger.error("Error downloading realtime predictions: #{inspect(e)}")
+        # end
       end)
     else
       e ->
