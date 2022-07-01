@@ -51,6 +51,12 @@
   </div>
   <hr>
   <div class="row">
+    <div class="col-sm-4">
+      <h4>Building Type:</h4> <%= ViewHelper.building_type(@assessment.building_type) %>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
     <img alt="house" class="mx-auto" src="<%= ViewHelper.mapbox_static(@assessment.latitude, @assessment.longitude)%>">
   </div>
   <hr>

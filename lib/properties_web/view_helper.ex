@@ -1,6 +1,29 @@
 defmodule PropertiesWeb.ViewHelper do
   use Phoenix.HTML
   @number_regex ~r/\B(?=(\d{3})+(?!\d))/
+  @building_type_map %{
+    "01" => "Ranch",
+    "02" => "Bi-level",
+    "03" => "Split-level",
+    "04" => "Cape-Cod",
+    "05" => "Colonial",
+    "06" => "Tudor",
+    "07" => "Townhouse",
+    "08" => "Residence (Old-style)",
+    "09" => "Mansion",
+    "10" => "Cottage",
+    "11" => "Duplex (Old-style)",
+    "12" => "Duplex (New-style)",
+    "13" => "Duplex Cottage",
+    "15" => "Triplex",
+    "16" => "Apartment (4-6 Units)",
+    "17" => "Townhouse Apartment",
+    "18" => "Milwaukee Bungalow",
+    "19" => "Apartment (7-9 Units)",
+    "20" => "Apartment (10-15 Units)",
+    "21" => "Apartment (16+ Units)",
+    "22" => "Bungalow (Old-style)"
+  }
 
   def number_with_commas(number) do
     number = to_string(number)
@@ -11,6 +34,9 @@ defmodule PropertiesWeb.ViewHelper do
   def air_conditioning(_), do: "No"
   def parking_type(nil), do: "None"
   def parking_type(parking_type), do: parking_type
+  def building_type(building_type) do
+    Map.get(@building_type_map, building_type, "Unknown")
+  end
 
   def mapbox_static(latitude, longitude) do
     "https://api.mapbox.com/styles/v1/mapbox/streets-v10/static/geojson(%7B%22type%22%3A%22Point%22%2C%22coordinates%22%3A%5B#{

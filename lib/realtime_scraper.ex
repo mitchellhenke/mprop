@@ -30,7 +30,10 @@ defmodule Transit.RealtimeScraper do
     "54",
     "57",
     "35",
-    "67"
+    "67",
+    "14",
+    "28",
+    "76"
   ]
 
   def start_link(_ \\ nil) do
