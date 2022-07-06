@@ -305,7 +305,6 @@ defmodule Properties.Assessment do
       where: ilike(p.zoning, ^"%#{zoning}%")
     )
   end
-  def filter_by_zipcode(query, ""), do: query
 
   def filter_by_zipcode(query, nil), do: query
   def filter_by_zipcode(query, ""), do: query
