@@ -4,7 +4,7 @@ defmodule Properties.CSVParser do
 
   def run(path, year) do
     File.stream!(path)
-    |> CSV.decode!(headers: true, validate_row_length: false)
+    |> CSV.decode!(headers: true)
     |> Task.async_stream(
       fn x ->
         attrs = %{
@@ -247,6 +247,9 @@ defmodule Properties.CSVParser do
   defp parse_air("1"), do: 1
   defp parse_air(_), do: 0
 
+  defp parse_int("NULL") do
+    nil
+  end
   defp parse_int(int) do
     String.trim(int)
     |> do_parse_int()

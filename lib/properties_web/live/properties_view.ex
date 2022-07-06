@@ -10,6 +10,10 @@ defmodule PropertiesWeb.PropertiesLiveView do
       :num_units,
       :min_bed,
       :max_bed,
+      :zoning,
+      :min_lot_area,
+      :max_lot_area,
+      :alder,
       :zip_code,
       :land_use,
       :parking_type,
@@ -28,6 +32,10 @@ defmodule PropertiesWeb.PropertiesLiveView do
         max_bath: :integer,
         min_bed: :integer,
         max_bed: :integer,
+        zoning: :string,
+        min_lot_area: :integer,
+        max_lot_area: :integer,
+        alder: :string,
         num_units: :integer,
         latitude: :float,
         longitude: :float,
@@ -50,6 +58,10 @@ defmodule PropertiesWeb.PropertiesLiveView do
         :num_units,
         :min_bed,
         :max_bed,
+        :zoning,
+        :min_lot_area,
+        :max_lot_area,
+        :alder,
         :zip_code,
         :land_use,
         :parking_type,
@@ -99,7 +111,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= label f, :max_bed, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :max_bed, class: "form-control col-sm-2" %>
            </div>
-                     <div class="row mb-2">
+           <div class="row mb-2">
             <%= label f, :latitude, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= number_input f, :latitude, class: "form-control col-sm-2" %>
             <%= label f, :longitude, class: "col-sm-2 justify-content-start form-control-label" %>
@@ -127,6 +139,18 @@ defmodule PropertiesWeb.PropertiesLiveView do
             <%= Phoenix.HTML.Form.select f, :building_type, building_type_options(), class: "form-control col-sm-2" %>
           </div>
           <div class="row mb-2">
+            <%= label f, :zoning, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= text_input f, :zoning, class: "form-control col-sm-2" %>
+          </div>
+          <div class="row mb-2">
+            <%= label f, :alder, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= text_input f, :alder, class: "form-control col-sm-2" %>
+            <%= label f, :min_lot_area, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :min_lot_area, class: "form-control col-sm-2" %>
+            <%= label f, :max_lot_area, class: "col-sm-2 justify-content-start form-control-label" %>
+            <%= number_input f, :max_lot_area, class: "form-control col-sm-2" %>
+          </div>
+          <div class="row mb-2">
             <%= label f, :zip_code, class: "col-sm-2 justify-content-start form-control-label" %>
             <%= text_input f, :zip_code, class: "form-control col-sm-2" %>
             <%= label f, :parking_type, class: "col-sm-2 justify-content-start form-control-label" %>
@@ -143,7 +167,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
               <th>Bathrooms</th>
               <th>Lot Area</th>
               <th>Property Area</th>
-              <th>Parking Type</th>
+              <th>Zoning</th>
               <th>Search Near Me</th>
               <th>Assessment</th>
             </tr>
@@ -170,7 +194,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
                   <%= comma_separated_number(property.building_area) %>
                 </td>
                 <td>
-                  <%= property.parking_type %>
+                  <%= property.zoning %>
                 </td>
                 <td>
                   <span class="input-group-btn">
@@ -255,7 +279,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
 
     query =
       from(p in Assessment,
-        where: p.year == 2020,
+        where: p.year == 2022,
         order_by: [desc: p.last_assessment_amount],
         limit: 50
       )
@@ -267,6 +291,10 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.filter_greater_than(:number_of_bedrooms, params.min_bed)
       |> Assessment.filter_less_than(:number_of_bedrooms, params.max_bed)
       |> Assessment.filter_by_zipcode(params.zip_code)
+      |> Assessment.filter_by_geo_alder(params.alder)
+      |> Assessment.filter_by_zoning(params.zoning)
+      |> Assessment.filter_greater_than(:lot_area, params.min_lot_area)
+      |> Assessment.filter_less_than(:lot_area, params.max_lot_area)
       # |> Assessment.maybe_filter_by(:land_use, "8810")
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
@@ -322,7 +350,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       "Apartment (4-6 Units)": "16",
       "Apartment (7-9 Units)": "19",
       "Apartment (10-15 Units)": "20",
-      "Apartment (10-15 Units)": "21",
+      "Apartment (16+ Units)": "21",
     ]
   end
 end

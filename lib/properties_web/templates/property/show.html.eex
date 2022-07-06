@@ -124,7 +124,9 @@
             $<%= comma_separated_number(assessment.last_assessment_amount) %>
           </td>
           <td>
-            <%= assessment.last_assessment_amount / assessment.lot_area %>
+            <%= if assessment.building_area > 0 do %>
+              <%= comma_separated_number(Float.round(assessment.last_assessment_amount / assessment.building_area, 1)) %>
+            <% end %>
           </td>
         </tr>
       <% end %>

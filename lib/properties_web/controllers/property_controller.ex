@@ -6,7 +6,7 @@ defmodule PropertiesWeb.PropertyController do
   def show(conn, %{"id" => id}) do
     query =
       if length(String.codepoints(id)) == 10 do
-        from(a in Assessment, where: a.tax_key == ^id and a.year == 2020)
+        from(a in Assessment, where: a.tax_key == ^id and a.year == 2022)
       else
         id = String.to_integer(id)
         from(a in Assessment, where: a.id == ^id)

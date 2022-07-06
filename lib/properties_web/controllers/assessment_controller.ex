@@ -48,6 +48,8 @@ defmodule PropertiesWeb.AssessmentController do
     max_bathrooms = handle_maybe_integer(params["maxBathrooms"])
     min_bedrooms = handle_maybe_integer(params["minBedrooms"])
     max_bedrooms = handle_maybe_integer(params["maxBedrooms"])
+    min_year = handle_maybe_integer(params["minYearBuilt"])
+    max_year = handle_maybe_integer(params["maxYearBuilt"])
     zipcode = params["zipcode"]
     land_use = params["land_use"]
     parking_type = params["parking_type"]
@@ -64,6 +66,8 @@ defmodule PropertiesWeb.AssessmentController do
       |> Assessment.filter_less_than(:bathrooms, max_bathrooms)
       |> Assessment.filter_greater_than(:number_of_bedrooms, min_bedrooms)
       |> Assessment.filter_less_than(:number_of_bedrooms, max_bedrooms)
+      |> Assessment.filter_greater_than(:year_built, min_year)
+      |> Assessment.filter_less_than(:year_built, max_year)
       |> Assessment.filter_by_zipcode(zipcode)
       |> Assessment.maybe_filter_by(:land_use, land_use)
       |> Assessment.maybe_filter_by(:parking_type, parking_type)

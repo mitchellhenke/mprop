@@ -289,6 +289,24 @@ defmodule Properties.Assessment do
     )
   end
 
+  def filter_by_geo_alder(query, nil), do: query
+  def filter_by_geo_alder(query, ""), do: query
+  def filter_by_geo_alder(query, alder) do
+    from(p in query,
+      where: p.geo_alder == ^alder
+    )
+  end
+
+
+  def filter_by_zoning(query, nil), do: query
+  def filter_by_zoning(query, ""), do: query
+  def filter_by_zoning(query, zoning) do
+    from(p in query,
+      where: ilike(p.zoning, ^"%#{zoning}%")
+    )
+  end
+  def filter_by_zipcode(query, ""), do: query
+
   def filter_by_zipcode(query, nil), do: query
   def filter_by_zipcode(query, ""), do: query
 

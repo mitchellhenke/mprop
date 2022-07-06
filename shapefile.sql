@@ -5,6 +5,10 @@ ALTER TABLE shapefiles
 ALTER TABLE shapefiles ADD COLUMN geom_point geometry(Point,4326);
 update shapefiles SET geom_point = ST_Centroid(geom);
 
+ALTER TABLE neighborhood_shapefiles
+ ALTER COLUMN geom TYPE geometry(MultiPolygon, 4326)
+   USING ST_Transform(geom, 4326);
+
 ALTER TABLE bike_lane_shapefiles
  ALTER COLUMN geom TYPE geometry(MultiLineString, 4326)
    USING ST_Transform(geom, 4326);
