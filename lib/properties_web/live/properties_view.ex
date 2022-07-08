@@ -39,7 +39,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
         num_units: :integer,
         latitude: :float,
         longitude: :float,
-        radius: :float,
+        radius: :decimal,
         zip_code: :string,
         land_use: :string,
         parking_type: :string,
@@ -192,8 +192,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
   end
 
   defp build_point_and_radius(latitude, longitude, radius_in_m) do
-    if is_float(latitude) && is_float(longitude) && is_float(radius_in_m) do
-      {%Geo.Point{coordinates: {longitude, latitude}, srid: 4326}, radius_in_m}
+    if is_float(latitude) && is_float(longitude) && not is_nil(radius_in_m) do
+      {%Geo.Point{coordinates: {longitude, latitude}, srid: 4326}, Decimal.to_float(radius_in_m)}
     else
       {nil, nil}
     end
