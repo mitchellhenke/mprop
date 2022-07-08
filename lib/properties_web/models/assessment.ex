@@ -339,7 +339,7 @@ defmodule Properties.Assessment do
       from(assessment in Properties.Assessment)
       |> with_joined_shapefile()
 
-    from([assessment, shapefile] in query,
+    query = from([assessment, shapefile] in query,
       where:
         fragment(
           "ST_DWithin(?::geography, ?::geography, ?)",
@@ -350,7 +350,6 @@ defmodule Properties.Assessment do
           assessment.tax_key != ^a.tax_key and
           ^a.number_of_bedrooms == assessment.number_of_bedrooms and
           ^a.land_use == assessment.land_use and ^a.year == assessment.year and
-          ^a.number_stories == assessment.number_stories and
           fragment(
             "(? + (coalesce(?, 0) * 0.5)) = (? + (coalesce(?, 0) * 0.5))",
             ^a.number_of_bathrooms,
@@ -360,6 +359,7 @@ defmodule Properties.Assessment do
           ),
       limit: 20
     )
+    |> maybe_filter_by(:number_stories, a.number_stories)
     |> Properties.Repo.all()
   end
 
