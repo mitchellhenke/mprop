@@ -5,6 +5,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
       :text_query,
       :min_year_built,
       :max_year_built,
+      :min_number_stories,
+      :max_number_stories,
       :min_bath,
       :max_bath,
       :num_units,
@@ -28,6 +30,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
         text_query: :string,
         min_year_built: :integer,
         max_year_built: :integer,
+        min_number_stories: :integer,
+        max_number_stories: :integer,
         min_bath: :integer,
         max_bath: :integer,
         min_bed: :integer,
@@ -53,6 +57,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
         :text_query,
         :min_year_built,
         :max_year_built,
+        :min_number_stories,
+        :max_number_stories,
         :min_bath,
         :max_bath,
         :num_units,
@@ -162,6 +168,8 @@ defmodule PropertiesWeb.PropertiesLiveView do
         limit: 50
       )
       |> Assessment.filter_by_address(params.text_query)
+      |> Assessment.filter_greater_than(:number_stories, params.min_number_stories)
+      |> Assessment.filter_less_than(:number_stories, params.max_number_stories)
       |> Assessment.filter_greater_than(:year_built, params.min_year_built)
       |> Assessment.filter_less_than(:year_built, params.max_year_built)
       |> Assessment.filter_greater_than(:bathrooms, params.min_bath)

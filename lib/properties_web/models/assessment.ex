@@ -30,6 +30,7 @@ defmodule Properties.Assessment do
     :fireplace,
     :parking_type,
     :number_units,
+    :number_stories,
     :neighborhood,
     :geo_tract,
     :geo_block,
@@ -79,6 +80,7 @@ defmodule Properties.Assessment do
     field(:air_conditioning, :integer)
     field(:parking_type, :string)
     field(:number_units, :integer)
+    field(:number_stories, :float)
     field(:attic, :string)
     field(:basement, :string)
     field(:neighborhood, :string)
@@ -348,6 +350,7 @@ defmodule Properties.Assessment do
           assessment.tax_key != ^a.tax_key and
           ^a.number_of_bedrooms == assessment.number_of_bedrooms and
           ^a.land_use == assessment.land_use and ^a.year == assessment.year and
+          ^a.number_stories == assessment.number_stories and
           fragment(
             "(? + (coalesce(?, 0) * 0.5)) = (? + (coalesce(?, 0) * 0.5))",
             ^a.number_of_bathrooms,

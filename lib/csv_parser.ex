@@ -46,6 +46,7 @@ defmodule Properties.CSVParser do
           air_conditioning: parse_air(String.trim(x["AIR_CONDITIONING"])),
           parking_type: String.trim(x["PARKING_TYPE"]),
           number_units: parse_int(x["NR_UNITS"]),
+          number_stories: parse_float(x["NR_STORIES"]),
           attic: x["ATTIC"],
           basement: x["BASEMENT"],
           geo_tract: x["GEO_TRACT"],
@@ -246,6 +247,12 @@ defmodule Properties.CSVParser do
   defp parse_air("0"), do: 0
   defp parse_air("1"), do: 1
   defp parse_air(_), do: 0
+
+  defp parse_float(""), do: nil
+  defp parse_float(float) do
+    {float, ""} = Float.parse(float)
+    float
+  end
 
   defp parse_int("NULL") do
     nil
