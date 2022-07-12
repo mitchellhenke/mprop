@@ -47,4 +47,11 @@ defmodule PropertiesWeb.PropertyView do
       "Apartment (16+ Units)": "21",
     ]
   end
+
+  def land_use_options do
+    [{"", ""} | Enum.map(PropertiesWeb.ViewHelper.land_use_map, fn({key, value}) ->
+      {value, key}
+    end)]
+    |> Enum.sort_by(&(elem(&1, 0)))
+  end
 end

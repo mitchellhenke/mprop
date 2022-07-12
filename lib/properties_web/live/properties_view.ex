@@ -181,7 +181,7 @@ defmodule PropertiesWeb.PropertiesLiveView do
       |> Assessment.filter_by_zoning(params.zoning)
       |> Assessment.filter_greater_than(:lot_area, params.min_lot_area)
       |> Assessment.filter_less_than(:lot_area, params.max_lot_area)
-      # |> Assessment.maybe_filter_by(:land_use, "8810")
+      |> Assessment.maybe_filter_by(:land_use, params.land_use)
       |> Assessment.maybe_filter_by(:parking_type, params.parking_type)
       |> Assessment.maybe_filter_by(:number_units, params.num_units)
       |> Assessment.maybe_filter_by(:building_type, params.building_type)

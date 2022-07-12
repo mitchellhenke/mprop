@@ -51,13 +51,16 @@
   </div>
   <hr>
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <h4>Building Type:</h4> <%= ViewHelper.building_type(@assessment.building_type) %>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
+      <h4>Land Use</h4> <%= ViewHelper.land_use(@assessment.land_use) %>
+    </div>
+    <div class="col-sm-3">
       <h4>Number Stories:</h4> <%= @assessment.number_stories %>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <h4>Milwaukee Assessor Page</h4>
       <a href="<%= "https://assessments.milwaukee.gov/searchresults.asp?searchparcel=#{@assessment.tax_key}" %>" rel="noopener noreferrer" target="_blank">Milwaukee Assessor Page</a>
     </div>
