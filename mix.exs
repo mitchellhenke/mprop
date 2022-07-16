@@ -57,7 +57,8 @@ defmodule Properties.Mixfile do
       {:nimble_csv, "~> 0.6.0"},
       {:tzdata, "~> 1.0"},
       {:redix, ">= 0.0.0"},
-      {:castore, ">= 0.0.0"}
+      {:castore, ">= 0.0.0"},
+      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
     ]
   end
 
@@ -71,7 +72,8 @@ defmodule Properties.Mixfile do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end
 end

@@ -1,4 +1,4 @@
-import Leaflet from "leaflet"
+// import Leaflet from "leaflet"
 import socket from "./socket"
 const pathname = window.location.pathname.slice(0, 5)
 
