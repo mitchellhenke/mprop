@@ -1,8 +1,6 @@
 defmodule Transit.RealtimePrediction do
   use Ecto.Schema
-  import Ecto.Query, only: [from: 1, from: 2]
   import Ecto.Changeset
-  alias Properties.Repo
 
   @schema_prefix "gtfs"
   @primary_key false

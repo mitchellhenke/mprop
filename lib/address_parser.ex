@@ -72,7 +72,7 @@ defmodule Properties.AddressParser do
     #   |> String.trim()
     # end)
 
-    results =
+    _results =
       Enum.map(addresses, fn address ->
         {address, parse_address(address)}
       end)

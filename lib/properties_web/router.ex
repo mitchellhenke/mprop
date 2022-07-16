@@ -17,8 +17,6 @@ defmodule PropertiesWeb.Router do
   scope "/webhooks", PropertiesWeb do
     pipe_through :api
 
-    get "/twitter", TwitterController, :crc
-    post "/twitter", TwitterController, :index
     post "/civ_webhook", PageController, :civ_webhook
   end
 

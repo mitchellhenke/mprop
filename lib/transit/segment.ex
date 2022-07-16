@@ -138,7 +138,7 @@ defmodule Transit.Segment do
 
     Enum.map(
       route_trips,
-      fn route_trip = %{
+      fn _route_trip = %{
            route_id: route_id,
            trip_headsign: headsign,
            direction_id: direction,

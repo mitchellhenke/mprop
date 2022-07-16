@@ -339,7 +339,7 @@ defmodule Properties.Assessment do
       from(assessment in Properties.Assessment)
       |> with_joined_shapefile()
 
-    query = from([assessment, shapefile] in query,
+    from([assessment, shapefile] in query,
       where:
         fragment(
           "ST_DWithin(?::geography, ?::geography, ?)",
